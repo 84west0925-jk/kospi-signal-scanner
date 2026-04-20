@@ -20,13 +20,17 @@ except Exception:
     FDR_OK = False
 
 # ── 파라미터 ──────────────────────────────────────────
-STOP_LOSS_PCT  = -5.0
-TARGET_PCT     = +10.0
+STOP_LOSS_PCT      = -3.0    # 손절 -3%
+TARGET_PCT         = +5.0    # 2차 목표 +5%
+PARTIAL_PROFIT_PCT = +3.0    # 1차 익절 +3%
+MAX_HOLD_DAYS      = 3       # 최대 보유일
+BUY_RATIO_1        = 0.5     # 1차 매수 비중
+BUY_RATIO_2        = 0.5     # 2차 매수 비중
 RSI_BUY_LOW    = 40
 RSI_BUY_HIGH   = 60
 RSI_SELL       = 70
 MAX_WORKERS    = 8
-VOL_SURGE_MULT = 1.5
+VOL_SURGE_MULT = 2.0         # stock_filter 기준 거래량 2배
 BB_LOW_THRESH  = 0.25
 BB_HIGH_THRESH = 0.75
 
@@ -57,14 +61,17 @@ EXTRA = {
 # ── 시장 필터 ─────────────────────────────────────────
 @st.cache_data(ttl=1800, show_spinner=False)
 def market_filter():
-    """KOSPI 60일선 기준 시장 상태 판단 (캐시 30분)"""
+    """KOSPI MA20>MA60 이중 기준 시장 상태 판단 (캐시 30분)"""
     try:
         idx = yf.download("^KS11", period="3mo", progress=False)
         if isinstance(idx.columns, pd.MultiIndex):
             idx.columns = idx.columns.get_level_values(0)
         close = idx["Close"].squeeze()
+        ma20  = close.rolling(20).mean()
         ma60  = close.rolling(60).mean()
-        return bool(close.iloc[-1] > ma60.iloc[-1]), float(close.iloc[-1]), float(ma60.iloc[-1])
+        cond1 = bool(close.iloc[-1] > ma20.iloc[-1])   # 현재가 > MA20
+        cond2 = bool(ma20.iloc[-1]  > ma60.iloc[-1])   # MA20 > MA60
+        return (cond1 and cond2), float(close.iloc[-1]), float(ma60.iloc[-1])
     except Exception:
         return True, 0.0, 0.0
 
@@ -170,6 +177,67 @@ def get_kospi200():
     """KOSPI 200 구성종목 반환 (내장 리스트 사용)"""
     return {code + ".KS": name for code, name in _KOSPI200_BASE.items()}
 
+# ── 종목 필터 / 진입 / 청산 로직 ─────────────────────
+def stock_filter(close, vol, vol_mult=2.0):
+    """매수 후보 필터: 추세 + 과매수방지 + 거래량"""
+    ma20 = close.rolling(20).mean()
+    ma60 = close.rolling(60).mean()
+    trend          = ma20.iloc[-1] > ma60.iloc[-1]
+    not_overextend = close.iloc[-1] < close.rolling(20).max().iloc[-1] * 1.05
+    volume_surge   = vol.iloc[-1]  > vol.rolling(20).mean().iloc[-1] * vol_mult
+    return trend and not_overextend and volume_surge
+
+def breakout_entry(close):
+    """전일 20일 고가 돌파 여부"""
+    prev_high  = close.rolling(20).max().iloc[-2]
+    today_price = close.iloc[-1]
+    return today_price > prev_high
+
+def exit_logic(entry_price, current_price, hold_days, volume_drop):
+    """청산 신호 판단"""
+    pnl = (current_price - entry_price) / entry_price
+    if pnl <= STOP_LOSS_PCT / 100:
+        return "STOPLOSS"
+    if pnl >= TARGET_PCT / 100:
+        return "FULL_SELL"
+    if pnl >= PARTIAL_PROFIT_PCT / 100:
+        return "PARTIAL_SELL"
+    if volume_drop:
+        return "FULL_SELL"
+    if hold_days >= MAX_HOLD_DAYS:
+        return "TIME_EXIT"
+    return "HOLD"
+
+class TradingSystem:
+    """포지션 관리 — session_state 기반"""
+    def __init__(self):
+        if "positions" not in st.session_state:
+            st.session_state["positions"] = {}
+
+    @property
+    def positions(self):
+        return st.session_state["positions"]
+
+    def enter(self, ticker, price, name=""):
+        self.positions[ticker] = {
+            "name":  name,
+            "entry": price,
+            "date":  datetime.now(),
+            "size1": BUY_RATIO_1,
+            "size2": BUY_RATIO_2,
+        }
+
+    def remove(self, ticker):
+        self.positions.pop(ticker, None)
+
+    def manage(self, ticker, current_price, vol_ratio):
+        pos = self.positions.get(ticker)
+        if not pos:
+            return None
+        hold_days   = (datetime.now() - pos["date"]).days
+        volume_drop = vol_ratio < 0.8
+        return exit_logic(pos["entry"], current_price, hold_days, volume_drop)
+
 # ── 신호 계산 ─────────────────────────────────────────
 def get_signal(ticker, name, strategy="NORMAL", market_ok=True,
                rsi_low=40, rsi_high=60, vol_mult=1.5):
@@ -238,17 +306,23 @@ def get_signal(ticker, name, strategy="NORMAL", market_ok=True,
     change_1d = float(close.pct_change().iloc[-1]) * 100 if len(close) > 1 else 0.0
 
     # 조건
-    c1 = ma20 > ma60
-    c2 = rsi_low <= rsi <= rsi_high
-    c3 = macd > sig
-    c4 = vol_ratio >= vol_mult
-    c5 = bb_pct <= BB_LOW_THRESH
-    c6 = price > float(close.rolling(20).max().iloc[-2])
-    c7 = change_1d > 0
+    c1 = ma20 > ma60                                                    # 추세: MA20 > MA60
+    c2 = rsi_low <= rsi <= rsi_high                                     # RSI 범위
+    c3 = macd > sig                                                     # MACD 골든크로스
+    c4 = vol_ratio >= vol_mult                                          # 거래량 급증(2x)
+    c5 = bb_pct <= BB_LOW_THRESH                                        # BB 하단 반등
+    prev_20d_high = float(close.rolling(20).max().iloc[-2])
+    c6 = price > prev_20d_high                                          # breakout_entry
+    c7 = change_1d > 0                                                  # 당일 상승
+    c8 = price < prev_20d_high * 1.05                                   # 과매수 방지(not_overextended)
+
+    # stock_filter = 추세(c1) + 과매수방지(c8) + 거래량(c4)
+    sf_ok = c1 and c8 and c4
 
     d1 = rsi >= RSI_SELL and hist < p_his
     d2 = price < ma20
     d3 = bb_pct >= BB_HIGH_THRESH
+    d4 = vol_ratio < 0.8                                                # 거래량 급감 → 청산
 
     # v3 가중치 점수
     score = 0
@@ -264,17 +338,19 @@ def get_signal(ticker, name, strategy="NORMAL", market_ok=True,
         signal = "NO TRADE"
         reason = f"하락장 진입 차단 | score={score} RSI={rsi:.1f}"
 
-    elif d1 or (d2 and d3):
+    elif d1 or (d2 and d3) or (d2 and d4):
         signal = "SELL"
         parts  = []
         if d1: parts.append(f"RSI={rsi:.1f} 과매수+MACD꺾임")
-        if d2: parts.append(f"MA20이탈")
+        if d2: parts.append("MA20이탈")
         if d3: parts.append(f"BB상단({bb_pct:.2f})")
+        if d4: parts.append("거래량급감")
         reason = "|".join(parts)
 
     else:
         if strategy == "SAFE":
-            if score >= thr["buy"] and c6 and c7:
+            # stock_filter + breakout + 당일 상승
+            if sf_ok and c6 and c7 and score >= thr["buy"]:
                 signal = "BUY"
             elif score >= thr["watch"]:
                 signal = "WATCH"
@@ -282,7 +358,8 @@ def get_signal(ticker, name, strategy="NORMAL", market_ok=True,
                 signal = "NEUTRAL"
 
         elif strategy == "NORMAL":
-            if score >= thr["buy"] and c6:
+            # stock_filter + breakout
+            if sf_ok and c6 and score >= thr["buy"]:
                 signal = "BUY"
             elif score >= thr["watch"]:
                 signal = "WATCH"
@@ -290,7 +367,7 @@ def get_signal(ticker, name, strategy="NORMAL", market_ok=True,
                 signal = "NEUTRAL"
 
         else:  # AGGRESSIVE
-            if score >= thr["buy"]:
+            if sf_ok and score >= thr["buy"]:
                 signal = "BUY"
             elif score >= thr["watch"]:
                 signal = "WATCH"
@@ -303,6 +380,7 @@ def get_signal(ticker, name, strategy="NORMAL", market_ok=True,
             if c7: extras.append("당일 상승")
             if c4: extras.append(f"거래량급증×{vol_ratio:.1f}")
             if c5: extras.append("BB하단반등")
+            if c8: extras.append("과매수미도달")
             base   = f"score={score}|MA정렬|RSI={rsi:.1f}|MACD골든"
             reason = base + ("|" + "|".join(extras) if extras else "")
 
@@ -316,10 +394,11 @@ def get_signal(ticker, name, strategy="NORMAL", market_ok=True,
             reason = (f"score={score}|MA:{'V' if c1 else 'X'} "
                       f"RSI:{'V' if c2 else 'X'} MACD:{'V' if c3 else 'X'}")
 
-    target = stop = None
+    target = partial = stop = None
     if signal in ("BUY", "WATCH"):
-        target = int(round(price * (1 + TARGET_PCT / 100)))
-        stop   = int(round(price * (1 + STOP_LOSS_PCT / 100)))
+        target  = int(round(price * (1 + TARGET_PCT         / 100)))  # +5%
+        partial = int(round(price * (1 + PARTIAL_PROFIT_PCT / 100)))  # +3%
+        stop    = int(round(price * (1 + STOP_LOSS_PCT      / 100)))  # -3%
 
     return dict(
         ticker=ticker, name=name, signal=signal, reason=reason,
@@ -328,7 +407,7 @@ def get_signal(ticker, name, strategy="NORMAL", market_ok=True,
         macd=macd, macd_sig=sig,
         bb_pct=round(bb_pct, 3), bb_up=bb_up, bb_low=bb_low,
         vol_ratio=round(vol_ratio, 2),
-        score=score, target=target, stop=stop,
+        score=score, target=target, partial=partial, stop=stop,
         date=df.index[-1].strftime("%Y-%m-%d"),
     )
 
@@ -358,8 +437,16 @@ def scan_all(watchlist, strategy, market_ok, rsi_low, rsi_high, vol_mult,
     return results
 
 # ── 테이블 변환 ───────────────────────────────────────
-SIG_ICON = {"BUY":"🟢","WATCH":"🟡","SELL":"🔴","NEUTRAL":"⚪","NO TRADE":"🚫","STOPLOSS":"🚨"}
-SIG_KR   = {"BUY":"매수","WATCH":"관심","SELL":"매도","NEUTRAL":"중립","NO TRADE":"진입차단","STOPLOSS":"손절"}
+SIG_ICON = {
+    "BUY":"🟢","WATCH":"🟡","SELL":"🔴","NEUTRAL":"⚪",
+    "NO TRADE":"🚫","STOPLOSS":"🚨",
+    "PARTIAL_SELL":"🟠","FULL_SELL":"🔴","TIME_EXIT":"⏰","HOLD":"🔵",
+}
+SIG_KR = {
+    "BUY":"매수","WATCH":"관심","SELL":"매도","NEUTRAL":"중립",
+    "NO TRADE":"진입차단","STOPLOSS":"손절",
+    "PARTIAL_SELL":"1차익절","FULL_SELL":"전량매도","TIME_EXIT":"시간청산","HOLD":"보유유지",
+}
 
 def to_df(lst):
     if not lst:
@@ -376,8 +463,9 @@ def to_df(lst):
             "RSI":       round(r["rsi"], 1),
             "BB%B":      r["bb_pct"],
             "거래량배율": r["vol_ratio"],
-            "목표가":    r["target"] or "-",
-            "손절가":    r["stop"]   or "-",
+            "1차익절":   r.get("partial") or "-",
+            "목표가":    r.get("target")  or "-",
+            "손절가":    r.get("stop")    or "-",
             "날짜":      r["date"],
             "판단근거":  r["reason"],
         })
@@ -530,8 +618,9 @@ if "results" in st.session_state:
                         "점수":      st.column_config.ProgressColumn("점수",  min_value=0, max_value=10, format="%d"),
                         "현재가":    st.column_config.NumberColumn("현재가",   format="%d원"),
                         "등락(%)":   st.column_config.NumberColumn("등락(%)", format="%.2f%%"),
-                        "목표가":    st.column_config.NumberColumn("목표가",   format="%d원"),
-                        "손절가":    st.column_config.NumberColumn("손절가",   format="%d원"),
+                        "1차익절":   st.column_config.NumberColumn("1차익절(+3%)", format="%d원"),
+                        "목표가":    st.column_config.NumberColumn("2차목표(+5%)", format="%d원"),
+                        "손절가":    st.column_config.NumberColumn("손절(-3%)",   format="%d원"),
                         "거래량배율": st.column_config.NumberColumn("거래량",  format="×%.1f"),
                     }
                 )
@@ -547,3 +636,91 @@ if "results" in st.session_state:
             file_name=f"kospi_signal_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
             mime="text/csv",
         )
+
+# ══════════════════════════════════════════════════════
+# 포지션 관리 (TradingSystem)
+# ══════════════════════════════════════════════════════
+st.markdown("---")
+st.subheader("💼 포지션 관리")
+st.caption(f"손절 {STOP_LOSS_PCT}% · 1차익절 +{PARTIAL_PROFIT_PCT}% · 2차목표 +{TARGET_PCT}% · 최대보유 {MAX_HOLD_DAYS}일 · 1차:{BUY_RATIO_1*100:.0f}% / 2차:{BUY_RATIO_2*100:.0f}%")
+
+ts = TradingSystem()
+
+# 포지션 등록
+with st.expander("➕ 보유 종목 등록", expanded=False):
+    col_t, col_p, col_d, col_btn2 = st.columns([2, 2, 2, 1])
+    with col_t:
+        pos_ticker = st.text_input("종목코드 (예: 005930.KS)", key="pos_ticker")
+    with col_p:
+        pos_price  = st.number_input("매수가 (원)", min_value=1, value=50000, step=100, key="pos_price")
+    with col_d:
+        pos_date   = st.date_input("매수일", key="pos_date")
+    with col_btn2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("등록", key="add_pos"):
+            name = pos_ticker
+            ts.positions[pos_ticker] = {
+                "name":  name,
+                "entry": pos_price,
+                "date":  datetime.combine(pos_date, datetime.min.time()),
+                "size1": BUY_RATIO_1,
+                "size2": BUY_RATIO_2,
+            }
+            st.success(f"{pos_ticker} 등록 완료")
+
+# 등록된 포지션 표시 + 청산 신호
+if ts.positions:
+    pos_rows = []
+    for ticker, pos in ts.positions.items():
+        hold_days = (datetime.now() - pos["date"]).days
+        try:
+            raw = yf.download(ticker, period="5d", interval="1d", progress=False, auto_adjust=True)
+            if isinstance(raw.columns, pd.MultiIndex):
+                raw.columns = raw.columns.get_level_values(0)
+            cur_price = float(raw["Close"].squeeze().iloc[-1])
+            vol_s     = raw["Volume"].squeeze()
+            vol_ratio = float(vol_s.iloc[-1] / vol_s.mean()) if len(vol_s) > 1 else 1.0
+        except Exception:
+            cur_price = pos["entry"]
+            vol_ratio = 1.0
+
+        sig   = ts.manage(ticker, cur_price, vol_ratio)
+        pnl   = (cur_price - pos["entry"]) / pos["entry"] * 100
+        t_1st = int(round(pos["entry"] * (1 + PARTIAL_PROFIT_PCT / 100)))
+        t_2nd = int(round(pos["entry"] * (1 + TARGET_PCT         / 100)))
+        s_prc = int(round(pos["entry"] * (1 + STOP_LOSS_PCT      / 100)))
+
+        pos_rows.append({
+            "종목코드":  ticker,
+            "매수가":    pos["entry"],
+            "현재가":    int(cur_price),
+            "손익(%)":   round(pnl, 2),
+            "보유일":    hold_days,
+            "거래량배율": round(vol_ratio, 2),
+            "청산신호":  SIG_ICON.get(sig,"") + " " + SIG_KR.get(sig, sig),
+            "손절가":    s_prc,
+            "1차익절":   t_1st,
+            "2차목표":   t_2nd,
+        })
+
+    pos_df = pd.DataFrame(pos_rows)
+    st.dataframe(
+        pos_df, use_container_width=True, hide_index=True,
+        column_config={
+            "매수가":    st.column_config.NumberColumn(format="%d원"),
+            "현재가":    st.column_config.NumberColumn(format="%d원"),
+            "손익(%)":   st.column_config.NumberColumn(format="%.2f%%"),
+            "손절가":    st.column_config.NumberColumn(format="%d원"),
+            "1차익절":   st.column_config.NumberColumn(format="%d원"),
+            "2차목표":   st.column_config.NumberColumn(format="%d원"),
+            "거래량배율": st.column_config.NumberColumn(format="×%.2f"),
+        }
+    )
+
+    # 개별 포지션 삭제
+    del_ticker = st.selectbox("포지션 청산(삭제)", [""] + list(ts.positions.keys()), key="del_pos")
+    if del_ticker and st.button("삭제", key="del_btn"):
+        ts.remove(del_ticker)
+        st.rerun()
+else:
+    st.info("등록된 포지션 없음 — 위 '보유 종목 등록'에서 추가하세요.")
