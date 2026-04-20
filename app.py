@@ -7,6 +7,8 @@ KOSPI 매매 신호 스캐너 v3 — Streamlit 웹 서비스
 import time, warnings
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import quote
+import xml.etree.ElementTree as ET
 warnings.filterwarnings("ignore")
 
 import streamlit as st
@@ -20,17 +22,17 @@ except Exception:
     FDR_OK = False
 
 # ── 파라미터 ──────────────────────────────────────────
-STOP_LOSS_PCT      = -3.0    # 손절 -3%
-TARGET_PCT         = +5.0    # 2차 목표 +5%
-PARTIAL_PROFIT_PCT = +3.0    # 1차 익절 +3%
-MAX_HOLD_DAYS      = 3       # 최대 보유일
-BUY_RATIO_1        = 0.5     # 1차 매수 비중
-BUY_RATIO_2        = 0.5     # 2차 매수 비중
+STOP_LOSS_PCT      = -3.0
+TARGET_PCT         = +5.0
+PARTIAL_PROFIT_PCT = +3.0
+MAX_HOLD_DAYS      = 3
+BUY_RATIO_1        = 0.5
+BUY_RATIO_2        = 0.5
 RSI_BUY_LOW    = 40
 RSI_BUY_HIGH   = 60
 RSI_SELL       = 70
 MAX_WORKERS    = 8
-VOL_SURGE_MULT = 2.0         # stock_filter 기준 거래량 2배
+VOL_SURGE_MULT = 2.0
 BB_LOW_THRESH  = 0.25
 BB_HIGH_THRESH = 0.75
 
@@ -58,10 +60,10 @@ EXTRA = {
     "000880.KS": "한화",
 }
 
-# ── 시장 필터 ─────────────────────────────────────────
+# ── 시장 필터
 @st.cache_data(ttl=1800, show_spinner=False)
 def market_filter():
-    """KOSPI MA20>MA60 이중 기준 시장 상태 판단 (캐시 30분)"""
+    """KOSPI MA20>MA60 이중 기준 시장 상태 판단"""
     try:
         idx = yf.download("^KS11", period="3mo", progress=False)
         if isinstance(idx.columns, pd.MultiIndex):
@@ -69,121 +71,67 @@ def market_filter():
         close = idx["Close"].squeeze()
         ma20  = close.rolling(20).mean()
         ma60  = close.rolling(60).mean()
-        cond1 = bool(close.iloc[-1] > ma20.iloc[-1])   # 현재가 > MA20
-        cond2 = bool(ma20.iloc[-1]  > ma60.iloc[-1])   # MA20 > MA60
+        cond1 = bool(close.iloc[-1] > ma20.iloc[-1])
+        cond2 = bool(ma20.iloc[-1]  > ma60.iloc[-1])
         return (cond1 and cond2), float(close.iloc[-1]), float(ma60.iloc[-1])
     except Exception:
         return True, 0.0, 0.0
 
-# ── KOSPI 200 구성종목 (2025년 기준 내장 리스트) ──────
+# ── KOSPI 200
 _KOSPI200_BASE = {
-    # 반도체/전자
-    "005930": "삼성전자",      "000660": "SK하이닉스",
-    "009150": "삼성전기",      "011070": "LG이노텍",
-    "066570": "LG전자",        "000990": "DB하이텍",
-    "357780": "솔브레인",      "034220": "LG디스플레이",
-    # 배터리/소재
-    "373220": "LG에너지솔루션","006400": "삼성SDI",
-    "003670": "포스코퓨처엠",  "247540": "에코프로비엠",
-    "086520": "에코프로",      "066970": "엘앤에프",
-    "278280": "천보",          "285130": "SK케미칼",
-    # 화학/정유
-    "051910": "LG화학",        "096770": "SK이노베이션",
-    "011170": "롯데케미칼",    "010950": "에쓰-오일",
-    "011780": "금호석유",      "009830": "한화솔루션",
-    "010060": "OCI홀딩스",     "014680": "한솔케미칼",
-    # 철강/금속
-    "005490": "POSCO홀딩스",   "004020": "현대제철",
-    "010130": "고려아연",      "103140": "풍산",
-    "117580": "LS MnM",        "075580": "세아제강지주",
-    # 바이오/제약
-    "207940": "삼성바이오로직스","068270": "셀트리온",
-    "128940": "한미약품",      "185750": "종근당",
-    "000100": "유한양행",      "069620": "대웅제약",
-    "196170": "알테오젠",      "141080": "리가켐바이오",
-    "028300": "HLB",           "302440": "SK바이오사이언스",
-    "003850": "보령",          "326030": "SK바이오팜",
-    "145720": "덴티움",        "145990": "삼양사",
-    "087660": "HK이노엔",      "214150": "클래시스",
-    # 자동차
-    "005380": "현대차",        "000270": "기아",
-    "012330": "현대모비스",    "011210": "현대위아",
-    "161390": "한국타이어앤테크놀로지", "002350": "넥센타이어",
-    "064350": "현대로템",      "086280": "현대글로비스",
-    # 조선/방산
-    "329180": "HD현대중공업",  "042660": "한화오션",
-    "009540": "한국조선해양",  "010620": "현대미포조선",
-    "010140": "삼성중공업",    "047810": "한국항공우주",
-    "012450": "한화에어로스페이스","034020": "두산에너빌리티",
-    "241560": "두산밥캣",      "267250": "HD현대",
-    "272210": "한화시스템",    "336260": "두산퓨얼셀",
-    "298040": "효성중공업",    "112610": "씨에스윈드",
-    # 금융/보험/증권
-    "105560": "KB금융",        "055550": "신한지주",
-    "086790": "하나금융지주",  "316140": "우리금융지주",
-    "024110": "기업은행",      "138930": "BNK금융지주",
-    "139130": "DGB금융지주",   "175330": "JB금융지주",
-    "032830": "삼성생명",      "000810": "삼성화재",
-    "001450": "현대해상",      "005830": "DB손해보험",
-    "016360": "삼성증권",      "005940": "NH투자증권",
-    "071050": "한국금융지주",  "039490": "키움증권",
+    "005930": "삼성전자","000660": "SK하이닉스","009150": "삼성전기","011070": "LG이노텍",
+    "066570": "LG전자","000990": "DB하이텍","357780": "솔브레인","034220": "LG디스플레이",
+    "373220": "LG에너지솔루션","006400": "삼성SDI","003670": "포스코퓨처엠","247540": "에코프로비엠",
+    "086520": "에코프로","066970": "엘앤에프","278280": "천보","285130": "SK케미칼",
+    "051910": "LG화학","096770": "SK이노베이션","011170": "롯데케미칼","010950": "에쓰-오일",
+    "011780": "금호석유","009830": "한화솔루션","010060": "OCI홀딩스","014680": "한솔케미칼",
+    "005490": "POSCO홀딩스","004020": "현대제철","010130": "고려아연","103140": "풍산",
+    "117580": "LS MnM","075580": "세아제강지주",
+    "207940": "삼성바이오로직스","068270": "셀트리온","128940": "한미약품","185750": "종근당",
+    "000100": "유한양행","069620": "대웅제약","196170": "알테오젠","141080": "리가켐바이오",
+    "028300": "HLB","302440": "SK바이오사이언스","003850": "보령","326030": "SK바이오팜",
+    "145720": "덴티움","145990": "삼양사","087660": "HK이노엔","214150": "클래시스",
+    "005380": "현대차","000270": "기아","012330": "현대모비스","011210": "현대위아",
+    "161390": "한국타이어앤테크놀로지","002350": "넥센타이어","064350": "현대로템","086280": "현대글로비스",
+    "329180": "HD현대중공업","042660": "한화오션","009540": "한국조선해양","010620": "현대미포조선",
+    "010140": "삼성중공업","047810": "한국항공우주","012450": "한화에어로스페이스","034020": "두산에너빌리티",
+    "241560": "두산밥캣","267250": "HD현대","272210": "한화시스템","336260": "두산퓨얼셀",
+    "298040": "효성중공업","112610": "씨에스윈드",
+    "105560": "KB금융","055550": "신한지주","086790": "하나금융지주","316140": "우리금융지주",
+    "024110": "기업은행","138930": "BNK금융지주","139130": "DGB금융지주","175330": "JB금융지주",
+    "032830": "삼성생명","000810": "삼성화재","001450": "현대해상","005830": "DB손해보험",
+    "016360": "삼성증권","005940": "NH투자증권","071050": "한국금융지주","039490": "키움증권",
     "138040": "메리츠금융지주","006800": "미래에셋증권",
-    # 건설/부동산
-    "000720": "현대건설",      "006360": "GS건설",
-    "047040": "대우건설",      "028260": "삼성물산",
+    "000720": "현대건설","006360": "GS건설","047040": "대우건설","028260": "삼성물산",
     "028050": "삼성엔지니어링","267270": "HDC현대산업개발",
-    # 통신/IT서비스
-    "017670": "SK텔레콤",      "030200": "KT",
-    "035720": "카카오",        "035420": "NAVER",
-    "323410": "카카오뱅크",
-    # 게임/엔터
-    "251270": "넷마블",        "036570": "엔씨소프트",
-    "259960": "크래프톤",      "263750": "펄어비스",
-    "352820": "하이브",        "041510": "에스엠",
-    "035900": "JYP Ent.",      "253450": "스튜디오드래곤",
-    # 유통/소비재
-    "004170": "신세계",        "139480": "이마트",
-    "023530": "롯데쇼핑",      "069960": "현대백화점",
-    "007070": "GS리테일",      "282330": "BGF리테일",
-    "271560": "오리온",        "097950": "CJ제일제당",
-    "001680": "대상",          "000080": "하이트진로",
-    "021240": "코웨이",        "033780": "KT&G",
-    "090430": "아모레퍼시픽",  "051900": "LG생활건강",
-    "002790": "아모레G",       "004370": "농심",
-    "007310": "오뚜기",        "044820": "코스맥스",
-    "093050": "LF",            "030000": "제일기획",
-    # 에너지/유틸리티
-    "015760": "한국전력",      "036460": "한국가스공사",
-    "051600": "한전KPS",
-    # 중공업/기계
-    "047050": "포스코인터내셔널","120110": "코오롱인더",
-    "018880": "한온시스템",    "010120": "LS ELECTRIC",
-    "001120": "LX홀딩스",      "011200": "HMM",
-    # 지주/복합기업
-    "003550": "LG",            "034730": "SK",
-    "001040": "CJ",            "078930": "GS",
-    "004800": "효성",          "002380": "KCC",
-    "004990": "롯데지주",      "001780": "알루코",
-    # 항공/물류/여행
-    "003490": "대한항공",      "180640": "한진칼",
-    "097150": "CJ대한통운",    "034230": "파라다이스",
-    # 기타
-    "111770": "영원무역",      "090140": "삼양패키징",
-    "014820": "동원시스템즈",  "053210": "스카이라이프",
+    "017670": "SK텔레콤","030200": "KT","035720": "카카오","035420": "NAVER","323410": "카카오뱅크",
+    "251270": "넷마블","036570": "엔씨소프트","259960": "크래프톤","263750": "펄어비스",
+    "352820": "하이브","041510": "에스엠","035900": "JYP Ent.","253450": "스튜디오드래곤",
+    "004170": "신세계","139480": "이마트","023530": "롯데쇼핑","069960": "현대백화점",
+    "007070": "GS리테일","282330": "BGF리테일","271560": "오리온","097950": "CJ제일제당",
+    "001680": "대상","000080": "하이트진로","021240": "코웨이","033780": "KT&G",
+    "090430": "아모레퍼시픽","051900": "LG생활건강","002790": "아모레G","004370": "농심",
+    "007310": "오뚜기","044820": "코스맥스","093050": "LF","030000": "제일기획",
+    "015760": "한국전력","036460": "한국가스공사","051600": "한전KPS",
+    "047050": "포스코인터내셔널","120110": "코오롱인더","018880": "한온시스템","010120": "LS ELECTRIC",
+    "001120": "LX홀딩스","011200": "HMM",
+    "003550": "LG","034730": "SK","001040": "CJ","078930": "GS",
+    "004800": "효성","002380": "KCC","004990": "롯데지주","001780": "알루코",
+    "003490": "대한항공","180640": "한진칼","097150": "CJ대한통운","034230": "파라다이스",
+    "111770": "영원무역","090140": "삼양패키징","014820": "동원시스템즈","053210": "스카이라이프",
 }
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def get_kospi200():
-    """KOSPI 200 구성종목 반환 (내장 리스트 사용)"""
     return {code + ".KS": name for code, name in _KOSPI200_BASE.items()}
 
-# ── 종목 필터 / 진입 / 청산 로직 ─────────────────────
+# ── 종목 필터 / 진입 / 청산 로직
 def stock_filter(close, vol, vol_mult=2.0):
-    """매수 후보 필터: 추세 + 과매수방지 + 거래량"""
     ma20 = close.rolling(20).mean()
     ma60 = close.rolling(60).mean()
     trend          = ma20.iloc[-1] > ma60.iloc[-1]
     not_overextend = close.iloc[-1] < close.rolling(20).max().iloc[-1] * 1.05
+    volume_surge   = vol.iloc[nd = close.iloc[-1] < close.rolling(20).max().iloc[-1] * 1.05
     volume_surge   = vol.iloc[-1]  > vol.rolling(20).mean().iloc[-1] * vol_mult
     return trend and not_overextend and volume_surge
 
@@ -238,7 +186,7 @@ class TradingSystem:
         volume_drop = vol_ratio < 0.8
         return exit_logic(pos["entry"], current_price, hold_days, volume_drop)
 
-# ── 신호 계산 ─────────────────────────────────────────
+# ── 신호 계산 ─────────────────────────────────────────────────────────────────
 def get_signal(ticker, name, strategy="NORMAL", market_ok=True,
                rsi_low=40, rsi_high=60, vol_mult=1.5):
     try:
@@ -411,7 +359,37 @@ def get_signal(ticker, name, strategy="NORMAL", market_ok=True,
         date=df.index[-1].strftime("%Y-%m-%d"),
     )
 
-# ── 병렬 스캔 ─────────────────────────────────────────
+# ── 뉴스 조회 ─────────────────────────────────────────────────────────────────
+@st.cache_data(ttl=1800, show_spinner=False)
+def get_news(stock_name: str, max_items: int = 5):
+    """Google News RSS 기반 종목 뉴스 조회 (캐시 30분)"""
+    try:
+        q   = quote(f"{stock_name} 주식")
+        url = (f"https://news.google.com/rss/search"
+               f"?q={q}&hl=ko&gl=KR&ceid=KR:ko")
+        import urllib.request
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            raw = resp.read()
+        root  = ET.fromstring(raw)
+        items = root.findall(".//item")[:max_items]
+        news  = []
+        for it in items:
+            title   = (it.findtext("title") or "").split(" - ")[0].strip()
+            link    = it.findtext("link") or ""
+            pub     = (it.findtext("pubDate") or "")[:22]
+            source  = ""
+            src_el  = it.find("{https://news.google.com/rss}source")
+            if src_el is not None:
+                source = src_el.text or ""
+            news.append({"title": title, "link": link,
+                         "date": pub, "source": source})
+        return news
+    except Exception:
+        return []
+
+# ── 병렬 스캔 ─────────────────────────────────────────────────────────────────
 def scan_all(watchlist, strategy, market_ok, rsi_low, rsi_high, vol_mult,
              progress_bar, status_text):
     total   = len(watchlist)
@@ -436,7 +414,7 @@ def scan_all(watchlist, strategy, market_ok, rsi_low, rsi_high, vol_mult,
 
     return results
 
-# ── 테이블 변환 ───────────────────────────────────────
+# ── 테이블 변환 ───────────────────────────────────────────────────────────────
 SIG_ICON = {
     "BUY":"🟢","WATCH":"🟡","SELL":"🔴","NEUTRAL":"⚪",
     "NO TRADE":"🚫","STOPLOSS":"🚨",
@@ -471,9 +449,9 @@ def to_df(lst):
         })
     return pd.DataFrame(rows)
 
-# ══════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════════════════
 # Streamlit 레이아웃
-# ══════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════════════════
 st.set_page_config(
     page_title="KOSPI 매매 신호 스캐너 v3",
     page_icon="📊",
@@ -483,7 +461,7 @@ st.set_page_config(
 st.title("📊 KOSPI 매매 신호 스캐너 v3")
 st.caption("기술지표 기반 자동 신호 분석 — MA · RSI · MACD · 볼린저밴드 · 거래량 · 전략 필터")
 
-# ── 사이드바 ──────────────────────────────────────────
+# ── 사이드바 ──────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.header("⚙️ 스캔 설정")
 
@@ -520,55 +498,15 @@ with st.sidebar:
     show_notrade  = st.checkbox("🚫 진입차단", value=False)
     show_neutral  = st.checkbox("⚪ 중립",   value=False)
 
-# ── 시장 상태 표시 ────────────────────────────────────
+# ── 시장 상태 표시 ────────────────────────────────────────────────────────────
 with st.spinner("KOSPI 시장 상태 확인 중..."):
     mkt_ok, kospi_now, kospi_ma60 = market_filter()
 
 if mkt_ok:
-    st.success(f"📈 **상승장** — KOSPI {kospi_now:,.0f} ＞ MA60 {kospi_ma60:,.0f}  |  신규 진입 가능")
-else:
-    st.error(f"📉 **하락장** — KOSPI {kospi_now:,.0f} ＜ MA60 {kospi_ma60:,.0f}  |  신규 진입 차단 (NO TRADE 신호 발동)")
-
-# 전략 안내
-strat_desc = {
-    "SAFE":       "🛡 보수형 — score ≥ 7 + 20일 고가 돌파 + 당일 상승 동시 충족 시 매수",
-    "NORMAL":     "⚖️ 중립형 — score ≥ 6 + 20일 고가 돌파 시 매수",
-    "AGGRESSIVE": "⚡ 공격형 — score ≥ 5 이면 매수 (저점 반등 포함)",
-}
-st.info(strat_desc[strategy])
-
-# ── 스캔 실행 ─────────────────────────────────────────
-col_btn, col_last = st.columns([2, 8])
-with col_btn:
-    run_btn = st.button("🔍 스캔 시작", type="primary", use_container_width=True)
-with col_last:
-    if "last_scan" in st.session_state:
-        st.caption(f"마지막 스캔: {st.session_state['last_scan']}")
-
-if run_btn:
-    with st.spinner("종목 리스트 로딩 중..."):
-        watchlist = get_kospi200() if include_kospi200 else {}
-        for k, v in EXTRA.items():
-            watchlist.setdefault(k, v)
-
-    total = len(watchlist)
-    st.info(f"총 **{total}개** 종목 스캔 시작 · 전략: **{strategy}** · 시장: **{'상승장' if mkt_ok else '하락장'}**")
-
-    pb   = st.progress(0)
-    stat = st.empty()
-    t0   = time.time()
-
-    results = scan_all(watchlist, strategy, mkt_ok, rsi_low, rsi_high, vol_mult, pb, stat)
-
-    elapsed = time.time() - t0
-    pb.empty()
-    stat.empty()
-
-    st.session_state["results"]   = results
-    st.session_state["last_scan"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    st.success(f"📈 **상승장** — KOSPI {kospi_now:%M:%S")
     st.success(f"✅ 스캔 완료 — {len(results)}개 분석 ({elapsed:.0f}초)")
 
-# ── 결과 표시 ─────────────────────────────────────────
+# ── 결과 표시 ─────────────────────────────────────────────────────────────────
 if "results" in st.session_state:
     results = st.session_state["results"]
 
@@ -591,7 +529,7 @@ if "results" in st.session_state:
     st.markdown("---")
 
     # 탭 레이아웃
-    tabs = st.tabs(["🟢 매수", "🟡 관심", "🔴 매도", "🚫 진입차단", "⚪ 중립"])
+    tabs = st.tabs(["🟢 매수", "🟡 관심", "🔴 매도", "🚫 진입차단", "⚪ 중립", "📰 뉴스"])
 
     tab_data = [
         (tabs[0], buy_list,     show_buy,     "매수 신호 없음"),
@@ -617,13 +555,36 @@ if "results" in st.session_state:
                     column_config={
                         "점수":      st.column_config.ProgressColumn("점수",  min_value=0, max_value=10, format="%d"),
                         "현재가":    st.column_config.NumberColumn("현재가",   format="%d원"),
-                        "등락(%)":   st.column_config.NumberColumn("등락(%)", format="%.2f%%"),
+                        "등락(%)": st.column_config.NumberColumn("등락(%)", format="%.2f%%"),
                         "1차익절":   st.column_config.NumberColumn("1차익절(+3%)", format="%d원"),
                         "목표가":    st.column_config.NumberColumn("2차목표(+5%)", format="%d원"),
                         "손절가":    st.column_config.NumberColumn("손절(-3%)",   format="%d원"),
                         "거래량배율": st.column_config.NumberColumn("거래량",  format="×%.1f"),
                     }
                 )
+
+    # 뉴스 탭
+    with tabs[5]:
+        news_targets = buy_list + watch_list
+        if not news_targets:
+            st.info("매수/관심 신호 종목이 없습니다. 먼저 스캔을 실행하세요.")
+        else:
+            st.caption(f"매수 {len(buy_list)}개 + 관심 {len(watch_list)}개 종목 뉴스 | Google News 기준 · 30분 캐시")
+            for r in news_targets:
+                icon  = "🟢" if r["signal"] == "BUY" else "🟡"
+                label = f"{icon} {r['name']}  ·  score {r['score']}  ·  {r['price']:,}원"
+                with st.expander(label, expanded=False):
+                    news_items = get_news(r["name"], max_items=5)
+                    if news_items:
+                        for n in news_items:
+                            src  = f"  *— {n['source']}*" if n["source"] else ""
+                            date = n["date"][:16] if n["date"] else ""
+                            st.markdown(
+                                f"- [{n['title']}]({n['link']})<br><sub>{date}{src}</sub>",
+                                unsafe_allow_html=True,
+                            )
+                    else:
+                        st.caption("관련 뉴스를 불러올 수 없습니다.")
 
     # CSV 다운로드
     st.markdown("---")
@@ -637,9 +598,9 @@ if "results" in st.session_state:
             mime="text/csv",
         )
 
-# ══════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════════════════
 # 포지션 관리 (TradingSystem)
-# ══════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
 st.subheader("💼 포지션 관리")
 st.caption(f"손절 {STOP_LOSS_PCT}% · 1차익절 +{PARTIAL_PROFIT_PCT}% · 2차목표 +{TARGET_PCT}% · 최대보유 {MAX_HOLD_DAYS}일 · 1차:{BUY_RATIO_1*100:.0f}% / 2차:{BUY_RATIO_2*100:.0f}%")
@@ -694,7 +655,7 @@ if ts.positions:
             "종목코드":  ticker,
             "매수가":    pos["entry"],
             "현재가":    int(cur_price),
-            "손익(%)":   round(pnl, 2),
+            "손익(%)": round(pnl, 2),
             "보유일":    hold_days,
             "거래량배율": round(vol_ratio, 2),
             "청산신호":  SIG_ICON.get(sig,"") + " " + SIG_KR.get(sig, sig),
@@ -709,7 +670,7 @@ if ts.positions:
         column_config={
             "매수가":    st.column_config.NumberColumn(format="%d원"),
             "현재가":    st.column_config.NumberColumn(format="%d원"),
-            "손익(%)":   st.column_config.NumberColumn(format="%.2f%%"),
+            "손익(%)": st.column_config.NumberColumn(format="%.2f%%"),
             "손절가":    st.column_config.NumberColumn(format="%d원"),
             "1차익절":   st.column_config.NumberColumn(format="%d원"),
             "2차목표":   st.column_config.NumberColumn(format="%d원"),
