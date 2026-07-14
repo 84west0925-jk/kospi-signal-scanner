@@ -38,6 +38,51 @@ except ImportError:
 
 EOK = 1e8  # 억 원
 
+# ── KRX 로그인 진단 ───────────────────────────────────
+def krx_login_diagnosis():
+    """KRX 로그인을 직접 시도해 (코드, 메시지) 반환. CD001=정상"""
+    kid, kpw = os.environ.get("KRX_ID"), os.environ.get("KRX_PW")
+    if not (kid and kpw):
+        return "NOID", "KRX_ID/KRX_PW 미설정"
+    try:
+        import requests
+        from pykrx.website.comm import auth as _a
+        s = requests.Session()
+        _a.warmup_krx_session(s)
+        hdr = {"User-Agent": _a.USER_AGENT, "Referer": _a.LOGIN_PAGE}
+        payload = {"mbrNm": "", "telNo": "", "di": "", "certType": "",
+                   "mbrId": kid, "pw": kpw}
+        d = s.post(_a.LOGIN_URL, data=payload, headers=hdr, timeout=15).json()
+        code, msg = d.get("_error_code", ""), d.get("_error_message", "")
+        if code == "CD011":  # 중복 로그인 → 재시도
+            payload["skipDup"] = "Y"
+            d = s.post(_a.LOGIN_URL, data=payload, headers=hdr, timeout=15).json()
+            code, msg = d.get("_error_code", ""), d.get("_error_message", "")
+        return code, msg
+    except Exception as e:
+        return "EXC", str(e)
+
+def show_krx_help(code, msg):
+    if code == "CD001":
+        st.info("✅ KRX 로그인은 정상입니다. 일시적 데이터 오류일 수 있으니 '데이터 갱신'을 눌러 재시도하세요.")
+    elif code == "NOID":
+        st.warning(
+            "⚠️ **KRX 계정 미설정** — Streamlit Cloud → Settings → Secrets에 "
+            "`KRX_ID`, `KRX_PW`를 등록하세요.")
+    elif code == "CD010":
+        st.warning(
+            "⚠️ **KRX 비밀번호 변경 필요** — [data.krx.co.kr](https://data.krx.co.kr)에서 "
+            "직접 로그인해 비밀번호를 변경한 뒤, Secrets의 KRX_PW도 새 비밀번호로 갱신하세요.")
+    else:
+        st.warning(
+            f"⚠️ **KRX 로그인 실패** (코드: {code or '없음'}) — {msg or '자격 증명을 확인하세요.'}\n\n"
+            "확인 사항:\n"
+            "1. KRX는 **이메일이 아닌 회원 아이디**로 로그인합니다. "
+            "[data.krx.co.kr](https://data.krx.co.kr)에서 직접 로그인해 아이디/비밀번호를 확인하세요.\n"
+            "2. 확인한 아이디/비밀번호를 Streamlit Cloud → Settings → **Secrets**의 "
+            "`KRX_ID`, `KRX_PW`에 정확히 입력 후 저장하세요.\n"
+            "3. 저장 후 앱이 재시작되면 다시 시도하세요.")
+
 # ── 기간 정의 (거래일 기준) ───────────────────────────
 PERIODS = {
     "일별": 1, "주별": 5, "월별": 22, "3개월": 66, "6개월": 126, "1년": 248,
@@ -277,13 +322,9 @@ def render():
             df = load_market_data(from_d, to_d, prev_from, prev_to)
         except Exception as e:
             st.error(f"KRX 데이터 로딩 실패: {e}")
-            if not os.environ.get("KRX_ID"):
-                st.warning(
-                    "⚠️ **KRX 계정 미설정** — KRX 데이터포털은 로그인이 필요합니다.\n\n"
-                    "1. [data.krx.co.kr](https://data.krx.co.kr) 무료 회원가입\n"
-                    "2. Streamlit Cloud → App Settings → **Secrets**에 아래 등록\n"
-                    "```toml\nKRX_ID = \"아이디\"\nKRX_PW = \"비밀번호\"\n```\n"
-                    "3. 앱 재시작 후 다시 시도")
+            with st.spinner("KRX 로그인 상태 진단 중..."):
+                code, msg = krx_login_diagnosis()
+            show_krx_help(code, msg)
             return
 
     # 52주 신고가/신저가 — 거래대금 상위 200개 종목 대상
