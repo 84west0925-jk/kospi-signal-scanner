@@ -360,8 +360,12 @@ def render():
         st.error("지표 계산에 필요한 데이터가 부족합니다.")
         return
 
-    df = m.merge(base[["종목코드", "종목명", "현재가", "등락률", "거래대금", "시가총액", "섹터"]],
-                 on="종목코드", how="left")
+    base_cols = ["종목코드", "종목명", "현재가", "등락률", "거래대금", "시가총액", "섹터"]
+    if "테마" in base.columns:
+        base_cols.append("테마")
+    df = m.merge(base[base_cols], on="종목코드", how="left")
+    if "테마" not in df.columns:
+        df["테마"] = ""
 
     # ── 시장 게이지 + KPI ──
     gcol, kcol = st.columns([2, 6])
@@ -433,17 +437,23 @@ def render():
     disp_cols = ["종목명", "별점", "판정", "Score", "Score등급", "신호", "현재가", "등락률",
                  "거래대금", "거래대금증가율", "외국인순매수", "기관순매수",
                  "외국인비율", "기관비율", "외국인연속", "기관연속",
-                 "20일선위", "20일신고가", "섹터"]
+                 "20일선위", "20일신고가", "섹터", "테마"]
 
     # ═══ 🎯 Radar 등급 ═══
     with t_radar:
-        g1, g2 = st.columns([2, 3])
+        g1, g2, g3 = st.columns([2, 2, 2])
         pick_g = g1.multiselect("등급 필터", ["S", "A", "B", "C", "D"],
                                 default=["S", "A", "B"], key="rd_grade")
-        q = g2.text_input("종목 검색", key="rd_q", placeholder="종목명 입력")
+        pick_s = g2.multiselect("대표 섹터", sorted(df["섹터"].dropna().unique()), key="rd_sec")
+        q = g3.text_input("종목·섹터·테마 검색", key="rd_q", placeholder="예: 삼성, HBM, 방산")
         view = df[df["등급"].isin(pick_g)] if pick_g else df
+        if pick_s:
+            view = view[view["섹터"].isin(pick_s)]
         if q:
-            view = view[view["종목명"].str.contains(q, na=False)]
+            q_ = q.strip()
+            view = view[view["종목명"].str.contains(q_, na=False)
+                        | view["섹터"].str.contains(q_, na=False)
+                        | view["테마"].str.contains(q_, na=False)]
         view = view.sort_values(["등급", "Score"], ascending=[True, False])
         d = eokify(view[disp_cols]).reset_index(drop=True)
         d.index += 1
@@ -500,7 +510,7 @@ def render():
             code2sec = dict(zip(base["종목코드"], base["섹터"]))
 
             rows = []
-            for sec_name in list(THEME_KEYWORDS.keys()) + ["기타"]:
+            for sec_name in sorted(base["섹터"].dropna().unique()):
                 cs = [c for c in frg_pv.columns if code2sec.get(c) == sec_name]
                 if not cs:
                     continue

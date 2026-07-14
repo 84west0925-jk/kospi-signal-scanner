@@ -121,7 +121,12 @@ def load_all_stocks() -> pd.DataFrame:
             continue
     df = pd.DataFrame(recs)
     if not df.empty:
-        df["섹터"] = df["종목명"].map(classify_sector)
+        try:
+            from sectors import attach_sectors
+            df = attach_sectors(df)          # 대표 섹터 + 연관 테마 (업종 기반)
+        except Exception:
+            df["섹터"] = df["종목명"].map(classify_sector)
+            df["테마"] = ""
     return df
 
 def _fetch_trend_rows(code: str, days: int) -> list:
@@ -415,6 +420,10 @@ def render():
         frg_min = f2.selectbox("외국인 순매수", ["전체", "10억 이상", "30억 이상", "50억 이상", "100억 이상"])
         ins_min = f3.selectbox("기관 순매수", ["전체", "10억 이상", "30억 이상", "50억 이상", "100억 이상"])
         chg_min = f4.selectbox("등락률", ["전체", "3% 이상", "5% 이상", "10% 이상", "15% 이상"])
+        f5, f6 = st.columns(2)
+        sec_pickf = f5.multiselect("대표 섹터", sorted(df["섹터"].dropna().unique()), key="flt_sec")
+        theme_q = f6.text_input("연관 테마 검색", key="flt_theme",
+                                placeholder="예: HBM, 수소, 우주항공")
 
     def th(s):
         return 0 if s == "전체" else float(s.split("억")[0].replace("% 이상", ""))
@@ -423,6 +432,10 @@ def render():
     if frg_min != "전체": fdf = fdf[fdf["외국인순매수"] >= th(frg_min) * EOK]
     if ins_min != "전체": fdf = fdf[fdf["기관순매수"] >= th(ins_min) * EOK]
     if chg_min != "전체": fdf = fdf[fdf["등락률"] >= float(chg_min.split("%")[0])]
+    if sec_pickf: fdf = fdf[fdf["섹터"].isin(sec_pickf)]
+    if theme_q:
+        q_ = theme_q.strip()
+        fdf = fdf[fdf["테마"].str.contains(q_, na=False) | fdf["섹터"].str.contains(q_, na=False)]
 
     # ── 시장 전체 순매수 (정확치, 억원 → 원) ──
     if not mtrend.empty:
@@ -656,11 +669,20 @@ def render():
 
         with cB:
             st.subheader("🏭 섹터 상세")
-            sec_pick = st.selectbox("섹터 선택", list(THEME_KEYWORDS.keys()) + ["기타"], key="sec_pick")
+            all_secs = sorted(df["섹터"].dropna().unique())
+            sec_pick = st.selectbox("대표 섹터 선택", all_secs, key="sec_pick")
+            theme_q2 = st.text_input("또는 연관 테마 검색", key="sec_theme_q",
+                                     placeholder="예: HBM, SMR, 수소 (입력 시 테마 기준 조회)")
             sec_sort = st.radio("정렬", ["거래대금", "외국인순매수", "기관순매수", "Smart Score"],
                                 horizontal=True, key="sec_sort")
-            sdf = df[df["섹터"] == sec_pick].sort_values(sec_sort, ascending=False)
-            cols_s = ["종목명", "현재가", "등락률", "거래대금", "외국인순매수", "기관순매수",
+            if theme_q2:
+                tq = theme_q2.strip()
+                sdf = df[df["테마"].str.contains(tq, na=False)
+                         | (df["섹터"].str.contains(tq, na=False))]
+            else:
+                sdf = df[df["섹터"] == sec_pick]
+            sdf = sdf.sort_values(sec_sort, ascending=False)
+            cols_s = ["종목명", "테마", "현재가", "등락률", "거래대금", "외국인순매수", "기관순매수",
                       "외국인보유율", "Smart Score", "등급"]
             ds = eokify(sdf[cols_s]).reset_index(drop=True)
             ds.index += 1
