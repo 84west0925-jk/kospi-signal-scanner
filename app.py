@@ -3,6 +3,7 @@
 """
 KOSPI 매매 신호 스캐너 v3 — Streamlit 웹 서비스
 전략 선택 · 시장 필터 · 점수 가중치 개선판
++ 📊 Smart Money Dashboard 탭 (smart_money.py)
 """
 import time, warnings
 from datetime import datetime
@@ -20,6 +21,8 @@ try:
     FDR_OK = True
 except Exception:
     FDR_OK = False
+
+import smart_money
 
 # ── 파라미터 ──────────────────────────────────────────────────────────────────
 STOP_LOSS_PCT      = -3.0
@@ -54,7 +57,6 @@ EXTRA = {
     "000880.KS": "한화",
     "395160.KS": "KODEX AI반도체",
     "487240.KS": "KODEX AI전력핵심설비",
-    "034020.KS": "두산에너빌리티",
     "047810.KS": "한국항공우주",
     "012450.KS": "한화에어로스페이스",
     "272210.KS": "한화시스템",
@@ -476,254 +478,267 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("📊 KOSPI 매매 신호 스캐너 v3")
-st.caption("기술지표 기반 자동 신호 분석 — MA · RSI · MACD · 볼린저밴드 · 거래량 · 전략 필터")
+# ── 메인 탭 ───────────────────────────────────────────────────────────────────
+tab_scanner, tab_smart = st.tabs(["🔍 매매 신호 스캐너", "📊 Smart Money Dashboard"])
 
-# ── 사이드바 ──────────────────────────────────────────────────────────────────
-with st.sidebar:
-    st.header("⚙️ 스캔 설정")
-    strategy_map = {
-        "🛡 보수형 — 돌파+당일상승 필수": "SAFE",
-        "⚖️ 중립형 — 균형 (기본)":       "NORMAL",
-        "⚡ 공격형 — 저점 반등 포함":    "AGGRESSIVE",
+# ══════════════════════════════════════════════════════════════════════════════
+# 탭 1 — 매매 신호 스캐너 v3 (기존 기능)
+# ══════════════════════════════════════════════════════════════════════════════
+with tab_scanner:
+    st.title("📊 KOSPI 매매 신호 스캐너 v3")
+    st.caption("기술지표 기반 자동 신호 분석 — MA · RSI · MACD · 볼린저밴드 · 거래량 · 전략 필터")
+
+    # ── 사이드바 ──────────────────────────────────────────────────────────────
+    with st.sidebar:
+        st.header("⚙️ 스캔 설정")
+        strategy_map = {
+            "🛡 보수형 — 돌파+당일상승 필수": "SAFE",
+            "⚖️ 중립형 — 균형 (기본)":       "NORMAL",
+            "⚡ 공격형 — 저점 반등 포함":    "AGGRESSIVE",
+        }
+        strategy_label = st.radio("투자 전략", list(strategy_map.keys()), index=1)
+        strategy = strategy_map[strategy_label]
+
+        st.markdown("---")
+        include_kospi200 = st.toggle("KOSPI 200 전체 스캔", value=True,
+                                      help="OFF 시 EXTRA 관심종목만 스캔")
+        st.markdown("---")
+        st.markdown("**파라미터 조정**")
+        rsi_low  = st.slider("RSI 매수 하한", 20, 50, RSI_BUY_LOW)
+        rsi_high = st.slider("RSI 매수 상한", 40, 75, RSI_BUY_HIGH)
+        vol_mult = st.slider("거래량 급증 배율", 1.0, 3.0, VOL_SURGE_MULT, 0.1)
+        st.markdown("---")
+        st.markdown("**신호 필터**")
+        show_buy      = st.checkbox("🟢 매수",   value=True)
+        show_watch    = st.checkbox("🟡 관심",   value=True)
+        show_sell     = st.checkbox("🔴 매도",   value=True)
+        show_notrade  = st.checkbox("🚫 진입차단", value=False)
+        show_neutral  = st.checkbox("⚪ 중립",   value=False)
+
+    # ── 시장 상태 표시 ────────────────────────────────────────────────────────
+    with st.spinner("KOSPI 시장 상태 확인 중..."):
+        mkt_ok, kospi_now, kospi_ma60 = market_filter()
+
+    if mkt_ok:
+        st.success(f"📈 **상승장** — KOSPI {kospi_now:,.0f} ＞ MA60 {kospi_ma60:,.0f}  |  신규 진입 가능")
+    else:
+        st.error(f"📉 **하락장** — KOSPI {kospi_now:,.0f} ＜ MA60 {kospi_ma60:,.0f}  |  신규 진입 차단 (NO TRADE 신호 발동)")
+
+    strat_desc = {
+        "SAFE":       "🛡 보수형 — score ≥ 7 + 20일 고가 돌파 + 당일 상승 동시 충족 시 매수",
+        "NORMAL":     "⚖️ 중립형 — score ≥ 6 + 20일 고가 돌파 시 매수",
+        "AGGRESSIVE": "⚡ 공격형 — score ≥ 5 이면 매수 (저점 반등 포함)",
     }
-    strategy_label = st.radio("투자 전략", list(strategy_map.keys()), index=1)
-    strategy = strategy_map[strategy_label]
+    st.info(strat_desc[strategy])
 
-    st.markdown("---")
-    include_kospi200 = st.toggle("KOSPI 200 전체 스캔", value=True,
-                                  help="OFF 시 EXTRA 관심종목만 스캔")
-    st.markdown("---")
-    st.markdown("**파라미터 조정**")
-    rsi_low  = st.slider("RSI 매수 하한", 20, 50, RSI_BUY_LOW)
-    rsi_high = st.slider("RSI 매수 상한", 40, 75, RSI_BUY_HIGH)
-    vol_mult = st.slider("거래량 급증 배율", 1.0, 3.0, VOL_SURGE_MULT, 0.1)
-    st.markdown("---")
-    st.markdown("**신호 필터**")
-    show_buy      = st.checkbox("🟢 매수",   value=True)
-    show_watch    = st.checkbox("🟡 관심",   value=True)
-    show_sell     = st.checkbox("🔴 매도",   value=True)
-    show_notrade  = st.checkbox("🚫 진입차단", value=False)
-    show_neutral  = st.checkbox("⚪ 중립",   value=False)
+    # ── 스캔 실행 ─────────────────────────────────────────────────────────────
+    col_btn, col_last = st.columns([2, 8])
+    with col_btn:
+        run_btn = st.button("🔍 스캔 시작", type="primary", use_container_width=True)
+    with col_last:
+        if "last_scan" in st.session_state:
+            st.caption(f"마지막 스캔: {st.session_state['last_scan']}")
 
-# ── 시장 상태 표시 ────────────────────────────────────────────────────────────
-with st.spinner("KOSPI 시장 상태 확인 중..."):
-    mkt_ok, kospi_now, kospi_ma60 = market_filter()
+    if run_btn:
+        with st.spinner("종목 리스트 로딩 중..."):
+            watchlist = get_kospi200() if include_kospi200 else {}
+            for k, v in EXTRA.items():
+                watchlist.setdefault(k, v)
 
-if mkt_ok:
-    st.success(f"📈 **상승장** — KOSPI {kospi_now:,.0f} ＞ MA60 {kospi_ma60:,.0f}  |  신규 진입 가능")
-else:
-    st.error(f"📉 **하락장** — KOSPI {kospi_now:,.0f} ＜ MA60 {kospi_ma60:,.0f}  |  신규 진입 차단 (NO TRADE 신호 발동)")
+        total = len(watchlist)
+        st.info(f"총 **{total}개** 종목 스캔 시작 · 전략: **{strategy}** · 시장: **{'상승장' if mkt_ok else '하락장'}**")
 
-strat_desc = {
-    "SAFE":       "🛡 보수형 — score ≥ 7 + 20일 고가 돌파 + 당일 상승 동시 충족 시 매수",
-    "NORMAL":     "⚖️ 중립형 — score ≥ 6 + 20일 고가 돌파 시 매수",
-    "AGGRESSIVE": "⚡ 공격형 — score ≥ 5 이면 매수 (저점 반등 포함)",
-}
-st.info(strat_desc[strategy])
+        pb   = st.progress(0)
+        stat = st.empty()
+        t0   = time.time()
 
-# ── 스캔 실행 ─────────────────────────────────────────────────────────────────
-col_btn, col_last = st.columns([2, 8])
-with col_btn:
-    run_btn = st.button("🔍 스캔 시작", type="primary", use_container_width=True)
-with col_last:
-    if "last_scan" in st.session_state:
-        st.caption(f"마지막 스캔: {st.session_state['last_scan']}")
+        results = scan_all(watchlist, strategy, mkt_ok, rsi_low, rsi_high, vol_mult, pb, stat)
 
-if run_btn:
-    with st.spinner("종목 리스트 로딩 중..."):
-        watchlist = get_kospi200() if include_kospi200 else {}
-        for k, v in EXTRA.items():
-            watchlist.setdefault(k, v)
+        elapsed = time.time() - t0
+        pb.empty()
+        stat.empty()
 
-    total = len(watchlist)
-    st.info(f"총 **{total}개** 종목 스캔 시작 · 전략: **{strategy}** · 시장: **{'상승장' if mkt_ok else '하락장'}**")
+        st.session_state["results"]   = results
+        st.session_state["last_scan"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        st.success(f"✅ 스캔 완료 — {len(results)}개 분석 ({elapsed:.0f}초)")
 
-    pb   = st.progress(0)
-    stat = st.empty()
-    t0   = time.time()
+    # ── 결과 표시 ─────────────────────────────────────────────────────────────
+    if "results" in st.session_state:
+        results = st.session_state["results"]
 
-    results = scan_all(watchlist, strategy, mkt_ok, rsi_low, rsi_high, vol_mult, pb, stat)
+        buy_list      = sorted([r for r in results if r["signal"] == "BUY"],      key=lambda r: -r["score"])
+        watch_list    = sorted([r for r in results if r["signal"] == "WATCH"],    key=lambda r: -r["score"])
+        sell_list     = sorted([r for r in results if r["signal"] == "SELL"],     key=lambda r:  r["rsi"])
+        notrade_list  = [r for r in results if r["signal"] == "NO TRADE"]
+        neutral_list  = [r for r in results if r["signal"] == "NEUTRAL"]
 
-    elapsed = time.time() - t0
-    pb.empty()
-    stat.empty()
+        st.markdown("---")
+        c1, c2, c3, c4, c5, c6 = st.columns(6)
+        c1.metric("🟢 매수",    len(buy_list))
+        c2.metric("🟡 관심",    len(watch_list))
+        c3.metric("🔴 매도",    len(sell_list))
+        c4.metric("🚫 진입차단", len(notrade_list))
+        c5.metric("⚪ 중립",    len(neutral_list))
+        c6.metric("📦 전체",    len(results))
 
-    st.session_state["results"]   = results
-    st.session_state["last_scan"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    st.success(f"✅ 스캔 완료 — {len(results)}개 분석 ({elapsed:.0f}초)")
+        st.markdown("---")
 
-# ── 결과 표시 ─────────────────────────────────────────────────────────────────
-if "results" in st.session_state:
-    results = st.session_state["results"]
+        tabs = st.tabs(["🟢 매수", "🟡 관심", "🔴 매도", "🚫 진입차단", "⚪ 중립", "📰 뉴스"])
 
-    buy_list      = sorted([r for r in results if r["signal"] == "BUY"],      key=lambda r: -r["score"])
-    watch_list    = sorted([r for r in results if r["signal"] == "WATCH"],    key=lambda r: -r["score"])
-    sell_list     = sorted([r for r in results if r["signal"] == "SELL"],     key=lambda r:  r["rsi"])
-    notrade_list  = [r for r in results if r["signal"] == "NO TRADE"]
-    neutral_list  = [r for r in results if r["signal"] == "NEUTRAL"]
+        tab_data = [
+            (tabs[0], buy_list,     show_buy,     "매수 신호 없음"),
+            (tabs[1], watch_list,   show_watch,   "관심 종목 없음"),
+            (tabs[2], sell_list,    show_sell,    "매도 신호 없음"),
+            (tabs[3], notrade_list, show_notrade, "진입 차단 종목 없음"),
+            (tabs[4], neutral_list, show_neutral, "중립 종목 없음"),
+        ]
 
-    st.markdown("---")
-    c1, c2, c3, c4, c5, c6 = st.columns(6)
-    c1.metric("🟢 매수",    len(buy_list))
-    c2.metric("🟡 관심",    len(watch_list))
-    c3.metric("🔴 매도",    len(sell_list))
-    c4.metric("🚫 진입차단", len(notrade_list))
-    c5.metric("⚪ 중립",    len(neutral_list))
-    c6.metric("📦 전체",    len(results))
+        for tab, lst, show, empty_msg in tab_data:
+            with tab:
+                if not show:
+                    st.info("사이드바에서 해당 신호를 활성화하세요.")
+                    continue
+                df = to_df(lst)
+                if df.empty:
+                    st.info(empty_msg)
+                else:
+                    st.dataframe(
+                        df,
+                        use_container_width=True,
+                        hide_index=True,
+                        column_config={
+                            "점수":      st.column_config.ProgressColumn("점수",  min_value=0, max_value=10, format="%d"),
+                            "현재가":    st.column_config.NumberColumn("현재가",   format="%d원"),
+                            "등락(%)": st.column_config.NumberColumn("등락(%)", format="%.2f%%"),
+                            "1차익절":   st.column_config.NumberColumn("1차익절(+3%)", format="%d원"),
+                            "목표가":    st.column_config.NumberColumn("2차목표(+5%)", format="%d원"),
+                            "손절가":    st.column_config.NumberColumn("손절(-3%)",   format="%d원"),
+                            "거래량배율": st.column_config.NumberColumn("거래량",  format="×%.1f"),
+                        }
+                    )
 
-    st.markdown("---")
-
-    tabs = st.tabs(["🟢 매수", "🟡 관심", "🔴 매도", "🚫 진입차단", "⚪ 중립", "📰 뉴스"])
-
-    tab_data = [
-        (tabs[0], buy_list,     show_buy,     "매수 신호 없음"),
-        (tabs[1], watch_list,   show_watch,   "관심 종목 없음"),
-        (tabs[2], sell_list,    show_sell,    "매도 신호 없음"),
-        (tabs[3], notrade_list, show_notrade, "진입 차단 종목 없음"),
-        (tabs[4], neutral_list, show_neutral, "중립 종목 없음"),
-    ]
-
-    for tab, lst, show, empty_msg in tab_data:
-        with tab:
-            if not show:
-                st.info("사이드바에서 해당 신호를 활성화하세요.")
-                continue
-            df = to_df(lst)
-            if df.empty:
-                st.info(empty_msg)
+        # 뉴스 탭
+        with tabs[5]:
+            news_targets = buy_list + watch_list
+            if not news_targets:
+                st.info("매수/관심 신호 종목이 없습니다. 먼저 스캔을 실행하세요.")
             else:
-                st.dataframe(
-                    df,
-                    use_container_width=True,
-                    hide_index=True,
-                    column_config={
-                        "점수":      st.column_config.ProgressColumn("점수",  min_value=0, max_value=10, format="%d"),
-                        "현재가":    st.column_config.NumberColumn("현재가",   format="%d원"),
-                        "등락(%)": st.column_config.NumberColumn("등락(%)", format="%.2f%%"),
-                        "1차익절":   st.column_config.NumberColumn("1차익절(+3%)", format="%d원"),
-                        "목표가":    st.column_config.NumberColumn("2차목표(+5%)", format="%d원"),
-                        "손절가":    st.column_config.NumberColumn("손절(-3%)",   format="%d원"),
-                        "거래량배율": st.column_config.NumberColumn("거래량",  format="×%.1f"),
-                    }
-                )
+                st.caption(f"매수 {len(buy_list)}개 + 관심 {len(watch_list)}개 종목 뉴스 | Google News 기준 · 30분 캐시")
+                for r in news_targets:
+                    icon  = "🟢" if r["signal"] == "BUY" else "🟡"
+                    label = f"{icon} {r['name']}  ·  score {r['score']}  ·  {r['price']:,}원"
+                    with st.expander(label, expanded=False):
+                        news_items = get_news(r["name"], max_items=5)
+                        if news_items:
+                            for n in news_items:
+                                src  = f"  *— {n['source']}*" if n["source"] else ""
+                                date = n["date"][:16] if n["date"] else ""
+                                st.markdown(
+                                    f"- [{n['title']}]({n['link']})<br><sub>{date}{src}</sub>",
+                                    unsafe_allow_html=True,
+                                )
+                        else:
+                            st.caption("관련 뉴스를 불러올 수 없습니다.")
 
-    # 뉴스 탭
-    with tabs[5]:
-        news_targets = buy_list + watch_list
-        if not news_targets:
-            st.info("매수/관심 신호 종목이 없습니다. 먼저 스캔을 실행하세요.")
-        else:
-            st.caption(f"매수 {len(buy_list)}개 + 관심 {len(watch_list)}개 종목 뉴스 | Google News 기준 · 30분 캐시")
-            for r in news_targets:
-                icon  = "🟢" if r["signal"] == "BUY" else "🟡"
-                label = f"{icon} {r['name']}  ·  score {r['score']}  ·  {r['price']:,}원"
-                with st.expander(label, expanded=False):
-                    news_items = get_news(r["name"], max_items=5)
-                    if news_items:
-                        for n in news_items:
-                            src  = f"  *— {n['source']}*" if n["source"] else ""
-                            date = n["date"][:16] if n["date"] else ""
-                            st.markdown(
-                                f"- [{n['title']}]({n['link']})<br><sub>{date}{src}</sub>",
-                                unsafe_allow_html=True,
-                            )
-                    else:
-                        st.caption("관련 뉴스를 불러올 수 없습니다.")
+        # CSV 다운로드
+        st.markdown("---")
+        all_signal = buy_list + watch_list + sell_list
+        if all_signal:
+            csv_df = to_df(all_signal)
+            st.download_button(
+                label="📥 결과 CSV 다운로드",
+                data=csv_df.to_csv(index=False, encoding="utf-8-sig").encode("utf-8-sig"),
+                file_name=f"kospi_signal_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+                mime="text/csv",
+            )
 
-    # CSV 다운로드
+    # ══════════════════════════════════════════════════════════════════════════
+    # 포지션 관리 (TradingSystem)
+    # ══════════════════════════════════════════════════════════════════════════
     st.markdown("---")
-    all_signal = buy_list + watch_list + sell_list
-    if all_signal:
-        csv_df = to_df(all_signal)
-        st.download_button(
-            label="📥 결과 CSV 다운로드",
-            data=csv_df.to_csv(index=False, encoding="utf-8-sig").encode("utf-8-sig"),
-            file_name=f"kospi_signal_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
-            mime="text/csv",
+    st.subheader("💼 포지션 관리")
+    st.caption(f"손절 {STOP_LOSS_PCT}% · 1차익절 +{PARTIAL_PROFIT_PCT}% · 2차목표 +{TARGET_PCT}% · 최대보유 {MAX_HOLD_DAYS}일 · 1차:{BUY_RATIO_1*100:.0f}% / 2차:{BUY_RATIO_2*100:.0f}%")
+
+    ts = TradingSystem()
+
+    with st.expander("➕ 보유 종목 등록", expanded=False):
+        col_t, col_p, col_d, col_btn2 = st.columns([2, 2, 2, 1])
+        with col_t:
+            pos_ticker = st.text_input("종목코드 (예: 005930.KS)", key="pos_ticker")
+        with col_p:
+            pos_price  = st.number_input("매수가 (원)", min_value=1, value=50000, step=100, key="pos_price")
+        with col_d:
+            pos_date   = st.date_input("매수일", key="pos_date")
+        with col_btn2:
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("등록", key="add_pos"):
+                name = pos_ticker
+                ts.positions[pos_ticker] = {
+                    "name":  name,
+                    "entry": pos_price,
+                    "date":  datetime.combine(pos_date, datetime.min.time()),
+                    "size1": BUY_RATIO_1,
+                    "size2": BUY_RATIO_2,
+                }
+                st.success(f"{pos_ticker} 등록 완료")
+
+    if ts.positions:
+        pos_rows = []
+        for ticker, pos in ts.positions.items():
+            hold_days = (datetime.now() - pos["date"]).days
+            try:
+                raw = yf.download(ticker, period="5d", interval="1d", progress=False, auto_adjust=True)
+                if isinstance(raw.columns, pd.MultiIndex):
+                    raw.columns = raw.columns.get_level_values(0)
+                cur_price = float(raw["Close"].squeeze().iloc[-1])
+                vol_s     = raw["Volume"].squeeze()
+                vol_ratio = float(vol_s.iloc[-1] / vol_s.mean()) if len(vol_s) > 1 else 1.0
+            except Exception:
+                cur_price = pos["entry"]
+                vol_ratio = 1.0
+
+            sig   = ts.manage(ticker, cur_price, vol_ratio)
+            pnl   = (cur_price - pos["entry"]) / pos["entry"] * 100
+            t_1st = int(round(pos["entry"] * (1 + PARTIAL_PROFIT_PCT / 100)))
+            t_2nd = int(round(pos["entry"] * (1 + TARGET_PCT         / 100)))
+            s_prc = int(round(pos["entry"] * (1 + STOP_LOSS_PCT      / 100)))
+
+            pos_rows.append({
+                "종목코드":  ticker,
+                "매수가":    pos["entry"],
+                "현재가":    int(cur_price),
+                "손익(%)": round(pnl, 2),
+                "보유일":    hold_days,
+                "거래량배율": round(vol_ratio, 2),
+                "청산신호":  SIG_ICON.get(sig,"") + " " + SIG_KR.get(sig, sig),
+                "손절가":    s_prc,
+                "1차익절":   t_1st,
+                "2차목표":   t_2nd,
+            })
+
+        pos_df = pd.DataFrame(pos_rows)
+        st.dataframe(
+            pos_df, use_container_width=True, hide_index=True,
+            column_config={
+                "매수가":    st.column_config.NumberColumn(format="%d원"),
+                "현재가":    st.column_config.NumberColumn(format="%d원"),
+                "손익(%)": st.column_config.NumberColumn(format="%.2f%%"),
+                "손절가":    st.column_config.NumberColumn(format="%d원"),
+                "1차익절":   st.column_config.NumberColumn(format="%d원"),
+                "2차목표":   st.column_config.NumberColumn(format="%d원"),
+                "거래량배율": st.column_config.NumberColumn(format="×%.2f"),
+            }
         )
 
+        del_ticker = st.selectbox("포지션 청산(삭제)", [""] + list(ts.positions.keys()), key="del_pos")
+        if del_ticker and st.button("삭제", key="del_btn"):
+            ts.remove(del_ticker)
+            st.rerun()
+    else:
+        st.info("등록된 포지션 없음 — 위 '보유 종목 등록'에서 추가하세요.")
+
 # ══════════════════════════════════════════════════════════════════════════════
-# 포지션 관리 (TradingSystem)
+# 탭 2 — Smart Money Dashboard
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown("---")
-st.subheader("💼 포지션 관리")
-st.caption(f"손절 {STOP_LOSS_PCT}% · 1차익절 +{PARTIAL_PROFIT_PCT}% · 2차목표 +{TARGET_PCT}% · 최대보유 {MAX_HOLD_DAYS}일 · 1차:{BUY_RATIO_1*100:.0f}% / 2차:{BUY_RATIO_2*100:.0f}%")
-
-ts = TradingSystem()
-
-with st.expander("➕ 보유 종목 등록", expanded=False):
-    col_t, col_p, col_d, col_btn2 = st.columns([2, 2, 2, 1])
-    with col_t:
-        pos_ticker = st.text_input("종목코드 (예: 005930.KS)", key="pos_ticker")
-    with col_p:
-        pos_price  = st.number_input("매수가 (원)", min_value=1, value=50000, step=100, key="pos_price")
-    with col_d:
-        pos_date   = st.date_input("매수일", key="pos_date")
-    with col_btn2:
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("등록", key="add_pos"):
-            name = pos_ticker
-            ts.positions[pos_ticker] = {
-                "name":  name,
-                "entry": pos_price,
-                "date":  datetime.combine(pos_date, datetime.min.time()),
-                "size1": BUY_RATIO_1,
-                "size2": BUY_RATIO_2,
-            }
-            st.success(f"{pos_ticker} 등록 완료")
-
-if ts.positions:
-    pos_rows = []
-    for ticker, pos in ts.positions.items():
-        hold_days = (datetime.now() - pos["date"]).days
-        try:
-            raw = yf.download(ticker, period="5d", interval="1d", progress=False, auto_adjust=True)
-            if isinstance(raw.columns, pd.MultiIndex):
-                raw.columns = raw.columns.get_level_values(0)
-            cur_price = float(raw["Close"].squeeze().iloc[-1])
-            vol_s     = raw["Volume"].squeeze()
-            vol_ratio = float(vol_s.iloc[-1] / vol_s.mean()) if len(vol_s) > 1 else 1.0
-        except Exception:
-            cur_price = pos["entry"]
-            vol_ratio = 1.0
-
-        sig   = ts.manage(ticker, cur_price, vol_ratio)
-        pnl   = (cur_price - pos["entry"]) / pos["entry"] * 100
-        t_1st = int(round(pos["entry"] * (1 + PARTIAL_PROFIT_PCT / 100)))
-        t_2nd = int(round(pos["entry"] * (1 + TARGET_PCT         / 100)))
-        s_prc = int(round(pos["entry"] * (1 + STOP_LOSS_PCT      / 100)))
-
-        pos_rows.append({
-            "종목코드":  ticker,
-            "매수가":    pos["entry"],
-            "현재가":    int(cur_price),
-            "손익(%)": round(pnl, 2),
-            "보유일":    hold_days,
-            "거래량배율": round(vol_ratio, 2),
-            "청산신호":  SIG_ICON.get(sig,"") + " " + SIG_KR.get(sig, sig),
-            "손절가":    s_prc,
-            "1차익절":   t_1st,
-            "2차목표":   t_2nd,
-        })
-
-    pos_df = pd.DataFrame(pos_rows)
-    st.dataframe(
-        pos_df, use_container_width=True, hide_index=True,
-        column_config={
-            "매수가":    st.column_config.NumberColumn(format="%d원"),
-            "현재가":    st.column_config.NumberColumn(format="%d원"),
-            "손익(%)": st.column_config.NumberColumn(format="%.2f%%"),
-            "손절가":    st.column_config.NumberColumn(format="%d원"),
-            "1차익절":   st.column_config.NumberColumn(format="%d원"),
-            "2차목표":   st.column_config.NumberColumn(format="%d원"),
-            "거래량배율": st.column_config.NumberColumn(format="×%.2f"),
-        }
-    )
-
-    del_ticker = st.selectbox("포지션 청산(삭제)", [""] + list(ts.positions.keys()), key="del_pos")
-    if del_ticker and st.button("삭제", key="del_btn"):
-        ts.remove(del_ticker)
-        st.rerun()
-else:
-    st.info("등록된 포지션 없음 — 위 '보유 종목 등록'에서 추가하세요.")
+with tab_smart:
+    smart_money.render()
