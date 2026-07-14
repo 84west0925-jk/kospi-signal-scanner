@@ -23,6 +23,7 @@ except Exception:
     FDR_OK = False
 
 import smart_money
+import smart_radar
 
 # ── 파라미터 ──────────────────────────────────────────────────────────────────
 STOP_LOSS_PCT      = -3.0
@@ -479,7 +480,8 @@ st.set_page_config(
 )
 
 # ── 메인 탭 ───────────────────────────────────────────────────────────────────
-tab_scanner, tab_smart = st.tabs(["🔍 매매 신호 스캐너", "📊 Smart Money Dashboard"])
+tab_scanner, tab_smart, tab_radar = st.tabs(
+    ["🔍 매매 신호 스캐너", "📊 Smart Money Dashboard", "🎯 Smart Money Radar"])
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 탭 1 — 매매 신호 스캐너 v3 (기존 기능)
@@ -742,3 +744,9 @@ with tab_scanner:
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_smart:
     smart_money.render()
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 탭 3 — Smart Money Radar (매매 전략 플랫폼)
+# ══════════════════════════════════════════════════════════════════════════════
+with tab_radar:
+    smart_radar.render()
