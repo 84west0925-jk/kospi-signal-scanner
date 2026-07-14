@@ -345,8 +345,11 @@ DARK_CSS = """
 """
 PLOTLY_TMPL = "plotly_dark"
 
+MONEY_KEYS = ["거래대금", "순매수", "합계", "합산", "시가총액", "누적", "외20", "기20", "외5", "기5"]
+
 def style_table(d: pd.DataFrame):
-    money_cols = [c for c in d.columns if any(k in c for k in ["거래대금", "순매수", "합계", "시가총액"])]
+    money_cols = [c for c in d.columns
+                  if any(k in c for k in MONEY_KEYS) and "증가율" not in c and "비율" not in c]
     cfg = {c: st.column_config.NumberColumn(c + "(억)", format="%.0f") for c in money_cols}
     if "등락률" in d.columns:
         cfg["등락률"] = st.column_config.NumberColumn("등락률(%)", format="%.2f%%")
@@ -357,7 +360,7 @@ def style_table(d: pd.DataFrame):
 def eokify(d: pd.DataFrame) -> pd.DataFrame:
     d = d.copy()
     for c in d.columns:
-        if any(k in c for k in ["거래대금", "순매수", "합계", "시가총액"]) and "증가율" not in c:
+        if any(k in c for k in MONEY_KEYS) and "증가율" not in c and "비율" not in c:
             d[c] = (d[c] / EOK).round(1)
     return d
 
@@ -388,6 +391,28 @@ def render():
         st.markdown(f'<meta http-equiv="refresh" content="{sec_map[refresh]}">', unsafe_allow_html=True)
 
     n = PERIODS[period]
+
+    # ── 🏁 Ultimate Summary — 첫 화면 30초 판단용 6카드 + Consensus ──
+    try:
+        import smart_radar as _sr
+        with st.spinner("AI Signal 요약 계산 중... (최초 1~2분, 이후 캐시)"):
+            summ = _sr.signal_summary(5)
+        if summ:
+            u = st.columns(6)
+            u[0].metric("Market Trend", summ["market_trend"], f"Bull {summ['bull']:.0f}")
+            u[1].metric("Smart Money Consensus", f"{summ['consensus']:.0f}점",
+                        summ["consensus_label"])
+            u[2].metric("🟢 Strong Buy", f"{summ['strong_buy']}개", f"Buy {summ['buy']}개")
+            u[3].metric("🔵 Early Entry", f"{summ['early']}개",
+                        f"💎 Hidden {summ['hidden']}개")
+            u[4].metric("⚠ Distribution", f"{summ['dist']}개", f"Exit {summ['exit']}개",
+                        delta_color="inverse")
+            u[5].metric("Today's Best Sector", summ["best_sector"])
+            st.caption("종목별 매수/매도 신호와 AI 추천 행동은 **🎯 Smart Money Radar → 🤖 AI Decision** 탭에서 확인 · "
+                       "모든 신호는 확률 기반 참고용")
+            st.markdown("---")
+    except Exception:
+        pass
 
     # ── 데이터 로딩 ──
     try:
