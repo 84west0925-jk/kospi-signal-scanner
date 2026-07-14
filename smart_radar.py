@@ -31,8 +31,14 @@ except ImportError:
 from smart_money import (
     EOK, NAVER_HDR, PLOTLY_TMPL, DARK_CSS, THEME_KEYWORDS,
     _n, _fetch_trend_rows, classify_sector, eokify, style_table,
-    fmt_eok, load_all_stocks, load_market_trend,
+    fmt_eok, load_all_stocks, load_market_trend, load_index_value,
 )
+
+try:
+    import derivatives
+    DERIV_OK = True
+except Exception:
+    DERIV_OK = False
 
 RADAR_N = 250        # 분석 대상: 거래대금 상위 250종목 (KOSPI250 근사)
 HIST_DAYS = 120      # 수급 이력 조회 일수
@@ -226,7 +232,8 @@ def build_metrics(codes: tuple, p: int) -> pd.DataFrame:
 # 백테스트
 # ═══════════════════════════════════════════════════════
 @st.cache_data(ttl=1800, show_spinner=False)
-def run_backtest(codes: tuple, threshold: float):
+def run_backtest(codes: tuple, threshold: float,
+                 fut_filter: bool = False, prog_filter: bool = False):
     """일별 Score 재계산 → threshold 이상 신호의 사후 수익률 분석"""
     fl = load_flows_history(codes)
     pr = load_price_history(codes)
@@ -302,6 +309,25 @@ def run_backtest(codes: tuple, threshold: float):
     if edf.empty:
         return edf, pd.DataFrame()
 
+    # 파생시장 조건 필터 (신호일 기준)
+    if fut_filter or prog_filter:
+        try:
+            import derivatives as _d
+            edf["_d"] = pd.to_datetime(edf["날짜"]).dt.normalize()
+            if fut_filter:
+                fut = _d.load_futures_trend(130)
+                ok = set(pd.to_datetime(fut.index[fut["외국인"] > 0]).normalize())
+                edf = edf[edf["_d"].isin(ok)]
+            if prog_filter and not edf.empty:
+                prog = _d.load_program_trend(130)
+                ok2 = set(pd.to_datetime(prog.index[prog["프로그램"] > 0]).normalize())
+                edf = edf[edf["_d"].isin(ok2)]
+            edf = edf.drop(columns=["_d"], errors="ignore")
+        except Exception:
+            pass
+        if edf.empty:
+            return edf, pd.DataFrame()
+
     stats = []
     for h in horizons:
         col = edf[f"{h}일후"].dropna()
@@ -367,27 +393,59 @@ def render():
     if "테마" not in df.columns:
         df["테마"] = ""
 
-    # ── 시장 게이지 + KPI ──
+    # ── 파생시장 통합: Confirmation · Score 보정 · 등급 게이트 ──
+    ds = derivatives.get_deriv_state(p=min(p, 20) if p > 1 else 5) if DERIV_OK else {"ok": False}
+    stock_bull = (df["외국인순매수"] + df["기관순매수"]) > 0
+    if ds.get("ok"):
+        df["파생확인"] = [derivatives.confirmation_label(b, ds["fut_pos"]) for b in stock_bull]
+        # Score: 현물 85% + 파생 확인 보너스 15% (외국인 선물 일치 10 + 프로그램 일치 5)
+        bonus = (stock_bull & ds["fut_pos"]).astype(int) * 10 \
+              + (stock_bull & ds["prog_pos"]).astype(int) * 5
+        df["Score"] = (0.85 * df["Score"] + bonus).clip(0, 100).round(1)
+        df["Score등급"] = pd.cut(df["Score"], [-1, 60, 70, 80, 90, 101],
+                               labels=["Weak", "중립", "Watch", "Buy", "Strong Buy"])
+        # S등급 게이트: 파생시장(외국인 선물 + 프로그램) 우호가 아니면 S → A
+        if not ds["deriv_pos"]:
+            df.loc[df["등급"] == "S", "등급"] = "A"
+            df["별점"] = df["등급"].map(GRADE_STARS)
+            df["판정"] = df["등급"].map(GRADE_LABEL)
+        # Exit 신호에 파생 확인 표시
+        if ds["deriv_neg"]:
+            df.loc[df["ExitSignal"], "신호"] = "🔴✔ Exit(파생확인)"
+    else:
+        df["파생확인"] = "—"
+
+    # ── Bull Score 게이지 (현물+선물+프로그램+거래대금) + KPI ──
     gcol, kcol = st.columns([2, 6])
     with gcol:
         try:
-            mt = load_market_trend(60)
-            today_flow = (mt["외국인"] + mt["기관"]).iloc[-1]
-            pct = float((mt["외국인"] + mt["기관"] < today_flow).mean() * 100)
+            mt60 = load_market_trend(60)
+            iv60 = load_index_value(60)
+            if DERIV_OK:
+                bs_val, bs_grade, bs_stars, _ = derivatives.bull_score(mt60, iv60, p=5)
+            else:
+                cur = (mt60["외국인"] + mt60["기관"]).rolling(5).sum()
+                bs_val = float((cur.dropna() < cur.iloc[-1]).mean() * 100)
+                bs_grade, bs_stars = "—", ""
         except Exception:
-            today_flow, pct = 0, 50.0
+            bs_val, bs_grade, bs_stars = 50.0, "—", ""
         fig_g = go.Figure(go.Indicator(
-            mode="gauge+number", value=round(pct),
-            title={"text": "시장 Smart Money 강도<br><sub>외+기 순매수 60일 백분위</sub>",
+            mode="gauge+number", value=round(bs_val),
+            title={"text": f"Bull Score — {bs_grade} {bs_stars}<br>"
+                           "<sub>현물+선물+프로그램+거래대금 종합</sub>",
                    "font": {"size": 13}},
-            number={"suffix": "%"},
             gauge={"axis": {"range": [0, 100]},
                    "bar": {"color": "#f0a500"},
-                   "steps": [{"range": [0, 30], "color": "#3a1f24"},
-                             {"range": [30, 70], "color": "#1a1f2e"},
-                             {"range": [70, 100], "color": "#123524"}]}))
+                   "steps": [{"range": [0, 20], "color": "#4a1520"},
+                             {"range": [20, 40], "color": "#3a1f24"},
+                             {"range": [40, 60], "color": "#1a1f2e"},
+                             {"range": [60, 80], "color": "#12351f"},
+                             {"range": [80, 100], "color": "#0e4429"}]}))
         fig_g.update_layout(template=PLOTLY_TMPL, height=230, margin=dict(t=60, b=10))
         st.plotly_chart(fig_g, use_container_width=True)
+        if ds.get("ok"):
+            st.caption(f"선물(외인) {ds['fut_frg']:+,.0f}억 · 프로그램 {ds['prog']:+,.0f}억 "
+                       f"({min(p, 20) if p > 1 else 5}일 합)")
     with kcol:
         gc = df["등급"].value_counts()
         k = st.columns(4)
@@ -426,6 +484,15 @@ def render():
     if top90:
         ai += f"Smart Money Score 90점 이상 종목은 **{', '.join(top90)}** 입니다. "
     ai += f"반면 **{worst_sec}** 섹터는 자금 이탈이 나타나 주의가 필요합니다."
+    if ds.get("ok"):
+        if ds["deriv_pos"]:
+            ai += (" 파생시장에서도 **외국인 선물 순매수 + 프로그램 매수**가 동반되어 "
+                   "매수 신호의 신뢰도가 높습니다.")
+        elif ds["deriv_neg"]:
+            ai += (" 파생시장은 **외국인 선물 순매도 + 프로그램 매도**로 약세 확인 중 — "
+                   "신규 진입보다 리스크 관리가 우선입니다.")
+        else:
+            ai += " 파생시장은 혼조 — 개별 종목의 파생확인(✔) 신호를 함께 확인하세요."
     st.markdown(f'<div class="sm-ai">🤖 <b>AI 전략 브리핑</b><br>{ai}</div>', unsafe_allow_html=True)
     st.markdown("")
 
@@ -434,8 +501,8 @@ def render():
         ["🎯 Radar 등급", "📡 매매 신호", "🔄 Sector Rotation", "🎬 Timeline",
          "🧪 백테스트", "🛠️ 전략 시뮬레이터"])
 
-    disp_cols = ["종목명", "별점", "판정", "Score", "Score등급", "신호", "현재가", "등락률",
-                 "거래대금", "거래대금증가율", "외국인순매수", "기관순매수",
+    disp_cols = ["종목명", "별점", "판정", "Score", "Score등급", "신호", "파생확인",
+                 "현재가", "등락률", "거래대금", "거래대금증가율", "외국인순매수", "기관순매수",
                  "외국인비율", "기관비율", "외국인연속", "기관연속",
                  "20일선위", "20일신고가", "섹터", "테마"]
 
@@ -620,10 +687,13 @@ def render():
         st.subheader("🧪 Smart Money Score 백테스트")
         st.caption(f"최근 {HIST_DAYS}거래일(약 6개월) 데이터 기준 · 60일 후 수익률은 오래된 신호만 계산 가능")
         thr = st.select_slider("신호 기준 Score", [70, 75, 80, 85, 90, 95], value=90, key="bt_thr")
+        bc1, bc2 = st.columns(2)
+        bt_fut = bc1.checkbox("+ 신호일 외국인 선물 순매수 조건", key="bt_fut")
+        bt_prog = bc2.checkbox("+ 신호일 프로그램 순매수 조건", key="bt_prog")
         if st.button("▶ 백테스트 실행", key="bt_run", type="primary"):
             with st.spinner("일별 Score 재계산 및 수익률 분석 중..."):
                 try:
-                    edf, sdf = run_backtest(codes, float(thr))
+                    edf, sdf = run_backtest(codes, float(thr), bt_fut, bt_prog)
                 except Exception as e:
                     st.error(f"백테스트 실패: {e}")
                     edf, sdf = pd.DataFrame(), pd.DataFrame()

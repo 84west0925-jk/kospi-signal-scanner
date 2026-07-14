@@ -28,6 +28,12 @@ try:
 except ImportError:
     PLOTLY_OK = False
 
+try:
+    import derivatives
+    DERIV_OK = True
+except Exception:
+    DERIV_OK = False
+
 EOK = 1e8   # 억 원
 MM = 1e6    # 백만 원
 
@@ -470,6 +476,25 @@ def render():
     k2[3].metric("52주 신저가", f"{int(df['52주신저가'].sum())}개")
     k2[4].metric("분석 종목 수", f"{len(df)}개")
 
+    # ── 파생시장 KPI (선물·프로그램) ──
+    ds = {"ok": False}
+    bull = None
+    if DERIV_OK:
+        ds = derivatives.get_deriv_state(p=min(n, 20))
+        if ds["ok"]:
+            k3 = st.columns(5)
+            k3[0].metric("외국인 선물", fmt_eok(ds["fut_frg"] * EOK))
+            k3[1].metric("기관 선물", fmt_eok(ds["fut_ins"] * EOK))
+            k3[2].metric("프로그램 순매수", fmt_eok(ds["prog"] * EOK))
+            k3[3].metric("차익 / 비차익", f"{ds['arb']:,.0f} / {ds['nonarb']:,.0f}억")
+            try:
+                mt60 = load_market_trend(60)
+                iv60 = load_index_value(60)
+                bull = derivatives.bull_score(mt60, iv60, p=5)
+                k3[4].metric("Market Risk Score", bull[2], bull[1])
+            except Exception:
+                pass
+
     # 섹터 집계 (여러 섹션에서 공용)
     sec = df.groupby("섹터").agg(
         거래대금=("거래대금", "sum"),
@@ -481,11 +506,43 @@ def render():
     )
     sec["외국인+기관"] = sec["외국인순매수"] + sec["기관순매수"]
 
-    # ── ⑭ AI 시장 분석 ──
-    st.markdown(
-        f'<div class="sm-ai">🤖 <b>AI 시장 분석</b><br>'
-        f'{build_ai_summary(df, sec, mkt_frg, mkt_ins)}</div>',
-        unsafe_allow_html=True)
+    # ── ⑭ AI 시장 분석 + Bull Score 게이지 ──
+    ai_txt = build_ai_summary(df, sec, mkt_frg, mkt_ins)
+    if ds.get("ok"):
+        if ds["deriv_pos"] and mkt_frg > 0:
+            ai_txt += (" 파생시장에서도 외국인이 선물을 순매수하고 프로그램 매수세가 유입되어 "
+                       "**상승 추세의 신뢰도가 높은** 상황입니다.")
+        elif ds["deriv_neg"]:
+            ai_txt += (" 다만 외국인 선물 순매도와 프로그램 매도세가 동반되고 있어 "
+                       "**추격매수에는 주의**가 필요합니다.")
+        elif not ds["fut_pos"] and mkt_frg > 0:
+            ai_txt += (" 현물은 순매수이나 **외국인 선물은 순매도**로 엇갈려, "
+                       "방향성 확인 전까지 보수적 접근이 유효합니다.")
+        else:
+            ai_txt += (" 파생시장은 혼조 흐름으로, 현물 수급 우위 종목 중심의 "
+                       "선별 대응이 필요합니다.")
+    if bull is not None:
+        gcol, acol = st.columns([2, 5])
+        with gcol:
+            bs_val, bs_grade, bs_stars, _ = bull
+            fig_bull = go.Figure(go.Indicator(
+                mode="gauge+number", value=bs_val,
+                title={"text": f"Bull Score — {bs_grade} {bs_stars}", "font": {"size": 13}},
+                gauge={"axis": {"range": [0, 100]},
+                       "bar": {"color": "#f0a500"},
+                       "steps": [{"range": [0, 20], "color": "#4a1520"},
+                                 {"range": [20, 40], "color": "#3a1f24"},
+                                 {"range": [40, 60], "color": "#1a1f2e"},
+                                 {"range": [60, 80], "color": "#12351f"},
+                                 {"range": [80, 100], "color": "#0e4429"}]}))
+            fig_bull.update_layout(template=PLOTLY_TMPL, height=220, margin=dict(t=50, b=10))
+            st.plotly_chart(fig_bull, use_container_width=True)
+        with acol:
+            st.markdown(f'<div class="sm-ai">🤖 <b>AI 시장 분석</b><br>{ai_txt}</div>',
+                        unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div class="sm-ai">🤖 <b>AI 시장 분석</b><br>{ai_txt}</div>',
+                    unsafe_allow_html=True)
     st.markdown("")
 
     # ── 내부 탭 구성 ──
@@ -609,6 +666,22 @@ def render():
                     fig_tr.add_trace(go.Bar(x=iv.index, y=iv["거래대금"] / EOK,
                                             name="시장 거래대금(억)", yaxis="y2", opacity=0.25,
                                             marker_color="#4caf50"))
+                if DERIV_OK:
+                    try:
+                        fut_t = derivatives.load_futures_trend(win)
+                        prog_t = derivatives.load_program_trend(win)
+                        if not fut_t.empty:
+                            fig_tr.add_trace(go.Scatter(
+                                x=fut_t.index, y=fut_t["외국인"].cumsum(),
+                                name="외국인 선물 누적(억)",
+                                line=dict(color="#e040fb", width=1.5, dash="dash")))
+                        if not prog_t.empty:
+                            fig_tr.add_trace(go.Scatter(
+                                x=prog_t.index, y=prog_t["프로그램"].cumsum(),
+                                name="프로그램 누적(억)",
+                                line=dict(color="#26c6da", width=1.5, dash="dot")))
+                    except Exception:
+                        pass
                 fig_tr.update_layout(
                     template=PLOTLY_TMPL, height=520, hovermode="x unified",
                     yaxis=dict(title="누적 순매수(억)"),
