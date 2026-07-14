@@ -23,11 +23,16 @@ try:
 except Exception:
     pass
 
+# pykrx는 import 시점에 KRX 로그인을 시도하므로, 로그인 실패(비JSON 응답 등)로
+# import 자체가 실패할 수 있음 → 어떤 예외든 잡아서 앱 전체가 죽지 않게 처리
+stock = None
+PYKRX_OK = False
+PYKRX_ERR = ""
 try:
     from pykrx import stock
     PYKRX_OK = True
-except ImportError:
-    PYKRX_OK = False
+except Exception as _e:
+    PYKRX_ERR = f"{type(_e).__name__}: {_e}"
 
 try:
     import plotly.express as px
@@ -38,7 +43,13 @@ except ImportError:
 
 EOK = 1e8  # 억 원
 
-# ── KRX 로그인 진단 ───────────────────────────────────
+# ── KRX 로그인 진단 (pykrx 의존 없이 자체 구현) ──────
+_KRX_LOGIN_PAGE = "https://data.krx.co.kr/contents/MDC/COMS/client/MDCCOMS001.cmd"
+_KRX_LOGIN_JSP = "https://data.krx.co.kr/contents/MDC/COMS/client/view/login.jsp?site=mdc"
+_KRX_LOGIN_URL = "https://data.krx.co.kr/contents/MDC/COMS/client/MDCCOMS001D1.cmd"
+_KRX_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+           "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+
 def krx_login_diagnosis():
     """KRX 로그인을 직접 시도해 (코드, 메시지) 반환. CD001=정상"""
     kid, kpw = os.environ.get("KRX_ID"), os.environ.get("KRX_PW")
@@ -46,17 +57,23 @@ def krx_login_diagnosis():
         return "NOID", "KRX_ID/KRX_PW 미설정"
     try:
         import requests
-        from pykrx.website.comm import auth as _a
         s = requests.Session()
-        _a.warmup_krx_session(s)
-        hdr = {"User-Agent": _a.USER_AGENT, "Referer": _a.LOGIN_PAGE}
+        s.get(_KRX_LOGIN_PAGE, headers={"User-Agent": _KRX_UA}, timeout=15)
+        s.get(_KRX_LOGIN_JSP,
+              headers={"User-Agent": _KRX_UA, "Referer": _KRX_LOGIN_PAGE}, timeout=15)
+        hdr = {"User-Agent": _KRX_UA, "Referer": _KRX_LOGIN_PAGE}
         payload = {"mbrNm": "", "telNo": "", "di": "", "certType": "",
                    "mbrId": kid, "pw": kpw}
-        d = s.post(_a.LOGIN_URL, data=payload, headers=hdr, timeout=15).json()
+        r = s.post(_KRX_LOGIN_URL, data=payload, headers=hdr, timeout=15)
+        try:
+            d = r.json()
+        except Exception:
+            return "HTML", f"KRX 비정상 응답 (HTTP {r.status_code}): {r.text[:150]}"
         code, msg = d.get("_error_code", ""), d.get("_error_message", "")
         if code == "CD011":  # 중복 로그인 → 재시도
             payload["skipDup"] = "Y"
-            d = s.post(_a.LOGIN_URL, data=payload, headers=hdr, timeout=15).json()
+            r = s.post(_KRX_LOGIN_URL, data=payload, headers=hdr, timeout=15)
+            d = r.json()
             code, msg = d.get("_error_code", ""), d.get("_error_message", "")
         return code, msg
     except Exception as e:
@@ -73,6 +90,11 @@ def show_krx_help(code, msg):
         st.warning(
             "⚠️ **KRX 비밀번호 변경 필요** — [data.krx.co.kr](https://data.krx.co.kr)에서 "
             "직접 로그인해 비밀번호를 변경한 뒤, Secrets의 KRX_PW도 새 비밀번호로 갱신하세요.")
+    elif code == "HTML":
+        st.warning(
+            f"⚠️ **KRX 서버가 비정상 응답을 반환했습니다** — {msg}\n\n"
+            "이 서버(Streamlit Cloud)의 IP가 KRX에서 일시 차단되었을 가능성이 있습니다. "
+            "몇 분 뒤 '데이터 갱신'으로 재시도하고, 반복되면 알려주세요.")
     else:
         st.warning(
             f"⚠️ **KRX 로그인 실패** (코드: {code or '없음'}) — {msg or '자격 증명을 확인하세요.'}\n\n"
@@ -287,9 +309,23 @@ def render():
     st.markdown('<h2 class="sm-title">📊 SMART MONEY DASHBOARD</h2>', unsafe_allow_html=True)
     st.caption("KOSPI 전 종목 · 거래대금 × 외국인 × 기관 자금 흐름 종합 분석  |  데이터: KRX")
 
-    if not PYKRX_OK or not PLOTLY_OK:
-        st.error("필수 패키지가 없습니다. `pip install pykrx plotly openpyxl` 후 다시 실행하세요.")
+    if not PLOTLY_OK:
+        st.error("plotly 패키지가 없습니다. requirements.txt를 확인하세요.")
         return
+
+    global stock, PYKRX_OK, PYKRX_ERR
+    if not PYKRX_OK:
+        # import 시점 로그인 실패 등 → 재시도
+        try:
+            import importlib, pykrx.stock as _stock_mod
+            stock = _stock_mod
+            PYKRX_OK = True
+        except Exception as _e:
+            st.error(f"pykrx 초기화 실패: {PYKRX_ERR or _e}")
+            with st.spinner("KRX 로그인 상태 진단 중..."):
+                code, msg = krx_login_diagnosis()
+            show_krx_help(code, msg)
+            return
 
     # ── 상단 컨트롤 ──
     c1, c2, c3 = st.columns([3, 2, 2])
