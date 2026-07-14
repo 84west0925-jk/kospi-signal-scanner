@@ -4,35 +4,22 @@
 📊 Smart Money Dashboard
 KOSPI 전체 종목의 거래대금 · 외국인/기관 순매수 데이터를 종합해
 시장 자금 흐름(Smart Money)을 시각화하는 전문 대시보드.
-데이터 소스: KRX (pykrx), 52주 신고가/신저가: yfinance
+
+데이터 소스: 네이버 금융 (KRX가 클라우드 서버 IP를 차단하여 대체)
+- 전 종목 시세/거래대금/시가총액: m.stock.naver.com API (정확)
+- 시장 전체 투자자별 순매수(억원): finance.naver.com 일별 동향 (정확)
+- 종목별 외국인/기관 순매수: 일별 순매수수량 × 종가 근사 (거래대금 상위 250종목)
+- 52주 신고가/신저가: yfinance (거래대금 상위 200종목)
 """
 import io
-import os
-from datetime import datetime, timedelta
+import re
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
+import requests
 import streamlit as st
-
-# KRX 데이터포털은 2025년부터 로그인 필수 → Streamlit Secrets에서 계정 주입
-# (Streamlit Cloud: Settings > Secrets 에 KRX_ID / KRX_PW 등록)
-try:
-    if "KRX_ID" in st.secrets:
-        os.environ["KRX_ID"] = str(st.secrets["KRX_ID"])
-        os.environ["KRX_PW"] = str(st.secrets["KRX_PW"])
-except Exception:
-    pass
-
-# pykrx는 import 시점에 KRX 로그인을 시도하므로, 로그인 실패(비JSON 응답 등)로
-# import 자체가 실패할 수 있음 → 어떤 예외든 잡아서 앱 전체가 죽지 않게 처리
-stock = None
-PYKRX_OK = False
-PYKRX_ERR = ""
-try:
-    from pykrx import stock
-    PYKRX_OK = True
-except Exception as _e:
-    PYKRX_ERR = f"{type(_e).__name__}: {_e}"
 
 try:
     import plotly.express as px
@@ -41,74 +28,18 @@ try:
 except ImportError:
     PLOTLY_OK = False
 
-EOK = 1e8  # 억 원
+EOK = 1e8   # 억 원
+MM = 1e6    # 백만 원
 
-# ── KRX 로그인 진단 (pykrx 의존 없이 자체 구현) ──────
-_KRX_LOGIN_PAGE = "https://data.krx.co.kr/contents/MDC/COMS/client/MDCCOMS001.cmd"
-_KRX_LOGIN_JSP = "https://data.krx.co.kr/contents/MDC/COMS/client/view/login.jsp?site=mdc"
-_KRX_LOGIN_URL = "https://data.krx.co.kr/contents/MDC/COMS/client/MDCCOMS001D1.cmd"
-_KRX_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-           "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
-
-def krx_login_diagnosis():
-    """KRX 로그인을 직접 시도해 (코드, 메시지) 반환. CD001=정상"""
-    kid, kpw = os.environ.get("KRX_ID"), os.environ.get("KRX_PW")
-    if not (kid and kpw):
-        return "NOID", "KRX_ID/KRX_PW 미설정"
-    try:
-        import requests
-        s = requests.Session()
-        s.get(_KRX_LOGIN_PAGE, headers={"User-Agent": _KRX_UA}, timeout=15)
-        s.get(_KRX_LOGIN_JSP,
-              headers={"User-Agent": _KRX_UA, "Referer": _KRX_LOGIN_PAGE}, timeout=15)
-        hdr = {"User-Agent": _KRX_UA, "Referer": _KRX_LOGIN_PAGE}
-        payload = {"mbrNm": "", "telNo": "", "di": "", "certType": "",
-                   "mbrId": kid, "pw": kpw}
-        r = s.post(_KRX_LOGIN_URL, data=payload, headers=hdr, timeout=15)
-        try:
-            d = r.json()
-        except Exception:
-            return "HTML", f"KRX 비정상 응답 (HTTP {r.status_code}): {r.text[:150]}"
-        code, msg = d.get("_error_code", ""), d.get("_error_message", "")
-        if code == "CD011":  # 중복 로그인 → 재시도
-            payload["skipDup"] = "Y"
-            r = s.post(_KRX_LOGIN_URL, data=payload, headers=hdr, timeout=15)
-            d = r.json()
-            code, msg = d.get("_error_code", ""), d.get("_error_message", "")
-        return code, msg
-    except Exception as e:
-        return "EXC", str(e)
-
-def show_krx_help(code, msg):
-    if code == "CD001":
-        st.info("✅ KRX 로그인은 정상입니다. 일시적 데이터 오류일 수 있으니 '데이터 갱신'을 눌러 재시도하세요.")
-    elif code == "NOID":
-        st.warning(
-            "⚠️ **KRX 계정 미설정** — Streamlit Cloud → Settings → Secrets에 "
-            "`KRX_ID`, `KRX_PW`를 등록하세요.")
-    elif code == "CD010":
-        st.warning(
-            "⚠️ **KRX 비밀번호 변경 필요** — [data.krx.co.kr](https://data.krx.co.kr)에서 "
-            "직접 로그인해 비밀번호를 변경한 뒤, Secrets의 KRX_PW도 새 비밀번호로 갱신하세요.")
-    elif code == "HTML":
-        st.warning(
-            f"⚠️ **KRX 서버가 비정상 응답을 반환했습니다** — {msg}\n\n"
-            "이 서버(Streamlit Cloud)의 IP가 KRX에서 일시 차단되었을 가능성이 있습니다. "
-            "몇 분 뒤 '데이터 갱신'으로 재시도하고, 반복되면 알려주세요.")
-    else:
-        st.warning(
-            f"⚠️ **KRX 로그인 실패** (코드: {code or '없음'}) — {msg or '자격 증명을 확인하세요.'}\n\n"
-            "확인 사항:\n"
-            "1. KRX는 **이메일이 아닌 회원 아이디**로 로그인합니다. "
-            "[data.krx.co.kr](https://data.krx.co.kr)에서 직접 로그인해 아이디/비밀번호를 확인하세요.\n"
-            "2. 확인한 아이디/비밀번호를 Streamlit Cloud → Settings → **Secrets**의 "
-            "`KRX_ID`, `KRX_PW`에 정확히 입력 후 저장하세요.\n"
-            "3. 저장 후 앱이 재시작되면 다시 시도하세요.")
+NAVER_HDR = {
+    "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                   "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"),
+    "Referer": "https://m.stock.naver.com/",
+}
+TOP_FLOW_N = 250   # 종목별 수급을 계산할 거래대금 상위 종목 수
 
 # ── 기간 정의 (거래일 기준) ───────────────────────────
-PERIODS = {
-    "일별": 1, "주별": 5, "월별": 22, "3개월": 66, "6개월": 126, "1년": 248,
-}
+PERIODS = {"일별": 1, "주별": 5, "월별": 22, "3개월": 66}
 
 # ── 섹터(테마) 분류 키워드 ────────────────────────────
 THEME_KEYWORDS = {
@@ -137,48 +68,155 @@ def classify_sector(name: str) -> str:
                 return theme
     return "기타"
 
-# ── 데이터 로딩 (KRX) ─────────────────────────────────
-@st.cache_data(ttl=600, show_spinner=False)
-def load_trading_dates():
-    """KOSPI 지수 OHLCV로 거래일 캘린더 + 시장 거래대금 추이 확보"""
-    end = datetime.now().strftime("%Y%m%d")
-    start = (datetime.now() - timedelta(days=800)).strftime("%Y%m%d")
-    idx = stock.get_index_ohlcv(start, end, "1001")
-    return idx
-
-@st.cache_data(ttl=600, show_spinner=False)
-def load_market_data(from_d: str, to_d: str, prev_from: str, prev_to: str):
-    """기간별 가격변동 · 투자자별 순매수 · 시총 · 외국인 보유율"""
-    chg = stock.get_market_price_change(from_d, to_d, market="KOSPI")
-    prev = stock.get_market_price_change(prev_from, prev_to, market="KOSPI")
-
-    frg = stock.get_market_net_purchases_of_equities(from_d, to_d, "KOSPI", "외국인")
-    ins = stock.get_market_net_purchases_of_equities(from_d, to_d, "KOSPI", "기관합계")
-    ind = stock.get_market_net_purchases_of_equities(from_d, to_d, "KOSPI", "개인")
-
-    cap = stock.get_market_cap(to_d, market="KOSPI")
+# ── 숫자 파싱 ─────────────────────────────────────────
+def _n(v) -> float:
+    """'1,234' / '+1,234' / '-716,994' / 'N/A' → float"""
     try:
-        fr = stock.get_exhaustion_rates_of_foreign_investment(to_d, "KOSPI")
+        s = str(v).replace(",", "").replace("+", "").replace("%", "").strip()
+        if s in ("", "N/A", "-", "nan"):
+            return 0.0
+        return float(s)
     except Exception:
-        fr = pd.DataFrame()
+        return 0.0
 
-    df = chg.copy()
-    df["전기간_거래대금"] = prev["거래대금"].reindex(df.index)
-    df["외국인순매수"] = frg["순매수거래대금"].reindex(df.index).fillna(0)
-    df["기관순매수"]   = ins["순매수거래대금"].reindex(df.index).fillna(0)
-    df["개인순매수"]   = ind["순매수거래대금"].reindex(df.index).fillna(0)
-    df["시가총액"]     = cap["시가총액"].reindex(df.index)
-    if not fr.empty and "지분율" in fr.columns:
-        df["외국인보유율"] = fr["지분율"].reindex(df.index)
-    else:
-        df["외국인보유율"] = np.nan
+# ═══════════════════════════════════════════════════════
+# 데이터 로딩 (네이버 금융)
+# ═══════════════════════════════════════════════════════
+@st.cache_data(ttl=600, show_spinner=False)
+def load_all_stocks() -> pd.DataFrame:
+    """KOSPI 전 종목 시세 (JSON API, 페이지네이션)"""
+    rows, page = [], 1
+    while page <= 30:
+        r = requests.get(
+            f"https://m.stock.naver.com/api/stocks/marketValue/KOSPI"
+            f"?page={page}&pageSize=100", headers=NAVER_HDR, timeout=15)
+        data = r.json()
+        stocks = data.get("stocks", [])
+        if not stocks:
+            break
+        rows.extend(stocks)
+        if page * 100 >= int(data.get("totalCount", 0)):
+            break
+        page += 1
 
-    df = df.reset_index().rename(columns={"티커": "종목코드", "index": "종목코드"})
-    df["섹터"] = df["종목명"].map(classify_sector)
-    df["거래대금증가율"] = np.where(
-        df["전기간_거래대금"] > 0,
-        (df["거래대금"] / df["전기간_거래대금"] - 1) * 100, 0.0)
+    recs = []
+    for s in rows:
+        if s.get("stockEndType") != "stock":   # ETF/ETN/리츠 등 제외
+            continue
+        try:
+            chg = _n(s.get("fluctuationsRatio"))
+            code = s.get("compareToPreviousPrice", {}).get("code", "")
+            if code in ("4", "5") and chg > 0:   # 하락인데 부호 없으면 보정
+                chg = -chg
+            recs.append({
+                "종목코드": s["itemCode"],
+                "종목명":   s["stockName"],
+                "현재가":   _n(s["closePrice"]),
+                "등락률":   chg,
+                "거래량":   _n(s["accumulatedTradingVolume"]),
+                "거래대금": _n(s["accumulatedTradingValue"]) * MM,   # 백만원 → 원
+                "시가총액": _n(s["marketValue"]) * EOK,              # 억원 → 원
+            })
+        except Exception:
+            continue
+    df = pd.DataFrame(recs)
+    if not df.empty:
+        df["섹터"] = df["종목명"].map(classify_sector)
     return df
+
+def _fetch_trend_rows(code: str, days: int) -> list:
+    """종목별 일별 투자자 동향 (최신순). days<=120"""
+    url = f"https://m.stock.naver.com/api/stock/{code}/trend"
+    rows = requests.get(url + "?pageSize=60", headers=NAVER_HDR, timeout=15).json()
+    if days > 60 and rows:
+        oldest = rows[-1]["bizdate"]
+        more = requests.get(url + f"?bizdate={oldest}&pageSize=60",
+                            headers=NAVER_HDR, timeout=15).json()
+        rows = rows + more
+    return rows[:days]
+
+@st.cache_data(ttl=600, show_spinner=False)
+def load_flows(codes: tuple, days: int) -> pd.DataFrame:
+    """상위 종목의 기간 순매수 금액(근사: 일별 수량×종가 합산) + 외국인 보유율"""
+    def one(code):
+        try:
+            rows = _fetch_trend_rows(code, days)
+            frg = sum(_n(x["foreignerPureBuyQuant"]) * _n(x["closePrice"]) for x in rows)
+            org = sum(_n(x["organPureBuyQuant"]) * _n(x["closePrice"]) for x in rows)
+            ind = sum(_n(x["individualPureBuyQuant"]) * _n(x["closePrice"]) for x in rows)
+            hold = _n(rows[0].get("foreignerHoldRatio")) if rows else np.nan
+            return code, frg, org, ind, hold
+        except Exception:
+            return code, 0.0, 0.0, 0.0, np.nan
+
+    with ThreadPoolExecutor(max_workers=12) as ex:
+        res = list(ex.map(one, codes))
+    return (pd.DataFrame(res, columns=["종목코드", "외국인순매수", "기관순매수",
+                                       "개인순매수", "외국인보유율"])
+            .set_index("종목코드"))
+
+@st.cache_data(ttl=600, show_spinner=False)
+def load_market_trend(days: int) -> pd.DataFrame:
+    """시장 전체 투자자별 일별 순매수 (억원) — finance.naver.com 스크레이핑"""
+    collected = {}
+    bizdate = datetime.now().strftime("%Y%m%d")
+    for _ in range(days // 10 + 3):
+        r = requests.get(
+            f"https://finance.naver.com/sise/investorDealTrendDay.naver"
+            f"?bizdate={bizdate}&sosok=01", headers=NAVER_HDR, timeout=15)
+        r.encoding = "euc-kr"
+        try:
+            t = pd.read_html(io.StringIO(r.text))[0]
+        except Exception:
+            break
+        t.columns = ["날짜", "개인", "외국인", "기관계"] + [f"c{i}" for i in range(t.shape[1] - 4)]
+        t = t.dropna(subset=["날짜"])
+        new = 0
+        for _, row in t.iterrows():
+            d = str(row["날짜"]).strip()
+            if not re.match(r"\d{2}\.\d{2}\.\d{2}", d):
+                continue
+            if d not in collected:
+                collected[d] = (float(row["개인"]), float(row["외국인"]), float(row["기관계"]))
+                new += 1
+        if len(collected) >= days or new == 0:
+            break
+        oldest = min(collected)                       # 'YY.MM.DD'
+        y, m, dd = oldest.split(".")
+        prev = pd.Timestamp(2000 + int(y), int(m), int(dd)) - pd.Timedelta(days=1)
+        bizdate = prev.strftime("%Y%m%d")
+
+    if not collected:
+        return pd.DataFrame()
+    df = pd.DataFrame(
+        [(pd.Timestamp(2000 + int(k[:2]), int(k[3:5]), int(k[6:8])), *v)
+         for k, v in collected.items()],
+        columns=["날짜", "개인", "외국인", "기관"]).sort_values("날짜")
+    return df.tail(days).set_index("날짜")
+
+@st.cache_data(ttl=600, show_spinner=False)
+def load_index_value(days: int) -> pd.DataFrame:
+    """KOSPI 지수 일별 거래대금(백만원) — 최대 20페이지"""
+    frames = []
+    pages = min(days // 6 + 2, 20)
+    for p in range(1, pages + 1):
+        r = requests.get(
+            f"https://finance.naver.com/sise/sise_index_day.naver?code=KOSPI&page={p}",
+            headers=NAVER_HDR, timeout=15)
+        r.encoding = "euc-kr"
+        try:
+            t = pd.read_html(io.StringIO(r.text))[0].dropna()
+            frames.append(t)
+        except Exception:
+            break
+    if not frames:
+        return pd.DataFrame()
+    df = pd.concat(frames, ignore_index=True)
+    df.columns = ["날짜", "체결가", "전일비", "등락률", "거래량", "거래대금"]
+    df["날짜"] = pd.to_datetime(df["날짜"], format="%Y.%m.%d", errors="coerce")
+    df = df.dropna(subset=["날짜"]).drop_duplicates("날짜").sort_values("날짜")
+    df["거래대금"] = pd.to_numeric(df["거래대금"], errors="coerce") * MM   # 백만원 → 원
+    return df.set_index("날짜")
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def load_52w_flags(tickers: tuple):
@@ -202,23 +240,36 @@ def load_52w_flags(tickers: tuple):
         return {}, {}
 
 @st.cache_data(ttl=600, show_spinner=False)
-def load_investor_trend(from_d: str, to_d: str):
-    """시장 전체 투자자별 일별 순매수"""
-    return stock.get_market_trading_value_by_date(from_d, to_d, "KOSPI")
+def load_ticker_detail(code: str, days: int):
+    """종목 상세: 일별 투자자 동향(근사금액) + yfinance 가격/거래대금"""
+    rows = _fetch_trend_rows(code, days)
+    trend = pd.DataFrame([{
+        "날짜": pd.to_datetime(x["bizdate"]),
+        "외국인": _n(x["foreignerPureBuyQuant"]) * _n(x["closePrice"]),
+        "기관":   _n(x["organPureBuyQuant"]) * _n(x["closePrice"]),
+        "개인":   _n(x["individualPureBuyQuant"]) * _n(x["closePrice"]),
+        "종가":   _n(x["closePrice"]),
+    } for x in rows]).sort_values("날짜").set_index("날짜")
 
-@st.cache_data(ttl=600, show_spinner=False)
-def load_ticker_detail(ticker: str, from_d: str, to_d: str):
-    ohlcv = stock.get_market_ohlcv(from_d, to_d, ticker)
-    flow = stock.get_market_trading_value_by_date(from_d, to_d, ticker)
-    return ohlcv, flow
+    price = pd.DataFrame()
+    try:
+        import yfinance as yf
+        raw = yf.download(code + ".KS", period="1y", interval="1d",
+                          progress=False, auto_adjust=True)
+        if isinstance(raw.columns, pd.MultiIndex):
+            raw.columns = raw.columns.get_level_values(0)
+        price = raw.tail(days)
+    except Exception:
+        pass
+    return trend, price
 
 # ── Smart Money Score ─────────────────────────────────
 def add_smart_score(df: pd.DataFrame) -> pd.DataFrame:
-    p_amt  = df["거래대금"].rank(pct=True) * 100
-    p_grw  = df["거래대금증가율"].rank(pct=True) * 100
-    p_frg  = df["외국인순매수"].rank(pct=True) * 100
-    p_ins  = df["기관순매수"].rank(pct=True) * 100
-    base = 0.25 * p_amt + 0.15 * p_grw + 0.25 * p_frg + 0.25 * p_ins
+    p_amt = df["거래대금"].rank(pct=True) * 100
+    p_chg = df["등락률"].rank(pct=True) * 100
+    p_frg = df["외국인순매수"].rank(pct=True) * 100
+    p_ins = df["기관순매수"].rank(pct=True) * 100
+    base = 0.30 * p_amt + 0.10 * p_chg + 0.25 * p_frg + 0.25 * p_ins
     bonus = df["52주신고가"].astype(int) * 10
     df["Smart Score"] = (base + bonus).clip(0, 100).round(1)
     df["등급"] = df["Smart Score"].map(score_stars)
@@ -232,16 +283,14 @@ def score_stars(s: float) -> str:
     return "★☆☆☆☆"
 
 # ── 포맷 헬퍼 ─────────────────────────────────────────
-def to_eok(v):  # 원 → 억
-    return round(v / EOK, 1)
-
 def fmt_eok(v):
     if abs(v) >= 1e12:
         return f"{v/1e12:,.1f}조"
     return f"{v/EOK:,.0f}억"
 
 # ── AI 시장 분석 (규칙 기반 자동 생성) ────────────────
-def build_ai_summary(df: pd.DataFrame, sec: pd.DataFrame) -> str:
+def build_ai_summary(df: pd.DataFrame, sec: pd.DataFrame,
+                     mkt_frg: float, mkt_ins: float) -> str:
     both = df[(df["외국인순매수"] > 0) & (df["기관순매수"] > 0)].copy()
     both["합산"] = both["외국인순매수"] + both["기관순매수"]
     top_stocks = both.nlargest(3, "합산")["종목명"].tolist()
@@ -252,13 +301,13 @@ def build_ai_summary(df: pd.DataFrame, sec: pd.DataFrame) -> str:
     worst_name = worst.index[0]
     worst_amt_down = worst["평균등락률"].iloc[0] < 0
 
-    frg_tot, ins_tot = df["외국인순매수"].sum(), df["기관순매수"].sum()
-    frg_txt = "순매수" if frg_tot > 0 else "순매도"
-    ins_txt = "순매수" if ins_tot > 0 else "순매도"
+    frg_txt = "순매수" if mkt_frg > 0 else "순매도"
+    ins_txt = "순매수" if mkt_ins > 0 else "순매도"
 
     msg = (
         f"이번 기간 시장에서는 **{' · '.join(top_sec)}** 섹터에 기관·외국인 자금이 집중되었습니다. "
-        f"외국인은 전체 {fmt_eok(abs(frg_tot))} {frg_txt}, 기관은 {fmt_eok(abs(ins_tot))} {ins_txt}를 기록했습니다. "
+        f"외국인은 시장 전체 {fmt_eok(abs(mkt_frg))} {frg_txt}, "
+        f"기관은 {fmt_eok(abs(mkt_ins))} {ins_txt}를 기록했습니다. "
     )
     if top_stocks:
         msg += f"특히 **{', '.join(top_stocks)}** 종목으로 강한 동반 자금 유입이 확인됩니다. "
@@ -307,25 +356,11 @@ def eokify(d: pd.DataFrame) -> pd.DataFrame:
 def render():
     st.markdown(DARK_CSS, unsafe_allow_html=True)
     st.markdown('<h2 class="sm-title">📊 SMART MONEY DASHBOARD</h2>', unsafe_allow_html=True)
-    st.caption("KOSPI 전 종목 · 거래대금 × 외국인 × 기관 자금 흐름 종합 분석  |  데이터: KRX")
+    st.caption("KOSPI 전 종목 · 거래대금 × 외국인 × 기관 자금 흐름 종합 분석  |  데이터: 네이버 금융")
 
     if not PLOTLY_OK:
         st.error("plotly 패키지가 없습니다. requirements.txt를 확인하세요.")
         return
-
-    global stock, PYKRX_OK, PYKRX_ERR
-    if not PYKRX_OK:
-        # import 시점 로그인 실패 등 → 재시도
-        try:
-            import importlib, pykrx.stock as _stock_mod
-            stock = _stock_mod
-            PYKRX_OK = True
-        except Exception as _e:
-            st.error(f"pykrx 초기화 실패: {PYKRX_ERR or _e}")
-            with st.spinner("KRX 로그인 상태 진단 중..."):
-                code, msg = krx_login_diagnosis()
-            show_krx_help(code, msg)
-            return
 
     # ── 상단 컨트롤 ──
     c1, c2, c3 = st.columns([3, 2, 2])
@@ -344,33 +379,34 @@ def render():
     n = PERIODS[period]
 
     # ── 데이터 로딩 ──
-    with st.spinner("KRX 데이터 로딩 중..."):
-        try:
-            idx = load_trading_dates()
-            dates = idx.index
-            if len(dates) < 2 * n + 1:
-                st.error("거래일 데이터가 부족합니다.")
-                return
-            to_d      = dates[-1].strftime("%Y%m%d")
-            from_d    = dates[-n].strftime("%Y%m%d")
-            prev_to   = dates[-n - 1].strftime("%Y%m%d")
-            prev_from = dates[-2 * n].strftime("%Y%m%d")
-            df = load_market_data(from_d, to_d, prev_from, prev_to)
-        except Exception as e:
-            st.error(f"KRX 데이터 로딩 실패: {e}")
-            with st.spinner("KRX 로그인 상태 진단 중..."):
-                code, msg = krx_login_diagnosis()
-            show_krx_help(code, msg)
+    try:
+        with st.spinner("전 종목 시세 로딩 중..."):
+            df = load_all_stocks()
+        if df.empty:
+            st.error("시세 데이터를 불러오지 못했습니다. 잠시 후 '데이터 갱신'으로 재시도하세요.")
             return
+        top_codes = tuple(df.nlargest(TOP_FLOW_N, "거래대금")["종목코드"].tolist())
+        with st.spinner(f"외국인·기관 수급 로딩 중... (상위 {TOP_FLOW_N}종목 × {n}일)"):
+            flows = load_flows(top_codes, n)
+        with st.spinner("시장 수급 동향 로딩 중..."):
+            mtrend = load_market_trend(max(n, 20))
+            idxval = load_index_value(min(2 * n, 60))
+    except Exception as e:
+        st.error(f"데이터 로딩 실패: {e}")
+        st.info("잠시 후 '데이터 갱신' 버튼으로 재시도하세요.")
+        return
+
+    df = df.merge(flows, left_on="종목코드", right_index=True, how="left")
+    for c in ["외국인순매수", "기관순매수", "개인순매수"]:
+        df[c] = df[c].fillna(0)
 
     # 52주 신고가/신저가 — 거래대금 상위 200개 종목 대상
     top200 = tuple(df.nlargest(200, "거래대금")["종목코드"].tolist())
     hi, lo = load_52w_flags(top200)
-    df["52주신고가"] = df["종목코드"].map(hi).fillna(False)
-    df["52주신저가"] = df["종목코드"].map(lo).fillna(False)
+    df["52주신고가"] = df["종목코드"].map(hi).fillna(False).astype(bool)
+    df["52주신저가"] = df["종목코드"].map(lo).fillna(False).astype(bool)
 
     df = add_smart_score(df)
-    df["현재가"] = df["종가"]
 
     # ── ⑮ 실시간 필터 ──
     with st.expander("🎛️ 실시간 필터", expanded=False):
@@ -388,19 +424,37 @@ def render():
     if ins_min != "전체": fdf = fdf[fdf["기관순매수"] >= th(ins_min) * EOK]
     if chg_min != "전체": fdf = fdf[fdf["등락률"] >= float(chg_min.split("%")[0])]
 
+    # ── 시장 전체 순매수 (정확치, 억원 → 원) ──
+    if not mtrend.empty:
+        recent = mtrend.tail(n)
+        mkt_frg = recent["외국인"].sum() * EOK
+        mkt_ins = recent["기관"].sum() * EOK
+        mkt_ind = recent["개인"].sum() * EOK
+    else:
+        mkt_frg = df["외국인순매수"].sum()
+        mkt_ins = df["기관순매수"].sum()
+        mkt_ind = df["개인순매수"].sum()
+
+    # 거래대금 증가율 (지수 일별 거래대금 기준)
+    growth_txt = "—"
+    if not idxval.empty and len(idxval) >= 2 * n:
+        cur = idxval["거래대금"].tail(n).sum()
+        prv = idxval["거래대금"].tail(2 * n).head(n).sum()
+        if prv > 0:
+            growth_txt = f"{(cur / prv - 1) * 100:+.1f}%"
+
     # ── ① 시장 요약 KPI ──
     k = st.columns(5)
-    k[0].metric("전체 거래대금", fmt_eok(df["거래대금"].sum()))
-    k[1].metric("외국인 순매수", fmt_eok(df["외국인순매수"].sum()))
-    k[2].metric("기관 순매수", fmt_eok(df["기관순매수"].sum()))
-    k[3].metric("개인 순매수", fmt_eok(df["개인순매수"].sum()))
-    tot_growth = (df["거래대금"].sum() / max(df["전기간_거래대금"].sum(), 1) - 1) * 100
-    k[4].metric("거래대금 증가율", f"{tot_growth:+.1f}%")
+    k[0].metric("전체 거래대금(당일)", fmt_eok(df["거래대금"].sum()))
+    k[1].metric("외국인 순매수", fmt_eok(mkt_frg))
+    k[2].metric("기관 순매수", fmt_eok(mkt_ins))
+    k[3].metric("개인 순매수", fmt_eok(mkt_ind))
+    k[4].metric("거래대금 증가율", growth_txt)
     k2 = st.columns(5)
     k2[0].metric("상승 종목", f"{(df['등락률'] > 0).sum()}개")
     k2[1].metric("하락 종목", f"{(df['등락률'] < 0).sum()}개")
-    k2[2].metric("52주 신고가", f"{df['52주신고가'].sum()}개")
-    k2[3].metric("52주 신저가", f"{df['52주신저가'].sum()}개")
+    k2[2].metric("52주 신고가", f"{int(df['52주신고가'].sum())}개")
+    k2[3].metric("52주 신저가", f"{int(df['52주신저가'].sum())}개")
     k2[4].metric("분석 종목 수", f"{len(df)}개")
 
     # 섹터 집계 (여러 섹션에서 공용)
@@ -415,8 +469,10 @@ def render():
     sec["외국인+기관"] = sec["외국인순매수"] + sec["기관순매수"]
 
     # ── ⑭ AI 시장 분석 ──
-    st.markdown(f'<div class="sm-ai">🤖 <b>AI 시장 분석</b><br>{build_ai_summary(df, sec)}</div>',
-                unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="sm-ai">🤖 <b>AI 시장 분석</b><br>'
+        f'{build_ai_summary(df, sec, mkt_frg, mkt_ins)}</div>',
+        unsafe_allow_html=True)
     st.markdown("")
 
     # ── 내부 탭 구성 ──
@@ -425,7 +481,6 @@ def render():
 
     # ═══ 🏆 자금 랭킹 ═══
     with t_rank:
-        # ⑥ 동시 순매수 (가장 중요 → 최상단)
         st.subheader("💎 외국인 + 기관 동시 순매수")
         both = fdf[(fdf["외국인순매수"] > 0) & (fdf["기관순매수"] > 0)].copy()
         both["합계"] = both["외국인순매수"] + both["기관순매수"]
@@ -435,14 +490,12 @@ def render():
         d6.index += 1
         st.dataframe(d6, use_container_width=True, column_config=style_table(both[cols6]))
 
-        # ② Smart Money Score
         st.subheader("🧠 Smart Money Score TOP100")
-        cols2 = ["종목명", "Smart Score", "등급", "거래대금", "거래대금증가율", "외국인순매수", "기관순매수", "등락률", "52주신고가", "섹터"]
+        cols2 = ["종목명", "Smart Score", "등급", "거래대금", "외국인순매수", "기관순매수", "등락률", "52주신고가", "섹터"]
         d2 = eokify(fdf.sort_values("Smart Score", ascending=False)[cols2].head(100)).reset_index(drop=True)
         d2.index += 1
         st.dataframe(d2, use_container_width=True, column_config=style_table(fdf[cols2]))
 
-        # ③④⑤ TOP100
         c_a, c_f, c_i = st.tabs(["💰 거래대금 TOP100", "🌍 외국인 순매수 TOP100", "🏛️ 기관 순매수 TOP100"])
         with c_a:
             sort_key = st.selectbox("정렬 기준", ["거래대금", "외국인순매수", "기관순매수", "Smart Score"], key="sort3")
@@ -460,10 +513,10 @@ def render():
             d5 = eokify(fdf.sort_values("기관순매수", ascending=False)[cols5].head(100)).reset_index(drop=True)
             d5.index += 1
             st.dataframe(d5, use_container_width=True, column_config=style_table(fdf[cols5]))
+        st.caption(f"※ 종목별 외국인/기관 순매수는 거래대금 상위 {TOP_FLOW_N}종목 대상 · 일별 순매수수량 × 종가 근사치")
 
     # ═══ 📈 자금 지도 ═══
     with t_chart:
-        # ⑦ 외국인 vs 기관 Scatter
         st.subheader("🎯 외국인 vs 기관 순매수")
         sc = fdf.nlargest(300, "거래대금").copy()
         for c in ["외국인순매수", "기관순매수", "거래대금"]:
@@ -482,7 +535,6 @@ def render():
                            showarrow=False, font=dict(color="#ff5252", size=14))
         st.plotly_chart(fig, use_container_width=True)
 
-        # ⑩ Money Flow Treemap
         st.subheader("🗺️ Money Flow HeatMap (Treemap)")
         tm = fdf.nlargest(300, "거래대금").copy()
         tm["거래대금_억"] = tm["거래대금"] / EOK
@@ -495,15 +547,13 @@ def render():
         st.plotly_chart(fig_tm, use_container_width=True)
         st.caption("사각형 크기 = 거래대금 · 색상 = 등락률 · 섹터 클릭 시 Drill-down")
 
-        # ⑧ Sector Money Flow HeatMap
         st.subheader("🌡️ Sector Money Flow")
-        hm = sec.copy()
         hm_disp = pd.DataFrame({
-            "거래대금(억)": hm["거래대금"] / EOK,
-            "외국인(억)": hm["외국인순매수"] / EOK,
-            "기관(억)": hm["기관순매수"] / EOK,
-            "평균등락률(%)": hm["평균등락률"],
-            "상승비율(%)": hm["상승비율"],
+            "거래대금(억)": sec["거래대금"] / EOK,
+            "외국인(억)": sec["외국인순매수"] / EOK,
+            "기관(억)": sec["기관순매수"] / EOK,
+            "평균등락률(%)": sec["평균등락률"],
+            "상승비율(%)": sec["상승비율"],
         })
         z = (hm_disp - hm_disp.mean()) / hm_disp.std().replace(0, 1)
         fig_hm = px.imshow(
@@ -514,7 +564,6 @@ def render():
             hovertemplate="섹터=%{x}<br>%{y}=%{customdata:,.1f}<extra></extra>")
         st.plotly_chart(fig_hm, use_container_width=True)
 
-        # ⑨ Sector Ranking + Sunburst
         st.subheader("🏅 Sector Ranking TOP20")
         rank = sec.sort_values("외국인+기관", ascending=False).head(20)
         st.dataframe(eokify(rank.reset_index()), use_container_width=True,
@@ -531,36 +580,34 @@ def render():
         st.subheader("📉 Smart Money Trend — 시장 수급 추이")
         win = st.radio("기간(거래일)", [20, 60, 120], horizontal=True, key="trend_win")
         try:
-            tf = dates[-win].strftime("%Y%m%d")
-            flow = load_investor_trend(tf, to_d)
-            idx_win = idx.loc[dates[-win]:]
-            fig_tr = go.Figure()
-            if "외국인합계" in flow.columns:
-                fig_tr.add_trace(go.Scatter(x=flow.index, y=flow["외국인합계"].cumsum() / EOK,
+            mt = load_market_trend(win)
+            iv = load_index_value(win)
+            if mt.empty:
+                st.warning("시장 수급 데이터를 불러오지 못했습니다.")
+            else:
+                fig_tr = go.Figure()
+                fig_tr.add_trace(go.Scatter(x=mt.index, y=mt["외국인"].cumsum(),
                                             name="외국인 누적(억)", line=dict(color="#00b0ff", width=2)))
-            if "기관합계" in flow.columns:
-                fig_tr.add_trace(go.Scatter(x=flow.index, y=flow["기관합계"].cumsum() / EOK,
+                fig_tr.add_trace(go.Scatter(x=mt.index, y=mt["기관"].cumsum(),
                                             name="기관 누적(억)", line=dict(color="#f0a500", width=2)))
-            if "개인" in flow.columns:
-                fig_tr.add_trace(go.Scatter(x=flow.index, y=flow["개인"].cumsum() / EOK,
+                fig_tr.add_trace(go.Scatter(x=mt.index, y=mt["개인"].cumsum(),
                                             name="개인 누적(억)", line=dict(color="#9e9e9e", width=1, dash="dot")))
-            if "거래대금" in idx_win.columns:
-                fig_tr.add_trace(go.Bar(x=idx_win.index, y=idx_win["거래대금"] / EOK,
-                                        name="시장 거래대금(억)", yaxis="y2", opacity=0.25,
-                                        marker_color="#4caf50"))
-            fig_tr.update_layout(
-                template=PLOTLY_TMPL, height=520, hovermode="x unified",
-                yaxis=dict(title="누적 순매수(억)"),
-                yaxis2=dict(title="거래대금(억)", overlaying="y", side="right", showgrid=False),
-                legend=dict(orientation="h", y=1.08))
-            st.plotly_chart(fig_tr, use_container_width=True)
+                if not iv.empty:
+                    fig_tr.add_trace(go.Bar(x=iv.index, y=iv["거래대금"] / EOK,
+                                            name="시장 거래대금(억)", yaxis="y2", opacity=0.25,
+                                            marker_color="#4caf50"))
+                fig_tr.update_layout(
+                    template=PLOTLY_TMPL, height=520, hovermode="x unified",
+                    yaxis=dict(title="누적 순매수(억)"),
+                    yaxis2=dict(title="거래대금(억)", overlaying="y", side="right", showgrid=False),
+                    legend=dict(orientation="h", y=1.08))
+                st.plotly_chart(fig_tr, use_container_width=True)
         except Exception as e:
             st.warning(f"추이 데이터 로딩 실패: {e}")
 
     # ═══ 🔍 종목·섹터 상세 ═══
     with t_detail:
         cA, cB = st.columns(2)
-        # ⑫ 종목 상세
         with cA:
             st.subheader("🔍 종목 상세")
             pick = st.selectbox("종목 검색", sorted(df["종목명"].tolist()), key="stock_pick",
@@ -569,31 +616,34 @@ def render():
             if pick:
                 code = df.loc[df["종목명"] == pick, "종목코드"].iloc[0]
                 try:
-                    d_from = dates[-win2].strftime("%Y%m%d")
-                    ohlcv, flw = load_ticker_detail(code, d_from, to_d)
+                    trend, price = load_ticker_detail(code, win2)
                     fig_p = go.Figure()
-                    fig_p.add_trace(go.Scatter(x=ohlcv.index, y=ohlcv["종가"], name="종가",
-                                               line=dict(color="#e8e8e8")))
-                    fig_p.add_trace(go.Bar(x=ohlcv.index, y=ohlcv["거래대금"] / EOK,
-                                           name="거래대금(억)", yaxis="y2", opacity=0.3,
-                                           marker_color="#4caf50"))
+                    if not price.empty:
+                        fig_p.add_trace(go.Scatter(x=price.index, y=price["Close"], name="종가",
+                                                   line=dict(color="#e8e8e8")))
+                        if "Volume" in price.columns:
+                            fig_p.add_trace(go.Bar(x=price.index,
+                                                   y=price["Volume"] * price["Close"] / EOK,
+                                                   name="거래대금(억, 근사)", yaxis="y2", opacity=0.3,
+                                                   marker_color="#4caf50"))
+                    elif not trend.empty:
+                        fig_p.add_trace(go.Scatter(x=trend.index, y=trend["종가"], name="종가",
+                                                   line=dict(color="#e8e8e8")))
                     fig_p.update_layout(template=PLOTLY_TMPL, height=340, hovermode="x unified",
                                         yaxis2=dict(overlaying="y", side="right", showgrid=False),
                                         legend=dict(orientation="h", y=1.12),
                                         title=f"{pick} — 주가 · 거래대금")
                     st.plotly_chart(fig_p, use_container_width=True)
 
-                    fig_f = go.Figure()
-                    for col, cname, cc in [("외국인합계", "외국인 누적", "#00b0ff"),
-                                           ("기관합계", "기관 누적", "#f0a500"),
-                                           ("개인", "개인 누적", "#9e9e9e")]:
-                        if col in flw.columns:
-                            fig_f.add_trace(go.Scatter(x=flw.index, y=flw[col].cumsum() / EOK,
-                                                       name=cname, line=dict(color=cc)))
-                    fig_f.update_layout(template=PLOTLY_TMPL, height=300, hovermode="x unified",
-                                        title="투자자별 누적 순매수(억)",
-                                        legend=dict(orientation="h", y=1.15))
-                    st.plotly_chart(fig_f, use_container_width=True)
+                    if not trend.empty:
+                        fig_f = go.Figure()
+                        for col, cc in [("외국인", "#00b0ff"), ("기관", "#f0a500"), ("개인", "#9e9e9e")]:
+                            fig_f.add_trace(go.Scatter(x=trend.index, y=trend[col].cumsum() / EOK,
+                                                       name=f"{col} 누적", line=dict(color=cc)))
+                        fig_f.update_layout(template=PLOTLY_TMPL, height=300, hovermode="x unified",
+                                            title="투자자별 누적 순매수(억, 근사)",
+                                            legend=dict(orientation="h", y=1.15))
+                        st.plotly_chart(fig_f, use_container_width=True)
 
                     row = df[df["종목코드"] == code].iloc[0]
                     m = st.columns(4)
@@ -604,7 +654,6 @@ def render():
                 except Exception as e:
                     st.warning(f"종목 데이터 로딩 실패: {e}")
 
-        # ⑬ 섹터 상세
         with cB:
             st.subheader("🏭 섹터 상세")
             sec_pick = st.selectbox("섹터 선택", list(THEME_KEYWORDS.keys()) + ["기타"], key="sec_pick")
@@ -629,17 +678,15 @@ def render():
                       "Smart Score", "등급", "섹터", "52주신고가"]
             st.dataframe(eokify(fav_df[cols_f]), use_container_width=True, hide_index=True,
                          column_config=style_table(fav_df[cols_f]))
-            # 간단 알림: 관심종목 중 동시 순매수 발생 시
             alert = fav_df[(fav_df["외국인순매수"] > 0) & (fav_df["기관순매수"] > 0)]
             if not alert.empty:
                 st.success(f"🔔 알림: {', '.join(alert['종목명'])} — 외국인·기관 동시 순매수 발생")
         else:
             st.info("관심종목을 추가하면 수급 현황과 동시 순매수 알림을 확인할 수 있습니다.")
 
-        # 다운로드
         st.markdown("---")
         dl_target = fdf if favs == [] else df[df["종목명"].isin(favs)]
-        exp = eokify(dl_target.drop(columns=["전기간_거래대금"], errors="ignore"))
+        exp = eokify(dl_target)
         c_csv, c_xlsx = st.columns(2)
         c_csv.download_button(
             "📥 CSV 다운로드",
@@ -658,4 +705,7 @@ def render():
         except Exception:
             c_xlsx.caption("Excel 다운로드는 openpyxl 설치 시 활성화됩니다.")
 
-    st.caption(f"기준일: {to_d} · 기간: {period}({from_d}~{to_d}) · 52주 신고가/신저가는 거래대금 상위 200종목 기준")
+    st.caption(
+        f"데이터: 네이버 금융 · 기간: {period} · "
+        f"종목별 수급은 거래대금 상위 {TOP_FLOW_N}종목(수량×종가 근사) · "
+        f"52주 신고가/신저가는 상위 200종목 기준 · 10분 캐시")
