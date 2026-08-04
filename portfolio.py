@@ -237,6 +237,19 @@ def render(st):
             st.caption(
                 f"※ 손익은 매매비용 반영 — 매수 수수료 {BUY_FEE_PCT}% / "
                 f"매도 수수료 {SELL_FEE_PCT}% + 매도세 {SELL_TAX_PCT}%(코스피 2026년 기준)")
+
+            with st.expander("🗑 오등록 정정 — 포지션 삭제"):
+                st.caption("잘못 등록한 종목을 이력 없이 지웁니다. 실제 매도는 ‘매도 등록’을 쓰세요.")
+                dmap = {p["name"]: t for t, p in positions.items()}
+                dcol1, dcol2 = st.columns([3, 1])
+                dname = dcol1.selectbox("삭제할 종목", list(dmap.keys()), key="del_sel")
+                if dcol2.button("삭제", type="secondary", use_container_width=True,
+                                disabled=not writable()):
+                    state["positions"].pop(dmap[dname], None)
+                    ok, msg = save(state, f"portfolio: {dname} 포지션 삭제")
+                    (st.success if ok else st.error)(f"{dname} 삭제됨 · {msg}" if ok else msg)
+                    if ok:
+                        st.rerun()
         else:
             st.info("등록된 보유 종목이 없습니다. ‘매수 등록’ 탭에서 추가하세요.")
 
