@@ -24,6 +24,7 @@ except Exception:
 
 import smart_money
 import smart_radar
+import swing_rsi
 
 # ── 파라미터 ──────────────────────────────────────────────────────────────────
 STOP_LOSS_PCT      = -3.0
@@ -480,8 +481,15 @@ st.set_page_config(
 )
 
 # ── 메인 탭 ───────────────────────────────────────────────────────────────────
-tab_scanner, tab_smart, tab_radar = st.tabs(
-    ["🔍 매매 신호 스캐너", "📊 Smart Money Dashboard", "🎯 Smart Money Radar"])
+tab_scanner, tab_swing, tab_smart, tab_radar = st.tabs(
+    ["🔍 매매 신호 스캐너", "⚡ 단타 RSI 3분할",
+     "📊 Smart Money Dashboard", "🎯 Smart Money Radar"])
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 탭 2 — 단타 RSI 3분할 (swing_rsi.py)
+# ══════════════════════════════════════════════════════════════════════════════
+with tab_swing:
+    swing_rsi.render(st)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 탭 1 — 매매 신호 스캐너 v3 (기존 기능)
