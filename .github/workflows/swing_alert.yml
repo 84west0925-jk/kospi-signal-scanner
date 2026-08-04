@@ -1,0 +1,59 @@
+name: KOSPI 단타 RSI 카톡 알림
+
+on:
+  schedule:
+    # UTC 기준 — 한국 09:00~15:30 = UTC 00:00~06:30, 30분 간격 (평일)
+    - cron: "0,30 0-6 * * 1-5"
+  workflow_dispatch:        # 수동 실행 버튼
+    inputs:
+      force:
+        description: "휴장 체크 무시하고 강제 실행"
+        default: "0"
+
+permissions:
+  contents: write           # 포지션 상태 파일 커밋용
+
+concurrency:
+  group: swing-alert
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: 의존성 설치
+        run: pip install -r requirements.txt
+
+      - name: 신호 스캔 및 카카오 알림
+        env:
+          KAKAO_REST_API_KEY:  ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
+          INTERVAL: "30m"
+          RSI_BUY:  "30"
+          RSI_SELL: "70"
+          SEED:     "3000000"
+          FORCE:    ${{ github.event.inputs.force || '0' }}
+        run: python alert_bot.py
+
+      - name: 포지션 상태 저장
+        if: always()
+        run: |
+          if [[ -n "$(git status --porcelain swing_positions.json)" ]]; then
+            git config user.name  "swing-bot"
+            git config user.email "bot@users.noreply.github.com"
+            git add swing_positions.json
+            git commit -m "chore: 단타 포지션 상태 갱신 $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          else
+            echo "변경 없음"
+          fi
