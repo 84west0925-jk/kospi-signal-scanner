@@ -2,7 +2,7 @@
   "positions": {
     "005930.KS": {
       "name": "삼성전자",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 230000.0,
       "first_sell": null,
@@ -12,6 +12,12 @@
           "price": 230000.0,
           "qty": 4,
           "time": "2026-08-04 13:20"
+        },
+        {
+          "stage": 2,
+          "price": 230000.0,
+          "qty": 4,
+          "time": "2026-08-04 13:21"
         }
       ],
       "exits": [],
@@ -22,5 +28,5 @@
     }
   },
   "history": [],
-  "updated": "2026-08-04 13:20:54"
+  "updated": "2026-08-04 13:21:14"
 }
