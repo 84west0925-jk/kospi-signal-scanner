@@ -52,30 +52,36 @@ git push
 
 Streamlit Cloud가 자동 재배포하며 ⚡ 단타 탭이 바로 생깁니다. **카톡 설정 없이도 웹 화면은 정상 동작합니다.**
 
-### 3-2. 카카오 앱 등록 (약 10분)
+### 3-2. 카카오 앱 등록 — ✅ 완료됨
 
-1. https://developers.kakao.com → 내 애플리케이션 → **애플리케이션 추가하기**
-2. **앱 키** → `REST API 키` 복사
-3. **카카오 로그인** → 활성화 **ON**
-4. **카카오 로그인 > Redirect URI** → `https://example.com/oauth` 등록
-5. **카카오 로그인 > 동의항목** → `카카오톡 메시지 전송(talk_message)` → **선택 동의** 설정
+앱 `KOSPI 단타알림` (ID 1532737) 생성 및 아래 설정 완료.
 
-### 3-3. 토큰 발급 (로컬 PC에서 1회)
+- 카카오 로그인 활성화 **ON**
+- 로그인 리다이렉트 URI `https://example.com/oauth` 등록
+- 동의항목 `카카오톡 메시지 전송(talk_message)` → **선택 동의**
+- 클라이언트 시크릿 **활성화 상태** (토큰 요청 시 필수)
+
+키 확인 위치: 카카오 디벨로퍼스 → 앱 → **플랫폼 키** → REST API 키 / 클라이언트 시크릿
+
+### 3-3. 토큰 발급 — ✅ 최초 발급 완료
+
+재발급이 필요할 때(약 2개월 주기)만 아래를 실행합니다.
 
 ```
-python get_kakao_token.py
+카카오토큰발급.bat  더블클릭   (또는 python get_kakao_token.py)
 ```
 
-출력되는 `KAKAO_REST_API_KEY`, `KAKAO_REFRESH_TOKEN` 두 값을 보관합니다.
+REST API 키와 클라이언트 시크릿을 입력하면 새 refresh_token이 출력됩니다.
 
-### 3-4. GitHub Secrets 등록
+### 3-4. GitHub Secrets 등록 ← **직접 하셔야 하는 단계**
 
 저장소 → Settings → Secrets and variables → Actions → **New repository secret**
 
-| Name | Value |
+| Name | 값 |
 |---|---|
-| `KAKAO_REST_API_KEY` | 3-2에서 복사한 REST API 키 |
-| `KAKAO_REFRESH_TOKEN` | 3-3에서 발급된 refresh token |
+| `KAKAO_REST_API_KEY` | 플랫폼 키 화면의 REST API 키 |
+| `KAKAO_CLIENT_SECRET` | 플랫폼 키 화면의 클라이언트 시크릿 코드 |
+| `KAKAO_REFRESH_TOKEN` | 발급받은 refresh token |
 
 ### 3-5. 동작 확인
 

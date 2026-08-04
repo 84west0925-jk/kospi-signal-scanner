@@ -4,8 +4,9 @@
 kakao_notify.py — 카카오톡 '나에게 보내기' 알림 전송기
 ────────────────────────────────────────────────────────────────────────────
 필요 환경변수 (GitHub Secrets 또는 .env)
-  KAKAO_REST_API_KEY  : 카카오 디벨로퍼스 > 내 애플리케이션 > 앱 키 > REST API 키
-  KAKAO_REFRESH_TOKEN : 최초 1회 발급 (get_token.py 참고). 유효기간 약 2개월
+  KAKAO_REST_API_KEY   : 카카오 디벨로퍼스 > 앱 > 플랫폼 키 > REST API 키
+  KAKAO_CLIENT_SECRET  : 같은 화면의 '클라이언트 시크릿' 코드 (활성화된 경우 필수)
+  KAKAO_REFRESH_TOKEN  : 최초 1회 발급 (get_kakao_token.py 참고). 유효기간 약 2개월
 선택
   TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID : 설정 시 텔레그램에도 동시 발송(백업)
 
@@ -37,12 +38,16 @@ def get_access_token() -> str | None:
     if not rest_key or not refresh:
         print("[kakao] 키 미설정 — 전송 생략")
         return None
+    payload = {
+        "grant_type": "refresh_token",
+        "client_id": rest_key,
+        "refresh_token": refresh,
+    }
+    secret = _env("KAKAO_CLIENT_SECRET")
+    if secret:
+        payload["client_secret"] = secret
     try:
-        r = requests.post(TOKEN_URL, data={
-            "grant_type": "refresh_token",
-            "client_id": rest_key,
-            "refresh_token": refresh,
-        }, timeout=10)
+        r = requests.post(TOKEN_URL, data=payload, timeout=10)
         r.raise_for_status()
         js = r.json()
         if "refresh_token" in js:
