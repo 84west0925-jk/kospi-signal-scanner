@@ -23,8 +23,9 @@ INTERVAL = os.getenv("INTERVAL", "30m")
 RSI_BUY = float(os.getenv("RSI_BUY", sw.RSI_BUY))
 RSI_SELL = float(os.getenv("RSI_SELL", sw.RSI_SELL))
 SEED = float(os.getenv("SEED", 3_000_000))
-FORCE = os.getenv("FORCE", "0") == "1"   # 휴장 체크 무시 (테스트용)
-TEST = os.getenv("TEST", "0") == "1"     # 카카오 연결만 테스트하고 종료
+_FORCE_RAW = os.getenv("FORCE", "0").strip().lower()
+FORCE = _FORCE_RAW in ("1", "true", "test")   # 휴장 체크 무시
+TEST = _FORCE_RAW == "test" or os.getenv("TEST", "0") == "1"  # 카카오 연결만 테스트
 
 
 def main() -> int:
