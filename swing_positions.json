@@ -1,5 +1,26 @@
 {
-  "positions": {},
+  "positions": {
+    "005930.KS": {
+      "name": "삼성전자",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 230000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 230000.0,
+          "qty": 4,
+          "time": "2026-08-04 13:20"
+        }
+      ],
+      "exits": [],
+      "avg_price": 230000.0,
+      "opened": "2026-08-04 13:20",
+      "source": "manual",
+      "memo": "RSI 44 진입"
+    }
+  },
   "history": [],
-  "updated": null
+  "updated": "2026-08-04 13:20:54"
 }
