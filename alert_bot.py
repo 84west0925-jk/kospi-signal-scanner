@@ -24,11 +24,19 @@ RSI_BUY = float(os.getenv("RSI_BUY", sw.RSI_BUY))
 RSI_SELL = float(os.getenv("RSI_SELL", sw.RSI_SELL))
 SEED = float(os.getenv("SEED", 3_000_000))
 FORCE = os.getenv("FORCE", "0") == "1"   # 휴장 체크 무시 (테스트용)
+TEST = os.getenv("TEST", "0") == "1"     # 카카오 연결만 테스트하고 종료
 
 
 def main() -> int:
     now = datetime.now(sw.KST)
     print(f"=== 단타 RSI 스캔 {now:%Y-%m-%d %H:%M} KST / {INTERVAL} ===")
+
+    if TEST:
+        print("[TEST 모드] 카카오 연결 테스트 메시지 발송")
+        ok = send_text(f"✅ 알림 봇 연결 테스트 성공 ({now:%m/%d %H:%M})\n"
+                       f"GitHub Actions에서 정상 발송되었습니다.")
+        print("카카오 전송:", "성공" if ok else "실패")
+        return 0 if ok else 1
 
     if now.weekday() >= 5 and not FORCE:
         print("주말 — 종료")
