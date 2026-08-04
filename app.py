@@ -25,6 +25,7 @@ except Exception:
 import smart_money
 import smart_radar
 import swing_rsi
+import portfolio
 
 # ── 파라미터 ──────────────────────────────────────────────────────────────────
 STOP_LOSS_PCT      = -3.0
@@ -481,8 +482,8 @@ st.set_page_config(
 )
 
 # ── 메인 탭 ───────────────────────────────────────────────────────────────────
-tab_scanner, tab_swing, tab_smart, tab_radar = st.tabs(
-    ["🔍 매매 신호 스캐너", "⚡ 단타 RSI 3분할",
+tab_scanner, tab_swing, tab_folio, tab_smart, tab_radar = st.tabs(
+    ["🔍 매매 신호 스캐너", "⚡ 단타 RSI 3분할", "💼 보유 종목 추적",
      "📊 Smart Money Dashboard", "🎯 Smart Money Radar"])
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -490,6 +491,12 @@ tab_scanner, tab_swing, tab_smart, tab_radar = st.tabs(
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_swing:
     swing_rsi.render(st)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 탭 3 — 보유 종목 추적 / 거래 이력 (portfolio.py)
+# ══════════════════════════════════════════════════════════════════════════════
+with tab_folio:
+    portfolio.render(st)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 탭 1 — 매매 신호 스캐너 v3 (기존 기능)

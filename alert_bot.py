@@ -66,11 +66,11 @@ def main() -> int:
         return 0
 
     # 상태 반영 (commit)
+    unit = SEED / 3
     for a in alerts:
-        sw.apply_action(state, a["ticker"], a["name"], a, a["time"])
+        sw.apply_action(state, a["ticker"], a["name"], a, a["time"], unit_krw=unit)
     sw.save_state(state)
 
-    unit = SEED / 3
     header = f"📣 KOSPI 단타 신호 {now:%m/%d %H:%M} ({INTERVAL})\n1회 투입금 {unit:,.0f}원\n"
     body = "\n\n".join(sw.format_alert(a) for a in alerts)
     msg = header + "\n" + body

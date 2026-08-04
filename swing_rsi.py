@@ -223,24 +223,38 @@ def decide(pos: dict | None, price: float, rsi_now: float, rsi_prev: float,
     return acts
 
 
-def apply_action(state: dict, ticker: str, name: str, act: dict, ts: str) -> dict:
-    """액션을 상태에 반영하고 갱신된 포지션을 반환."""
+def apply_action(state: dict, ticker: str, name: str, act: dict, ts: str,
+                 unit_krw: float | None = None) -> dict:
+    """액션을 상태에 반영하고 갱신된 포지션을 반환.
+    unit_krw: 1회 투입금액. 주면 수량까지 기록해 손익 계산이 가능해진다."""
     pos = state["positions"].get(ticker) or new_position(name)
     price = act["price"]
+    qty = int(unit_krw // price) if unit_krw and price > 0 else 0
 
     if act["action"] == "BUY":
         pos["buy_stage"] = act["stage"]
-        pos["entries"].append({"stage": act["stage"], "price": price, "time": ts})
+        pos["entries"].append({"stage": act["stage"], "price": price,
+                               "qty": qty, "time": ts})
+        pos.setdefault("source", "bot")
         if act["stage"] == 1:
             pos["first_buy"] = price
             pos["opened"] = ts
-        prices = [e["price"] for e in pos["entries"]]
-        pos["avg_price"] = round(sum(prices) / len(prices), 2)
+        tot_q = sum(e.get("qty", 0) for e in pos["entries"])
+        if tot_q:
+            pos["avg_price"] = round(
+                sum(e["price"] * e.get("qty", 0) for e in pos["entries"]) / tot_q, 2)
+        else:
+            prices = [e["price"] for e in pos["entries"]]
+            pos["avg_price"] = round(sum(prices) / len(prices), 2)
         state["positions"][ticker] = pos
 
     elif act["action"] == "SELL":
+        held = sum(e.get("qty", 0) for e in pos["entries"]) - \
+               sum(x.get("qty", 0) for x in pos.get("exits", []))
+        sell_q = held if act["stage"] >= 3 else held // (4 - act["stage"])
         pos["sell_stage"] = act["stage"]
-        pos["exits"].append({"stage": act["stage"], "price": price, "time": ts})
+        pos["exits"].append({"stage": act["stage"], "price": price,
+                             "qty": max(sell_q, 0), "time": ts})
         if act["stage"] == 1:
             pos["first_sell"] = price
         if act["stage"] >= 3:
@@ -249,7 +263,10 @@ def apply_action(state: dict, ticker: str, name: str, act: dict, ts: str) -> dic
         state["positions"][ticker] = pos
 
     elif act["action"] == "STOP":
-        pos["exits"].append({"stage": 9, "price": price, "time": ts})
+        held = sum(e.get("qty", 0) for e in pos["entries"]) - \
+               sum(x.get("qty", 0) for x in pos.get("exits", []))
+        pos["exits"].append({"stage": 9, "price": price,
+                             "qty": max(held, 0), "time": ts})
         _close(state, ticker, pos, price, ts, "손절 청산")
         return pos
 
