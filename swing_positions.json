@@ -1,5 +1,26 @@
 {
-  "positions": {},
+  "positions": {
+    "278470.KS": {
+      "name": "에이피알",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 374000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 374000.0,
+          "qty": 2,
+          "time": "2026-08-05 11:19"
+        }
+      ],
+      "exits": [],
+      "avg_price": 374000.0,
+      "opened": "2026-08-05 11:19",
+      "source": "manual",
+      "memo": "RSI57 매수"
+    }
+  },
   "history": [],
-  "updated": "2026-08-04 13:21:36"
+  "updated": "2026-08-05 11:19:33"
 }
