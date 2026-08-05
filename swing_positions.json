@@ -1,5 +1,26 @@
 {
-  "positions": {},
+  "positions": {
+    "278470.KS": {
+      "name": "에이피알",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 354900.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 354900.0,
+          "qty": 5,
+          "time": "2026-08-05 11:21"
+        }
+      ],
+      "exits": [],
+      "avg_price": 354900.0,
+      "opened": "2026-08-05 11:21",
+      "source": "manual",
+      "memo": "삼성증권3주, 미래에셋2주"
+    }
+  },
   "history": [],
-  "updated": "2026-08-05 11:20:32"
+  "updated": "2026-08-05 11:21:05"
 }
