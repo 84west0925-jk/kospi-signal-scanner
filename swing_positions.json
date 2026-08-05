@@ -3,9 +3,9 @@
     "278470.KS": {
       "name": "에이피알",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 354900.0,
-      "first_sell": null,
+      "first_sell": 360000.0,
       "entries": [
         {
           "stage": 1,
@@ -14,7 +14,14 @@
           "time": "2026-08-05 11:21"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 360000.0,
+          "qty": 3,
+          "time": "2026-08-05 14:01"
+        }
+      ],
       "avg_price": 354900.0,
       "opened": "2026-08-05 11:21",
       "source": "manual",
@@ -22,5 +29,5 @@
     }
   },
   "history": [],
-  "updated": "2026-08-05 11:21:05"
+  "updated": "2026-08-05 14:01:56"
 }
