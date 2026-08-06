@@ -1,5 +1,25 @@
 {
-  "positions": {},
+  "positions": {
+    "259960.KS": {
+      "name": "크래프톤",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 229000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 229000.0,
+          "qty": 2,
+          "time": "2026-08-06 15:23"
+        }
+      ],
+      "exits": [],
+      "avg_price": 229000.0,
+      "opened": "2026-08-06 15:23",
+      "source": "manual"
+    }
+  },
   "history": [],
-  "updated": "2026-08-06 15:23:18"
+  "updated": "2026-08-06 15:23:57"
 }
