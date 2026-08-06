@@ -1,31 +1,5 @@
 {
   "positions": {
-    "259960.KS": {
-      "name": "크래프톤",
-      "buy_stage": 2,
-      "sell_stage": 0,
-      "first_buy": 229000.0,
-      "first_sell": null,
-      "entries": [
-        {
-          "stage": 1,
-          "price": 229000.0,
-          "qty": 2,
-          "time": "2026-08-06 09:25"
-        },
-        {
-          "stage": 2,
-          "price": 229000.0,
-          "qty": 2,
-          "time": "2026-08-06 09:35"
-        }
-      ],
-      "exits": [],
-      "avg_price": 229000.0,
-      "opened": "2026-08-06 09:25",
-      "source": "manual",
-      "memo": "RSI371차진입"
-    },
     "278470.KS": {
       "name": "에이피알",
       "buy_stage": 2,
@@ -54,5 +28,5 @@
     }
   },
   "history": [],
-  "updated": "2026-08-06 10:51:47"
+  "updated": "2026-08-06 15:23:10"
 }
