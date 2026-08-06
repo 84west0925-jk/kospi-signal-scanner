@@ -3,7 +3,7 @@ name: KOSPI 단타 RSI 카톡 알림
 on:
   schedule:
     # UTC 기준 — 한국 09:00~15:30 = UTC 00:00~06:30, 30분 간격 (평일)
-    - cron: "0,30 0-6 * * 1-5"
+    - cron: "0,10,20,30,40,50 0-6 * * 1-5"
   workflow_dispatch:        # 수동 실행 버튼
     inputs:
       force:
