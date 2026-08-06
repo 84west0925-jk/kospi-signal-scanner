@@ -57,10 +57,12 @@ def main() -> int:
         print("데이터 없음 — 종료")
         return 0
 
-    # 휴장 판정: 최신 봉 날짜가 오늘이 아니면 장이 열리지 않은 것
+    # 휴장 판정: 최신 '마감봉' 날짜가 오늘이 아니면 장이 열리지 않은 것.
+    # 단, 개장 직후(09:35 이전)에는 오늘 마감된 봉이 아직 없으므로 검사하지 않는다.
     last_day = str(df["시각"].max())[:10]
-    if last_day != now.strftime("%Y-%m-%d") and not FORCE:
-        print(f"최신 봉 {last_day} ≠ 오늘 — 휴장으로 간주, 종료")
+    after_first_close = (now.hour * 60 + now.minute) >= (9 * 60 + 35)
+    if last_day != now.strftime("%Y-%m-%d") and after_first_close and not FORCE:
+        print(f"최신 마감봉 {last_day} ≠ 오늘 — 휴장으로 간주, 종료")
         return 0
 
     print(f"과매도 {int((df['구간']=='과매도').sum())} · 과매수 {int((df['구간']=='과매수').sum())} · "

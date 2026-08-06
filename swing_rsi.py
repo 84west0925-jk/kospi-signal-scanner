@@ -40,6 +40,7 @@ ADD_SELL_STEP_1 = 5.0      # 1차 매도가 대비 %
 ADD_SELL_STEP_2 = 10.0
 HARD_STOP_PCT   = -15.0    # 평단 대비 강제 손절선
 INTERVAL_MAP    = {"30분봉": "30m", "60분봉": "60m"}
+INTERVAL_MIN    = {"15m": 15, "30m": 30, "60m": 60, "90m": 90}
 
 # ── KOSPI 시총 50위 폴백 (FDR 조회 실패 시 사용) ──────────────────────────────
 TOP50_FALLBACK = {
@@ -209,6 +210,24 @@ def build_indicators(df: pd.DataFrame) -> pd.DataFrame:
     d = df.copy()
     d["RSI"] = rsi_wilder(d["Close"])
     d["MA20"] = d["Close"].rolling(20).mean()
+    return d
+
+
+def drop_unclosed(d: pd.DataFrame, interval: str = "30m") -> pd.DataFrame:
+    """진행 중인(아직 마감되지 않은) 마지막 봉을 제거한다.
+
+    yfinance 분봉은 '시작 시각'으로 인덱싱된다. 예를 들어 30분봉 10:00 봉은
+    10:00~10:30 구간이며 10:30이 지나야 확정된다. 확정 전 값으로 신호를 내면
+    가격이 되돌아올 때 알림이 헛신호가 되므로(리페인팅) 잘라낸다."""
+    step = timedelta(minutes=INTERVAL_MIN.get(interval, 30))
+    try:
+        last = d.index[-1]
+        if last.tzinfo is None:
+            last = last.tz_localize("Asia/Seoul")
+        if last + step > datetime.now(KST):
+            return d.iloc[:-1]
+    except Exception:
+        pass
     return d
 
 
@@ -395,10 +414,12 @@ def _cap_kosdaq(alerts: list[dict], limit: int = KOSDAQ_MAX_ALERTS) -> list[dict
 def scan(universe: dict[str, str], interval: str = "30m",
          rsi_buy: float = RSI_BUY, rsi_sell: float = RSI_SELL,
          state: dict | None = None, commit: bool = False,
-         kosdaq_limit: int = KOSDAQ_MAX_ALERTS) -> tuple[pd.DataFrame, list[dict]]:
+         kosdaq_limit: int = KOSDAQ_MAX_ALERTS,
+         closed_only: bool = True) -> tuple[pd.DataFrame, list[dict]]:
     """
     전 종목 RSI 평가 + 액션 도출.
     commit=True 이면 state에 반영 후 저장(알림 봇용). False면 조회만(앱 화면용).
+    closed_only=True 이면 마감된 봉만 사용한다(헛신호 방지). 기본값 권장.
     """
     state = state if state is not None else load_state()
     data = fetch_intraday(list(universe.keys()), interval)
@@ -408,6 +429,8 @@ def scan(universe: dict[str, str], interval: str = "30m",
     for ticker, df in data.items():
         name = universe.get(ticker, ticker)
         d = build_indicators(df)
+        if closed_only:
+            d = drop_unclosed(d, interval)
         if len(d) < 2:
             continue
         price = float(d["Close"].iloc[-1])
@@ -556,6 +579,8 @@ def render(st):
         f"／ 매도: RSI>{rsi_sell:.0f} 시 1/3 → 1차 매도가 +5% → +10% 전량 "
         f"／ 안전장치: 평단 -15% 이탈 시 강제 청산"
     )
+    st.caption("⏱ 신호는 **마감된 봉** 기준으로만 판정합니다. 진행 중인 봉은 값이 계속 바뀌어 "
+               "헛신호가 되므로 제외합니다. 알림 봇은 10분마다 돌며 봉이 마감되는 즉시 감지합니다.")
 
     state = load_state()
     run = st.button("🔍 단타 신호 스캔", type="primary", use_container_width=True)
@@ -565,7 +590,8 @@ def render(st):
                         f"(종목이 많아 30~60초 걸립니다)"):
             universe = get_universe(int(kospi_n), int(kosdaq_n))
             df, alerts = scan(universe, interval, rsi_buy, rsi_sell, state,
-                              commit=False, kosdaq_limit=int(kq_limit))
+                              commit=False, kosdaq_limit=int(kq_limit),
+                              closed_only=True)
         st.session_state["swing_df"] = df
         st.session_state["swing_alerts"] = alerts
         st.session_state["swing_uni"] = universe
