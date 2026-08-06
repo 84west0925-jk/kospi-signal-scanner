@@ -18,6 +18,25 @@
       "avg_price": 229000.0,
       "opened": "2026-08-06 15:23",
       "source": "manual"
+    },
+    "278470.KS": {
+      "name": "에이피알",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 370000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 370000.0,
+          "qty": 2,
+          "time": "2026-08-06 15:28"
+        }
+      ],
+      "exits": [],
+      "avg_price": 370000.0,
+      "opened": "2026-08-06 15:28",
+      "source": "manual"
     }
   },
   "history": [
@@ -36,5 +55,5 @@
       "사유": "수동 매도"
     }
   ],
-  "updated": "2026-08-06 15:25:12"
+  "updated": "2026-08-06 15:28:04"
 }
