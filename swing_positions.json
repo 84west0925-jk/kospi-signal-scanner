@@ -56,6 +56,25 @@
       "avg_price": 91700.0,
       "opened": "2026-08-06 15:28",
       "source": "manual"
+    },
+    "079550.KS": {
+      "name": "LIG디펜스앤에어로스페이스",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 696000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 696000.0,
+          "qty": 1,
+          "time": "2026-08-06 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 696000.0,
+      "opened": "2026-08-06 14:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -74,5 +93,5 @@
       "사유": "수동 매도"
     }
   ],
-  "updated": "2026-08-06 15:28:23"
+  "updated": "2026-08-06 16:09:38"
 }
