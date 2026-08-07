@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# 로컬 생성물 (실행 결과물 — 저장소에 올리지 않음)
+dashboard_*.html
+signal_log.csv
+
+# 비밀값
+.streamlit/secrets.toml
+.env
