@@ -160,6 +160,72 @@ def position_summary(pos: dict, cur_price: float | None) -> dict:
     return row
 
 
+def recalc(pos: dict) -> dict:
+    """entries·exits 를 원본으로 삼아 차수·평단·기준가를 전면 재계산."""
+    entries = sorted(pos.get("entries", []), key=lambda e: str(e.get("time") or ""))
+    exits = sorted(pos.get("exits", []), key=lambda x: str(x.get("time") or ""))
+    for i, e in enumerate(entries, 1):
+        e["stage"] = i
+    for i, x in enumerate(exits, 1):
+        x["stage"] = i
+
+    pos["entries"] = entries
+    pos["exits"] = exits
+    pos["buy_stage"] = min(len(entries), 3)
+    pos["sell_stage"] = min(len(exits), 3)
+    pos["first_buy"] = float(entries[0]["price"]) if entries else None
+    pos["first_sell"] = float(exits[0]["price"]) if exits else None
+    pos["opened"] = entries[0].get("time") if entries else None
+
+    tot_qty = sum(int(e.get("qty", 0)) for e in entries)
+    tot_amt = sum(float(e["price"]) * int(e.get("qty", 0)) for e in entries)
+    pos["avg_price"] = round(tot_amt / tot_qty, 2) if tot_qty else None
+    return pos
+
+
+def held_qty(pos: dict) -> int:
+    return sum(int(e.get("qty", 0)) for e in pos.get("entries", [])) - \
+           sum(int(x.get("qty", 0)) for x in pos.get("exits", []))
+
+
+def archive(state: dict, ticker: str, ts: str, note: str) -> dict:
+    """잔량 0 포지션을 거래 이력으로 이관."""
+    pos = state["positions"][ticker]
+    invested = sum(buy_cost(e["price"], e.get("qty", 0)) for e in pos["entries"])
+    recovered = sum(sell_proceeds(x["price"], x.get("qty", 0)) for x in pos.get("exits", []))
+    state.setdefault("history", []).append({
+        "종목": pos["name"], "코드": ticker.replace(".KS", ""),
+        "진입": (pos.get("opened") or "")[:16], "청산": ts[:16],
+        "분할차수": pos["buy_stage"],
+        "평단": round(pos.get("avg_price") or 0, 1),
+        "총수량": sum(e.get("qty", 0) for e in pos["entries"]),
+        "투입금액": round(invested), "회수금액": round(recovered),
+        "실현손익": round(recovered - invested),
+        "수익률%": round((recovered - invested) / invested * 100, 2) if invested else 0,
+        "사유": note,
+        # 복원용 원본 스냅샷(화면·CSV에는 표시하지 않음)
+        "_ticker": ticker,
+        "_entries": json.loads(json.dumps(pos.get("entries", []), ensure_ascii=False)),
+        "_exits": json.loads(json.dumps(pos.get("exits", []), ensure_ascii=False)),
+        "_source": pos.get("source"),
+        "_memo": pos.get("memo"),
+    })
+    state["positions"].pop(ticker, None)
+    return state
+
+
+HIST_COLS = ["종목", "코드", "진입", "청산", "분할차수", "평단", "총수량",
+             "투입금액", "회수금액", "실현손익", "수익률%", "사유"]
+
+
+def hist_view(history: list[dict]) -> pd.DataFrame:
+    """내부 키(_로 시작)를 제외한 표시용 데이터프레임."""
+    if not history:
+        return pd.DataFrame(columns=HIST_COLS)
+    df = pd.DataFrame(history)
+    return df[[c for c in df.columns if not str(c).startswith("_")]]
+
+
 def close_out(state: dict, ticker: str, price: float, qty: int, ts: str, note: str) -> dict:
     """매도 반영. 잔량 0이면 이력으로 이관."""
     pos = state["positions"][ticker]
@@ -169,23 +235,8 @@ def close_out(state: dict, ticker: str, price: float, qty: int, ts: str, note: s
     if pos["sell_stage"] == 1:
         pos["first_sell"] = price
 
-    held = sum(e.get("qty", 0) for e in pos["entries"]) - \
-           sum(x.get("qty", 0) for x in pos["exits"])
-    if held <= 0:
-        invested = sum(buy_cost(e["price"], e.get("qty", 0)) for e in pos["entries"])
-        recovered = sum(sell_proceeds(x["price"], x.get("qty", 0)) for x in pos["exits"])
-        state["history"].append({
-            "종목": pos["name"], "코드": ticker.replace(".KS", ""),
-            "진입": (pos.get("opened") or "")[:16], "청산": ts[:16],
-            "분할차수": pos["buy_stage"],
-            "평단": round(pos.get("avg_price") or 0, 1),
-            "총수량": sum(e.get("qty", 0) for e in pos["entries"]),
-            "투입금액": round(invested), "회수금액": round(recovered),
-            "실현손익": round(recovered - invested),
-            "수익률%": round((recovered - invested) / invested * 100, 2) if invested else 0,
-            "사유": note,
-        })
-        state["positions"].pop(ticker, None)
+    if held_qty(pos) <= 0:
+        state = archive(state, ticker, ts, note)
     return state
 
 
@@ -216,7 +267,7 @@ def render(st):
 
     # ── 요약 지표 ────────────────────────────────────────────────────────────
     rows = [position_summary(p, prices.get(t)) for t, p in positions.items()]
-    hist = pd.DataFrame(state.get("history", []))
+    hist = hist_view(state.get("history", []))
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("보유 종목", len(positions))
     c2.metric("평가손익", f"{sum(r.get('평가손익', 0) or 0 for r in rows):,.0f}원")
@@ -227,8 +278,8 @@ def render(st):
     else:
         c4.metric("승률", "-")
 
-    tab_hold, tab_add, tab_sell, tab_hist = st.tabs(
-        ["📋 보유 현황", "➕ 매수 등록", "➖ 매도 등록", "📜 거래 이력"])
+    tab_hold, tab_add, tab_sell, tab_edit, tab_hist = st.tabs(
+        ["📋 보유 현황", "➕ 매수 등록", "➖ 매도 등록", "✏️ 거래내역 수정", "📜 거래 이력"])
 
     # ── 보유 현황 ────────────────────────────────────────────────────────────
     with tab_hold:
@@ -322,6 +373,104 @@ def render(st):
                 if ok:
                     st.rerun()
 
+    # ── 거래내역 수정 ────────────────────────────────────────────────────────
+    with tab_edit:
+        if not positions:
+            st.info("수정할 보유 종목이 없습니다.")
+        else:
+            st.caption(
+                "잘못 입력한 매수·매도 건을 직접 고칩니다. 셀을 클릭해 값을 수정하고, "
+                "행을 지우려면 행 왼쪽을 선택한 뒤 휴지통 아이콘을 누르세요. "
+                "저장하면 차수·평단·분할 기준가가 자동 재계산됩니다.")
+
+            emap = {p["name"]: t for t, p in positions.items()}
+            ename = st.selectbox("수정할 종목", list(emap.keys()), key="edit_sel")
+            etkr = emap[ename]
+            epos = positions[etkr]
+
+            num_cfg = {
+                "단가": st.column_config.NumberColumn("단가(원)", min_value=1.0, step=100.0,
+                                                     format="%.1f", required=True),
+                "수량": st.column_config.NumberColumn("수량(주)", min_value=1, step=1,
+                                                     format="%d", required=True),
+                "일시": st.column_config.TextColumn("일시", required=True,
+                                                   help="예: 2026-08-07 09:30"),
+            }
+
+            st.markdown("**매수 내역**")
+            e_df = pd.DataFrame(
+                [{"차수": e.get("stage"), "단가": float(e.get("price", 0)),
+                  "수량": int(e.get("qty", 0)), "일시": str(e.get("time") or "")}
+                 for e in epos.get("entries", [])],
+                columns=["차수", "단가", "수량", "일시"])
+            e_new = st.data_editor(
+                e_df, num_rows="dynamic", use_container_width=True, hide_index=True,
+                disabled=["차수"], key=f"edit_entries_{etkr}", column_config=num_cfg)
+
+            st.markdown("**매도 내역**")
+            x_df = pd.DataFrame(
+                [{"차수": x.get("stage"), "단가": float(x.get("price", 0)),
+                  "수량": int(x.get("qty", 0)), "일시": str(x.get("time") or "")}
+                 for x in epos.get("exits", [])],
+                columns=["차수", "단가", "수량", "일시"])
+            x_new = st.data_editor(
+                x_df, num_rows="dynamic", use_container_width=True, hide_index=True,
+                disabled=["차수"], key=f"edit_exits_{etkr}", column_config=num_cfg)
+
+            def _rows(df) -> tuple[list[dict], list[str]]:
+                out, errs = [], []
+                for i, r in df.iterrows():
+                    price, qty, when = r.get("단가"), r.get("수량"), r.get("일시")
+                    if pd.isna(price) or pd.isna(qty) or not str(when or "").strip():
+                        errs.append(f"{i + 1}행 — 단가·수량·일시를 모두 입력하세요.")
+                        continue
+                    if float(price) <= 0 or int(qty) <= 0:
+                        errs.append(f"{i + 1}행 — 단가와 수량은 0보다 커야 합니다.")
+                        continue
+                    out.append({"price": float(price), "qty": int(qty),
+                                "time": str(when).strip()})
+                return out, errs
+
+            if st.button("💾 수정 내용 저장", type="primary", use_container_width=True,
+                         disabled=not writable(), key="edit_save"):
+                entries, err1 = _rows(e_new)
+                exits, err2 = _rows(x_new)
+                errs = err1 + err2
+
+                buy_q = sum(e["qty"] for e in entries)
+                sell_q = sum(x["qty"] for x in exits)
+                if not entries:
+                    errs.append("매수 내역이 비었습니다. 종목 전체를 지우려면 "
+                                "‘보유 현황 → 오등록 정정’을 쓰세요.")
+                elif sell_q > buy_q:
+                    errs.append(f"매도 수량({sell_q}주)이 매수 수량({buy_q}주)을 초과합니다.")
+
+                if errs:
+                    st.error("\n\n".join(f"· {e}" for e in errs))
+                else:
+                    new_pos = dict(epos)
+                    new_pos["entries"] = entries
+                    new_pos["exits"] = exits
+                    new_pos = recalc(new_pos)
+                    state["positions"][etkr] = new_pos
+
+                    closed = held_qty(new_pos) <= 0
+                    if closed:
+                        last_ts = exits[-1]["time"] if exits else \
+                            datetime.now(sw.KST).strftime("%Y-%m-%d %H:%M")
+                        state = archive(state, etkr, last_ts, "수정 반영 청산")
+
+                    ok, msg = save(state, f"portfolio: {ename} 거래내역 수정")
+                    if ok:
+                        st.success(
+                            f"{ename} 수정 완료 — "
+                            + (f"잔량 0 → 거래 이력으로 이관 · {msg}" if closed else
+                               f"평단 {new_pos['avg_price']:,.0f}원 / 잔량 "
+                               f"{held_qty(new_pos)}주 · {msg}"))
+                        st.rerun()
+                    else:
+                        st.error(msg)
+
     # ── 거래 이력 ────────────────────────────────────────────────────────────
     with tab_hist:
         if hist.empty:
@@ -332,3 +481,100 @@ def render(st):
                                hist.to_csv(index=False).encode("utf-8-sig"),
                                file_name=f"거래이력_{datetime.now(sw.KST):%Y%m%d}.csv",
                                mime="text/csv")
+
+            records = state.get("history", [])
+
+            # ── 이력 수정·삭제 ────────────────────────────────────────────
+            with st.expander("✏️ 이력 수정·삭제"):
+                st.caption(
+                    "실현손익·수익률%는 투입금액·회수금액에서 자동 재계산되므로 직접 고칠 수 없습니다. "
+                    "잘못 들어간 건은 ‘삭제’를 체크하고 저장하세요.")
+
+                h_edit = hist.copy()
+                h_edit.insert(0, "삭제", False)
+                h_new = st.data_editor(
+                    h_edit, num_rows="fixed", use_container_width=True, hide_index=True,
+                    disabled=["실현손익", "수익률%"], key="hist_editor",
+                    column_config={
+                        "삭제": st.column_config.CheckboxColumn("삭제", default=False),
+                        "평단": st.column_config.NumberColumn(format="%.1f"),
+                        "총수량": st.column_config.NumberColumn(format="%d"),
+                        "투입금액": st.column_config.NumberColumn(format="%d"),
+                        "회수금액": st.column_config.NumberColumn(format="%d"),
+                    })
+
+                if st.button("💾 이력 저장", type="primary", use_container_width=True,
+                             disabled=not writable(), key="hist_save"):
+                    errs, kept = [], []
+                    for i, r in h_new.iterrows():
+                        if bool(r.get("삭제")):
+                            continue
+                        inv, rec = r.get("투입금액"), r.get("회수금액")
+                        if pd.isna(inv) or pd.isna(rec) or float(inv) <= 0:
+                            errs.append(f"{i + 1}행 — 투입금액·회수금액을 확인하세요"
+                                        " (투입금액은 0보다 커야 합니다).")
+                            continue
+                        base = dict(records[i])          # 내부 스냅샷 유지
+                        for c in hist.columns:
+                            v = r.get(c)
+                            base[c] = None if pd.isna(v) else (
+                                v.item() if hasattr(v, "item") else v)
+                        base["실현손익"] = round(float(rec) - float(inv))
+                        base["수익률%"] = round((float(rec) - float(inv)) / float(inv) * 100, 2)
+                        kept.append(base)
+
+                    removed = len(records) - len(kept)
+                    if errs:
+                        st.error("\n\n".join(f"· {e}" for e in errs))
+                    else:
+                        state["history"] = kept
+                        ok, msg = save(state, "portfolio: 거래 이력 수정")
+                        if ok:
+                            st.success(f"이력 저장 완료 — 삭제 {removed}건 / 잔여 "
+                                       f"{len(kept)}건 · {msg}")
+                            st.rerun()
+                        else:
+                            st.error(msg)
+
+            # ── 보유 포지션으로 보원 ──────────────────────────────────────
+            with st.expander("↩️ 보유 포지션으로 복원"):
+                st.caption("실수로 청산 처리된 거래를 매수·매도 내역 그대로 되살립니다. "
+                           "보원 후 ‘거래내역 수정’ 탭에서 잘못된 매도 건을 지우세요.")
+                restorable = {
+                    f"{i + 1}. {r.get('종목')} ({r.get('진입','')[:10]} → "
+                    f"{r.get('청산','')[:10]})": i
+                    for i, r in enumerate(records) if r.get("_entries")}
+
+                if not restorable:
+                    st.info("복원 가능한 이력이 없습니다. "
+                            "(이번 업데이트 이후 청산된 거래부터 원본 스냅샷이 보관됩니다.)")
+                else:
+                    rlabel = st.selectbox("복원할 거래", list(restorable.keys()),
+                                          key="hist_restore_sel")
+                    ridx = restorable[rlabel]
+                    rrec = records[ridx]
+                    rtkr = rrec.get("_ticker") or f"{rrec.get('코드','')}.KS"
+                    dup = rtkr in state.get("positions", {})
+                    if dup:
+                        st.warning(f"{rrec.get('종목')}은(는) 이미 보유 중입니다. "
+                                   "복원하면 기존 포지션과 충돌하므로 먼저 정리하세요.", icon="⚠️")
+
+                    if st.button("보원", type="primary", use_container_width=True,
+                                 disabled=not writable() or dup, key="hist_restore_btn"):
+                        pos = sw.new_position(rrec.get("종목"))
+                        pos["entries"] = rrec.get("_entries", [])
+                        pos["exits"] = rrec.get("_exits", [])
+                        if rrec.get("_source"):
+                            pos["source"] = rrec["_source"]
+                        if rrec.get("_memo"):
+                            pos["memo"] = rrec["_memo"]
+                        state.setdefault("positions", {})[rtkr] = recalc(pos)
+                        state["history"] = [r for j, r in enumerate(records) if j != ridx]
+
+                        ok, msg = save(state, f"portfolio: {rrec.get('종목')} 이력 복원")
+                        if ok:
+                            st.success(f"{rrec.get('종목')} 복원 완료 — 잔량 "
+                                       f"{held_qty(pos)}주 · {msg}")
+                            st.rerun()
+                        else:
+                            st.error(msg)
