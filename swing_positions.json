@@ -61,32 +61,26 @@
     },
     "017670.KS": {
       "name": "SK텔레콤",
-      "buy_stage": 3,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 91700.0,
       "first_sell": null,
       "entries": [
         {
-          "stage": 1,
           "price": 91700.0,
           "qty": 5,
-          "time": "2026-08-06 13:38"
+          "time": "2026-08-06 13:38",
+          "stage": 1
         },
         {
-          "stage": 2,
           "price": 86400.0,
           "qty": 5,
-          "time": "2026-08-07 13:51"
-        },
-        {
-          "stage": 3,
-          "price": 378000.0,
-          "qty": 1,
-          "time": "2026-08-07 14:13"
+          "time": "2026-08-07 13:51",
+          "stage": 2
         }
       ],
       "exits": [],
-      "avg_price": 115318.18,
+      "avg_price": 89050.0,
       "opened": "2026-08-06 13:38",
       "source": "manual",
       "memo": "2차매수"
@@ -136,5 +130,5 @@
       "사유": "매도진행"
     }
   ],
-  "updated": "2026-08-07 14:13:27"
+  "updated": "2026-08-07 14:16:52"
 }
