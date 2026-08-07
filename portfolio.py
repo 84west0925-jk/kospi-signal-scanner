@@ -559,7 +559,7 @@ def render(st):
                         st.warning(f"{rrec.get('종목')}은(는) 이미 보유 중입니다. "
                                    "복원하면 기존 포지션과 충돌하므로 먼저 정리하세요.", icon="⚠️")
 
-                    if st.button("보원", type="primary", use_container_width=True,
+                    if st.button("복원", type="primary", use_container_width=True,
                                  disabled=not writable() or dup, key="hist_restore_btn"):
                         pos = sw.new_position(rrec.get("종목"))
                         pos["entries"] = rrec.get("_entries", [])
