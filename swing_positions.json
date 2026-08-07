@@ -76,6 +76,25 @@
       "opened": "2026-08-07 11:19",
       "source": "manual",
       "memo": "RSI28진입"
+    },
+    "214450.KQ": {
+      "name": "파마리서치",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 346000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 346000.0,
+          "qty": 2,
+          "time": "2026-08-07 11:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 346000.0,
+      "opened": "2026-08-07 11:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -122,5 +141,5 @@
       "사유": "수동 매도"
     }
   ],
-  "updated": "2026-08-07 11:19:36"
+  "updated": "2026-08-07 11:54:00"
 }
