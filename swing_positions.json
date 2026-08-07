@@ -79,7 +79,7 @@
     },
     "214450.KQ": {
       "name": "파마리서치",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 346000.0,
       "first_sell": null,
@@ -89,12 +89,19 @@
           "price": 346000.0,
           "qty": 2,
           "time": "2026-08-07 11:00"
+        },
+        {
+          "stage": 2,
+          "price": 336500.0,
+          "qty": 2,
+          "time": "2026-08-07 12:16"
         }
       ],
       "exits": [],
-      "avg_price": 346000.0,
+      "avg_price": 341250.0,
       "opened": "2026-08-07 11:00",
-      "source": "bot"
+      "source": "manual",
+      "memo": "26진입"
     }
   },
   "history": [
@@ -141,5 +148,5 @@
       "사유": "수동 매도"
     }
   ],
-  "updated": "2026-08-07 11:54:00"
+  "updated": "2026-08-07 12:16:47"
 }
