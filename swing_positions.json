@@ -56,6 +56,26 @@
       "avg_price": 491500.0,
       "opened": "2026-08-07 09:41",
       "source": "manual"
+    },
+    "071050.KS": {
+      "name": "한국금융지주",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 188900.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 188900.0,
+          "qty": 3,
+          "time": "2026-08-07 11:19"
+        }
+      ],
+      "exits": [],
+      "avg_price": 188900.0,
+      "opened": "2026-08-07 11:19",
+      "source": "manual",
+      "memo": "RSI28진입"
     }
   },
   "history": [
@@ -102,5 +122,5 @@
       "사유": "수동 매도"
     }
   ],
-  "updated": "2026-08-07 11:19:20"
+  "updated": "2026-08-07 11:19:36"
 }
