@@ -59,25 +59,6 @@
       "source": "manual",
       "memo": "26진입"
     },
-    "005930.KS": {
-      "name": "삼성전자",
-      "buy_stage": 1,
-      "sell_stage": 0,
-      "first_buy": 91700.0,
-      "first_sell": null,
-      "entries": [
-        {
-          "stage": 1,
-          "price": 91700.0,
-          "qty": 5,
-          "time": "2026-08-07 13:35"
-        }
-      ],
-      "exits": [],
-      "avg_price": 91700.0,
-      "opened": "2026-08-07 13:35",
-      "source": "manual"
-    },
     "017670.KS": {
       "name": "SK텔레콤",
       "buy_stage": 1,
@@ -156,5 +137,5 @@
       "사유": "매도진행"
     }
   ],
-  "updated": "2026-08-07 13:38:59"
+  "updated": "2026-08-07 13:39:33"
 }
