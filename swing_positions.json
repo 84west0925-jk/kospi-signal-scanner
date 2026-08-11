@@ -83,6 +83,25 @@
       "avg_price": 192600.0,
       "opened": "2026-08-11 12:00",
       "source": "bot"
+    },
+    "105560.KS": {
+      "name": "KB금융",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 166200.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 166200.0,
+          "qty": 6,
+          "time": "2026-08-11 13:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 166200.0,
+      "opened": "2026-08-11 13:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -162,5 +181,5 @@
       "_memo": "26진입"
     }
   ],
-  "updated": "2026-08-11 12:54:18"
+  "updated": "2026-08-11 14:14:45"
 }
