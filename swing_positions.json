@@ -102,6 +102,25 @@
       "avg_price": 166200.0,
       "opened": "2026-08-11 13:30",
       "source": "bot"
+    },
+    "271560.KS": {
+      "name": "오리온",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 132900.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 132900.0,
+          "qty": 7,
+          "time": "2026-08-12 10:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 132900.0,
+      "opened": "2026-08-12 10:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -181,5 +200,5 @@
       "_memo": "26진입"
     }
   ],
-  "updated": "2026-08-11 14:14:45"
+  "updated": "2026-08-12 11:23:15"
 }
