@@ -65,25 +65,6 @@
       "source": "manual",
       "memo": "2차매수"
     },
-    "097950.KS": {
-      "name": "CJ제일제당",
-      "buy_stage": 1,
-      "sell_stage": 0,
-      "first_buy": 192600.0,
-      "first_sell": null,
-      "entries": [
-        {
-          "stage": 1,
-          "price": 192600.0,
-          "qty": 5,
-          "time": "2026-08-11 12:00"
-        }
-      ],
-      "exits": [],
-      "avg_price": 192600.0,
-      "opened": "2026-08-11 12:00",
-      "source": "bot"
-    },
     "105560.KS": {
       "name": "KB금융",
       "buy_stage": 1,
@@ -200,5 +181,5 @@
       "_memo": "26진입"
     }
   ],
-  "updated": "2026-08-12 11:23:15"
+  "updated": "2026-08-12 19:32:56"
 }
