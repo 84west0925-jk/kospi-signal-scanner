@@ -32,6 +32,25 @@
       "opened": "2026-08-06 13:38",
       "source": "manual",
       "memo": "2차매수"
+    },
+    "033780.KS": {
+      "name": "KT&G",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 175000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 175000.0,
+          "qty": 3,
+          "time": "2026-08-13 13:22"
+        }
+      ],
+      "exits": [],
+      "avg_price": 175000.0,
+      "opened": "2026-08-13 13:22",
+      "source": "manual"
     }
   },
   "history": [
@@ -144,5 +163,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-13 11:24:47"
+  "updated": "2026-08-13 13:22:57"
 }
