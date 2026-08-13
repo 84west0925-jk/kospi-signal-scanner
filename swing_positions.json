@@ -51,6 +51,44 @@
       "avg_price": 175000.0,
       "opened": "2026-08-13 13:22",
       "source": "manual"
+    },
+    "009540.KS": {
+      "name": "HD한국조선해양",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 372500.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 372500.0,
+          "qty": 2,
+          "time": "2026-08-13 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 372500.0,
+      "opened": "2026-08-13 14:30",
+      "source": "bot"
+    },
+    "003490.KS": {
+      "name": "대한항공",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 26000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 26000.0,
+          "qty": 38,
+          "time": "2026-08-13 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 26000.0,
+      "opened": "2026-08-13 14:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -163,5 +201,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-13 13:22:57"
+  "updated": "2026-08-13 15:01:26"
 }
