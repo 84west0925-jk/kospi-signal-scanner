@@ -89,6 +89,25 @@
       "avg_price": 26000.0,
       "opened": "2026-08-13 14:30",
       "source": "bot"
+    },
+    "047050.KS": {
+      "name": "포스코인터내셔널",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 52850.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 52850.0,
+          "qty": 18,
+          "time": "2026-08-14 12:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 52850.0,
+      "opened": "2026-08-14 12:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -201,5 +220,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-13 15:01:26"
+  "updated": "2026-08-14 13:24:41"
 }
