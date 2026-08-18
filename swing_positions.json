@@ -133,6 +133,44 @@
       "avg_price": 80800.0,
       "opened": "2026-08-18 11:00",
       "source": "bot"
+    },
+    "064400.KS": {
+      "name": "LG씨엔에스",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 74800.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 74800.0,
+          "qty": 13,
+          "time": "2026-08-18 13:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 74800.0,
+      "opened": "2026-08-18 13:00",
+      "source": "bot"
+    },
+    "196170.KQ": {
+      "name": "알테오젠",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 303000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 303000.0,
+          "qty": 3,
+          "time": "2026-08-18 13:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 303000.0,
+      "opened": "2026-08-18 13:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -245,5 +283,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-18 11:41:42"
+  "updated": "2026-08-18 13:59:38"
 }
