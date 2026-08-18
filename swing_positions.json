@@ -247,6 +247,158 @@
       "avg_price": 55550.0,
       "opened": "2026-08-18 14:00",
       "source": "bot"
+    },
+    "034020.KS": {
+      "name": "두산에너빌리티",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 77950.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 77950.0,
+          "qty": 12,
+          "time": "2026-08-18 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 77950.0,
+      "opened": "2026-08-18 14:30",
+      "source": "bot"
+    },
+    "015760.KS": {
+      "name": "한국전력",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 32350.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 32350.0,
+          "qty": 30,
+          "time": "2026-08-18 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 32350.0,
+      "opened": "2026-08-18 14:30",
+      "source": "bot"
+    },
+    "047810.KS": {
+      "name": "한국항공우주",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 139200.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 139200.0,
+          "qty": 7,
+          "time": "2026-08-18 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 139200.0,
+      "opened": "2026-08-18 14:30",
+      "source": "bot"
+    },
+    "005940.KS": {
+      "name": "NH투자증권",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 27550.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 27550.0,
+          "qty": 36,
+          "time": "2026-08-18 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 27550.0,
+      "opened": "2026-08-18 14:30",
+      "source": "bot"
+    },
+    "028050.KS": {
+      "name": "삼성E&A",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 47350.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 47350.0,
+          "qty": 21,
+          "time": "2026-08-18 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 47350.0,
+      "opened": "2026-08-18 14:30",
+      "source": "bot"
+    },
+    "352820.KS": {
+      "name": "하이브",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 171100.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 171100.0,
+          "qty": 5,
+          "time": "2026-08-18 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 171100.0,
+      "opened": "2026-08-18 14:30",
+      "source": "bot"
+    },
+    "277810.KQ": {
+      "name": "레인보우로보틱스",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 470500.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 470500.0,
+          "qty": 2,
+          "time": "2026-08-18 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 470500.0,
+      "opened": "2026-08-18 14:30",
+      "source": "bot"
+    },
+    "298380.KQ": {
+      "name": "에이비엘바이오",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 80100.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 80100.0,
+          "qty": 12,
+          "time": "2026-08-18 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 80100.0,
+      "opened": "2026-08-18 14:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -359,5 +511,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-18 14:38:25"
+  "updated": "2026-08-18 15:02:16"
 }
