@@ -171,6 +171,82 @@
       "avg_price": 303000.0,
       "opened": "2026-08-18 13:00",
       "source": "bot"
+    },
+    "035720.KS": {
+      "name": "카카오",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 38150.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 38150.0,
+          "qty": 26,
+          "time": "2026-08-18 14:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 38150.0,
+      "opened": "2026-08-18 14:00",
+      "source": "bot"
+    },
+    "018260.KS": {
+      "name": "삼성에스디에스",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 225000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 225000.0,
+          "qty": 4,
+          "time": "2026-08-18 14:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 225000.0,
+      "opened": "2026-08-18 14:00",
+      "source": "bot"
+    },
+    "016360.KS": {
+      "name": "삼성증권",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 89300.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 89300.0,
+          "qty": 11,
+          "time": "2026-08-18 14:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 89300.0,
+      "opened": "2026-08-18 14:00",
+      "source": "bot"
+    },
+    "011170.KS": {
+      "name": "롯데케미칼",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 55550.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 55550.0,
+          "qty": 18,
+          "time": "2026-08-18 14:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 55550.0,
+      "opened": "2026-08-18 14:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -283,5 +359,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-18 13:59:38"
+  "updated": "2026-08-18 14:38:25"
 }
