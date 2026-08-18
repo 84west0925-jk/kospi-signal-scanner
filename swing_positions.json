@@ -114,6 +114,25 @@
       "avg_price": 52850.0,
       "opened": "2026-08-14 12:30",
       "source": "bot"
+    },
+    "000100.KS": {
+      "name": "유한양행",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 80800.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 80800.0,
+          "qty": 12,
+          "time": "2026-08-18 11:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 80800.0,
+      "opened": "2026-08-18 11:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -226,5 +245,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-14 14:58:44"
+  "updated": "2026-08-18 11:41:42"
 }
