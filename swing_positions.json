@@ -499,6 +499,25 @@
       "avg_price": 278000.0,
       "opened": "2026-08-19 12:00",
       "source": "bot"
+    },
+    "039490.KS": {
+      "name": "키움증권",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 262500.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 262500.0,
+          "qty": 3,
+          "time": "2026-08-19 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 262500.0,
+      "opened": "2026-08-19 14:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -611,5 +630,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-19 14:04:35"
+  "updated": "2026-08-19 15:18:39"
 }
