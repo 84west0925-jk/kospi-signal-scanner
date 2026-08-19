@@ -136,7 +136,7 @@
     },
     "064400.KS": {
       "name": "LG씨엔에스",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 74800.0,
       "first_sell": null,
@@ -146,10 +146,16 @@
           "price": 74800.0,
           "qty": 13,
           "time": "2026-08-18 13:00"
+        },
+        {
+          "stage": 2,
+          "price": 71000.0,
+          "qty": 14,
+          "time": "2026-08-19 12:00"
         }
       ],
       "exits": [],
-      "avg_price": 74800.0,
+      "avg_price": 72829.63,
       "opened": "2026-08-18 13:00",
       "source": "bot"
     },
@@ -269,7 +275,7 @@
     },
     "015760.KS": {
       "name": "한국전력",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 32350.0,
       "first_sell": null,
@@ -279,10 +285,16 @@
           "price": 32350.0,
           "qty": 30,
           "time": "2026-08-18 14:30"
+        },
+        {
+          "stage": 2,
+          "price": 30550.0,
+          "qty": 32,
+          "time": "2026-08-19 12:00"
         }
       ],
       "exits": [],
-      "avg_price": 32350.0,
+      "avg_price": 31420.97,
       "opened": "2026-08-18 14:30",
       "source": "bot"
     },
@@ -462,6 +474,25 @@
       "avg_price": 41300.0,
       "opened": "2026-08-19 11:00",
       "source": "bot"
+    },
+    "032830.KS": {
+      "name": "삼성생명",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 278000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 278000.0,
+          "qty": 3,
+          "time": "2026-08-19 12:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 278000.0,
+      "opened": "2026-08-19 12:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -574,5 +605,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-19 11:43:53"
+  "updated": "2026-08-19 12:34:09"
 }
