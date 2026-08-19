@@ -307,7 +307,7 @@
     },
     "005940.KS": {
       "name": "NH투자증권",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 27550.0,
       "first_sell": null,
@@ -317,10 +317,16 @@
           "price": 27550.0,
           "qty": 36,
           "time": "2026-08-18 14:30"
+        },
+        {
+          "stage": 2,
+          "price": 26050.0,
+          "qty": 38,
+          "time": "2026-08-19 11:00"
         }
       ],
       "exits": [],
-      "avg_price": 27550.0,
+      "avg_price": 26779.73,
       "opened": "2026-08-18 14:30",
       "source": "bot"
     },
@@ -398,6 +404,63 @@
       "exits": [],
       "avg_price": 80100.0,
       "opened": "2026-08-18 14:30",
+      "source": "bot"
+    },
+    "064350.KS": {
+      "name": "현대로템",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 136000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 136000.0,
+          "qty": 7,
+          "time": "2026-08-19 11:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 136000.0,
+      "opened": "2026-08-19 11:00",
+      "source": "bot"
+    },
+    "267270.KS": {
+      "name": "HD건설기계",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 127400.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 127400.0,
+          "qty": 7,
+          "time": "2026-08-19 11:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 127400.0,
+      "opened": "2026-08-19 11:00",
+      "source": "bot"
+    },
+    "377300.KS": {
+      "name": "카카오페이",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 41300.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 41300.0,
+          "qty": 24,
+          "time": "2026-08-19 11:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 41300.0,
+      "opened": "2026-08-19 11:00",
       "source": "bot"
     }
   },
@@ -511,5 +574,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-18 15:02:16"
+  "updated": "2026-08-19 11:43:53"
 }
