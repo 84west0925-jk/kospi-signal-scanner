@@ -518,6 +518,25 @@
       "avg_price": 262500.0,
       "opened": "2026-08-19 14:30",
       "source": "bot"
+    },
+    "036570.KS": {
+      "name": "NC",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 217000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 217000.0,
+          "qty": 4,
+          "time": "2026-08-19 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 217000.0,
+      "opened": "2026-08-19 14:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -630,5 +649,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-19 15:18:39"
+  "updated": "2026-08-19 16:11:43"
 }
