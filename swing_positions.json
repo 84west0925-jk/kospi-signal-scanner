@@ -169,9 +169,9 @@
     "196170.KQ": {
       "name": "알테오젠",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 303000.0,
-      "first_sell": null,
+      "first_sell": 338500.0,
       "entries": [
         {
           "stage": 1,
@@ -180,7 +180,14 @@
           "time": "2026-08-18 13:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 338500.0,
+          "qty": 1,
+          "time": "2026-08-20 14:30"
+        }
+      ],
       "avg_price": 303000.0,
       "opened": "2026-08-18 13:00",
       "source": "bot"
@@ -563,6 +570,25 @@
       "avg_price": 60100.0,
       "opened": "2026-08-20 10:00",
       "source": "bot"
+    },
+    "086790.KS": {
+      "name": "하나금융지주",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 123600.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 123600.0,
+          "qty": 8,
+          "time": "2026-08-20 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 123600.0,
+      "opened": "2026-08-20 14:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -675,5 +701,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-20 14:45:31"
+  "updated": "2026-08-20 15:20:00"
 }
