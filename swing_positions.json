@@ -537,6 +537,25 @@
       "avg_price": 217000.0,
       "opened": "2026-08-19 14:30",
       "source": "bot"
+    },
+    "241560.KS": {
+      "name": "두산밥캣",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 60100.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 60100.0,
+          "qty": 16,
+          "time": "2026-08-20 10:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 60100.0,
+      "opened": "2026-08-20 10:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -649,5 +668,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-19 16:11:43"
+  "updated": "2026-08-20 10:35:31"
 }
