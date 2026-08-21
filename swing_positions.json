@@ -783,6 +783,82 @@
       "avg_price": 70500.0,
       "opened": "2026-08-21 12:00",
       "source": "bot"
+    },
+    "329180.KS": {
+      "name": "HD현대중공업",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 456000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 456000.0,
+          "qty": 2,
+          "time": "2026-08-21 13:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 456000.0,
+      "opened": "2026-08-21 13:00",
+      "source": "bot"
+    },
+    "001440.KS": {
+      "name": "대한전선",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 26650.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 26650.0,
+          "qty": 37,
+          "time": "2026-08-21 13:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 26650.0,
+      "opened": "2026-08-21 13:00",
+      "source": "bot"
+    },
+    "086520.KQ": {
+      "name": "에코프로",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 82700.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 82700.0,
+          "qty": 12,
+          "time": "2026-08-21 13:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 82700.0,
+      "opened": "2026-08-21 13:00",
+      "source": "bot"
+    },
+    "240810.KQ": {
+      "name": "원익IPS",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 105200.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 105200.0,
+          "qty": 9,
+          "time": "2026-08-21 13:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 105200.0,
+      "opened": "2026-08-21 13:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -895,5 +971,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-21 12:54:26"
+  "updated": "2026-08-21 13:44:48"
 }
