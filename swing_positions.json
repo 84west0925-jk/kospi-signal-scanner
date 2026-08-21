@@ -546,9 +546,9 @@
     "032830.KS": {
       "name": "삼성생명",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 278000.0,
-      "first_sell": null,
+      "first_sell": 319000.0,
       "entries": [
         {
           "stage": 1,
@@ -557,7 +557,14 @@
           "time": "2026-08-19 12:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 319000.0,
+          "qty": 1,
+          "time": "2026-08-21 11:00"
+        }
+      ],
       "avg_price": 278000.0,
       "opened": "2026-08-19 12:00",
       "source": "bot"
@@ -825,5 +832,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-21 10:41:04"
+  "updated": "2026-08-21 11:51:59"
 }
