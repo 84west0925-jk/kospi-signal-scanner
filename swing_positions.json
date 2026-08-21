@@ -60,7 +60,7 @@
     },
     "009540.KS": {
       "name": "HD한국조선해양",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 372500.0,
       "first_sell": null,
@@ -70,10 +70,16 @@
           "price": 372500.0,
           "qty": 2,
           "time": "2026-08-13 14:30"
+        },
+        {
+          "stage": 2,
+          "price": 349500.0,
+          "qty": 2,
+          "time": "2026-08-21 10:00"
         }
       ],
       "exits": [],
-      "avg_price": 372500.0,
+      "avg_price": 361000.0,
       "opened": "2026-08-13 14:30",
       "source": "bot"
     },
@@ -98,7 +104,7 @@
     },
     "047050.KS": {
       "name": "포스코인터내셔널",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 52850.0,
       "first_sell": null,
@@ -108,10 +114,16 @@
           "price": 52850.0,
           "qty": 18,
           "time": "2026-08-14 12:30"
+        },
+        {
+          "stage": 2,
+          "price": 49900.0,
+          "qty": 20,
+          "time": "2026-08-21 10:00"
         }
       ],
       "exits": [],
-      "avg_price": 52850.0,
+      "avg_price": 51297.37,
       "opened": "2026-08-14 12:30",
       "source": "bot"
     },
@@ -194,7 +206,7 @@
     },
     "035720.KS": {
       "name": "카카오",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 38150.0,
       "first_sell": null,
@@ -204,10 +216,16 @@
           "price": 38150.0,
           "qty": 26,
           "time": "2026-08-18 14:00"
+        },
+        {
+          "stage": 2,
+          "price": 35900.0,
+          "qty": 27,
+          "time": "2026-08-21 10:00"
         }
       ],
       "exits": [],
-      "avg_price": 38150.0,
+      "avg_price": 37003.77,
       "opened": "2026-08-18 14:00",
       "source": "bot"
     },
@@ -276,7 +294,7 @@
     },
     "034020.KS": {
       "name": "두산에너빌리티",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 77950.0,
       "first_sell": null,
@@ -286,10 +304,16 @@
           "price": 77950.0,
           "qty": 12,
           "time": "2026-08-18 14:30"
+        },
+        {
+          "stage": 2,
+          "price": 73500.0,
+          "qty": 13,
+          "time": "2026-08-21 10:00"
         }
       ],
       "exits": [],
-      "avg_price": 77950.0,
+      "avg_price": 75636.0,
       "opened": "2026-08-18 14:30",
       "source": "bot"
     },
@@ -320,7 +344,7 @@
     },
     "047810.KS": {
       "name": "한국항공우주",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 139200.0,
       "first_sell": null,
@@ -330,10 +354,16 @@
           "price": 139200.0,
           "qty": 7,
           "time": "2026-08-18 14:30"
+        },
+        {
+          "stage": 2,
+          "price": 130700.0,
+          "qty": 7,
+          "time": "2026-08-21 10:00"
         }
       ],
       "exits": [],
-      "avg_price": 139200.0,
+      "avg_price": 134950.0,
       "opened": "2026-08-18 14:30",
       "source": "bot"
     },
@@ -402,7 +432,7 @@
     },
     "277810.KQ": {
       "name": "레인보우로보틱스",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 470500.0,
       "first_sell": null,
@@ -412,16 +442,22 @@
           "price": 470500.0,
           "qty": 2,
           "time": "2026-08-18 14:30"
+        },
+        {
+          "stage": 2,
+          "price": 443000.0,
+          "qty": 2,
+          "time": "2026-08-21 10:00"
         }
       ],
       "exits": [],
-      "avg_price": 470500.0,
+      "avg_price": 456750.0,
       "opened": "2026-08-18 14:30",
       "source": "bot"
     },
     "298380.KQ": {
       "name": "에이비엘바이오",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 80100.0,
       "first_sell": null,
@@ -431,10 +467,16 @@
           "price": 80100.0,
           "qty": 12,
           "time": "2026-08-18 14:30"
+        },
+        {
+          "stage": 2,
+          "price": 75500.0,
+          "qty": 13,
+          "time": "2026-08-21 10:00"
         }
       ],
       "exits": [],
-      "avg_price": 80100.0,
+      "avg_price": 77708.0,
       "opened": "2026-08-18 14:30",
       "source": "bot"
     },
@@ -459,7 +501,7 @@
     },
     "267270.KS": {
       "name": "HD건설기계",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 127400.0,
       "first_sell": null,
@@ -469,10 +511,16 @@
           "price": 127400.0,
           "qty": 7,
           "time": "2026-08-19 11:00"
+        },
+        {
+          "stage": 2,
+          "price": 115900.0,
+          "qty": 8,
+          "time": "2026-08-21 10:00"
         }
       ],
       "exits": [],
-      "avg_price": 127400.0,
+      "avg_price": 121266.67,
       "opened": "2026-08-19 11:00",
       "source": "bot"
     },
@@ -608,6 +656,63 @@
       "avg_price": 101300.0,
       "opened": "2026-08-20 14:30",
       "source": "bot"
+    },
+    "267260.KS": {
+      "name": "HD현대일렉트릭",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 711000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 711000.0,
+          "qty": 1,
+          "time": "2026-08-21 10:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 711000.0,
+      "opened": "2026-08-21 10:00",
+      "source": "bot"
+    },
+    "326030.KS": {
+      "name": "SK바이오팜",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 82400.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 82400.0,
+          "qty": 12,
+          "time": "2026-08-21 10:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 82400.0,
+      "opened": "2026-08-21 10:00",
+      "source": "bot"
+    },
+    "247540.KQ": {
+      "name": "에코프로비엠",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 105900.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 105900.0,
+          "qty": 9,
+          "time": "2026-08-21 10:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 105900.0,
+      "opened": "2026-08-21 10:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -720,5 +825,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-20 16:14:45"
+  "updated": "2026-08-21 10:41:04"
 }
