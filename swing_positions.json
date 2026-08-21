@@ -859,6 +859,25 @@
       "avg_price": 105200.0,
       "opened": "2026-08-21 13:00",
       "source": "bot"
+    },
+    "009830.KS": {
+      "name": "한화솔루션",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 32125.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 32125.0,
+          "qty": 31,
+          "time": "2026-08-21 14:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 32125.0,
+      "opened": "2026-08-21 14:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -971,5 +990,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-21 13:44:48"
+  "updated": "2026-08-21 14:54:43"
 }
