@@ -878,6 +878,25 @@
       "avg_price": 32125.0,
       "opened": "2026-08-21 14:00",
       "source": "bot"
+    },
+    "353200.KS": {
+      "name": "대덕전자",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 104200.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 104200.0,
+          "qty": 9,
+          "time": "2026-08-21 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 104200.0,
+      "opened": "2026-08-21 14:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -990,5 +1009,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-21 14:54:43"
+  "updated": "2026-08-21 15:55:58"
 }
