@@ -206,7 +206,7 @@
     },
     "035720.KS": {
       "name": "카카오",
-      "buy_stage": 2,
+      "buy_stage": 3,
       "sell_stage": 0,
       "first_buy": 38150.0,
       "first_sell": null,
@@ -222,10 +222,16 @@
           "price": 35900.0,
           "qty": 27,
           "time": "2026-08-21 10:00"
+        },
+        {
+          "stage": 3,
+          "price": 34250.0,
+          "qty": 29,
+          "time": "2026-08-21 12:00"
         }
       ],
       "exits": [],
-      "avg_price": 37003.77,
+      "avg_price": 36029.88,
       "opened": "2026-08-18 14:00",
       "source": "bot"
     },
@@ -720,6 +726,63 @@
       "avg_price": 105900.0,
       "opened": "2026-08-21 10:00",
       "source": "bot"
+    },
+    "042660.KS": {
+      "name": "한화오션",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 84000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 84000.0,
+          "qty": 11,
+          "time": "2026-08-21 12:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 84000.0,
+      "opened": "2026-08-21 12:00",
+      "source": "bot"
+    },
+    "011070.KS": {
+      "name": "LG이노텍",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 554000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 554000.0,
+          "qty": 1,
+          "time": "2026-08-21 12:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 554000.0,
+      "opened": "2026-08-21 12:00",
+      "source": "bot"
+    },
+    "272210.KS": {
+      "name": "한화시스템",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 70500.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 70500.0,
+          "qty": 14,
+          "time": "2026-08-21 12:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 70500.0,
+      "opened": "2026-08-21 12:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -832,5 +895,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-21 11:51:59"
+  "updated": "2026-08-21 12:54:26"
 }
