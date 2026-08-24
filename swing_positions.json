@@ -400,7 +400,7 @@
     },
     "028050.KS": {
       "name": "삼성E&A",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 47350.0,
       "first_sell": null,
@@ -410,10 +410,16 @@
           "price": 47350.0,
           "qty": 21,
           "time": "2026-08-18 14:30"
+        },
+        {
+          "stage": 2,
+          "price": 44850.0,
+          "qty": 22,
+          "time": "2026-08-24 10:00"
         }
       ],
       "exits": [],
-      "avg_price": 47350.0,
+      "avg_price": 46070.93,
       "opened": "2026-08-18 14:30",
       "source": "bot"
     },
@@ -533,9 +539,9 @@
     "377300.KS": {
       "name": "카카오페이",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 41300.0,
-      "first_sell": null,
+      "first_sell": 46500.0,
       "entries": [
         {
           "stage": 1,
@@ -544,7 +550,14 @@
           "time": "2026-08-19 11:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 46500.0,
+          "qty": 8,
+          "time": "2026-08-24 10:00"
+        }
+      ],
       "avg_price": 41300.0,
       "opened": "2026-08-19 11:00",
       "source": "bot"
@@ -1009,5 +1022,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-21 15:55:58"
+  "updated": "2026-08-24 10:41:45"
 }
