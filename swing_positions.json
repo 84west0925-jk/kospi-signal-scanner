@@ -1,44 +1,5 @@
 {
   "positions": {
-    "017670.KS": {
-      "name": "SK텔레콤",
-      "buy_stage": 2,
-      "sell_stage": 2,
-      "first_buy": 91700.0,
-      "first_sell": 94900.0,
-      "entries": [
-        {
-          "price": 91700.0,
-          "qty": 5,
-          "time": "2026-08-06 13:38",
-          "stage": 1
-        },
-        {
-          "price": 86400.0,
-          "qty": 5,
-          "time": "2026-08-07 13:51",
-          "stage": 2
-        }
-      ],
-      "exits": [
-        {
-          "stage": 1,
-          "price": 94900.0,
-          "qty": 3,
-          "time": "2026-08-13 10:30"
-        },
-        {
-          "stage": 2,
-          "price": 100000.0,
-          "qty": 3,
-          "time": "2026-08-14 14:00"
-        }
-      ],
-      "avg_price": 89050.0,
-      "opened": "2026-08-06 13:38",
-      "source": "manual",
-      "memo": "2차매수"
-    },
     "033780.KS": {
       "name": "KT&G",
       "buy_stage": 1,
@@ -1039,7 +1000,17 @@
       ],
       "_source": "manual",
       "_memo": "RSI28진입"
+    },
+    {
+      "ticker": "017670.KS",
+      "name": "SK텔레콤",
+      "opened": "2026-08-06 13:38",
+      "closed": "2026-08-24 13:00",
+      "avg_buy": 89050.0,
+      "last_sell": 104800.0,
+      "pnl_pct": 17.69,
+      "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-08-24 12:58:42"
+  "updated": "2026-08-24 13:55:45"
 }
