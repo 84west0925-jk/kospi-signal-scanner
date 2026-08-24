@@ -910,6 +910,25 @@
       "avg_price": 104200.0,
       "opened": "2026-08-21 14:30",
       "source": "bot"
+    },
+    "047040.KS": {
+      "name": "대우건설",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 15560.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 15560.0,
+          "qty": 64,
+          "time": "2026-08-24 12:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 15560.0,
+      "opened": "2026-08-24 12:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -1022,5 +1041,5 @@
       "_memo": "RSI28진입"
     }
   ],
-  "updated": "2026-08-24 10:41:45"
+  "updated": "2026-08-24 12:58:42"
 }
