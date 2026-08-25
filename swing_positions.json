@@ -890,6 +890,63 @@
       "avg_price": 15560.0,
       "opened": "2026-08-24 12:00",
       "source": "bot"
+    },
+    "005930.KS": {
+      "name": "삼성전자",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 248500.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 248500.0,
+          "qty": 4,
+          "time": "2026-08-25 10:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 248500.0,
+      "opened": "2026-08-25 10:00",
+      "source": "bot"
+    },
+    "000660.KS": {
+      "name": "SK하이닉스",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 1572000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 1572000.0,
+          "qty": 0,
+          "time": "2026-08-25 10:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 1572000.0,
+      "opened": "2026-08-25 10:00",
+      "source": "bot"
+    },
+    "000150.KS": {
+      "name": "두산",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 1035000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 1035000.0,
+          "qty": 0,
+          "time": "2026-08-25 10:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 1035000.0,
+      "opened": "2026-08-25 10:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -1012,5 +1069,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-08-24 13:55:45"
+  "updated": "2026-08-25 10:36:45"
 }
