@@ -3,9 +3,9 @@
     "033780.KS": {
       "name": "KT&G",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 175000.0,
-      "first_sell": null,
+      "first_sell": 175900.0,
       "entries": [
         {
           "stage": 1,
@@ -14,7 +14,14 @@
           "time": "2026-08-13 13:22"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 175900.0,
+          "qty": 1,
+          "time": "2026-08-25 11:00"
+        }
+      ],
       "avg_price": 175000.0,
       "opened": "2026-08-13 13:22",
       "source": "manual"
@@ -609,9 +616,9 @@
     "086790.KS": {
       "name": "하나금융지주",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 123600.0,
-      "first_sell": null,
+      "first_sell": 131600.0,
       "entries": [
         {
           "stage": 1,
@@ -620,7 +627,14 @@
           "time": "2026-08-20 14:30"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 131600.0,
+          "qty": 2,
+          "time": "2026-08-25 11:00"
+        }
+      ],
       "avg_price": 123600.0,
       "opened": "2026-08-20 14:30",
       "source": "bot"
@@ -628,9 +642,9 @@
     "055550.KS": {
       "name": "신한지주",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 101300.0,
-      "first_sell": null,
+      "first_sell": 107100.0,
       "entries": [
         {
           "stage": 1,
@@ -639,7 +653,14 @@
           "time": "2026-08-20 14:30"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 107100.0,
+          "qty": 3,
+          "time": "2026-08-25 11:00"
+        }
+      ],
       "avg_price": 101300.0,
       "opened": "2026-08-20 14:30",
       "source": "bot"
@@ -875,9 +896,9 @@
     "047040.KS": {
       "name": "대우건설",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 15560.0,
-      "first_sell": null,
+      "first_sell": 16940.0,
       "entries": [
         {
           "stage": 1,
@@ -886,7 +907,14 @@
           "time": "2026-08-24 12:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 16940.0,
+          "qty": 21,
+          "time": "2026-08-25 11:00"
+        }
+      ],
       "avg_price": 15560.0,
       "opened": "2026-08-24 12:00",
       "source": "bot"
@@ -1069,5 +1097,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-08-25 10:36:45"
+  "updated": "2026-08-25 11:44:43"
 }
