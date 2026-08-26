@@ -984,6 +984,25 @@
       "avg_price": 1035000.0,
       "opened": "2026-08-25 10:00",
       "source": "bot"
+    },
+    "012330.KS": {
+      "name": "현대모비스",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 466500.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 466500.0,
+          "qty": 2,
+          "time": "2026-08-26 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 466500.0,
+      "opened": "2026-08-26 14:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -1116,5 +1135,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-08-26 13:49:31"
+  "updated": "2026-08-26 16:06:54"
 }
