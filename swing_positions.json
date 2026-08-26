@@ -401,9 +401,9 @@
     "352820.KS": {
       "name": "하이브",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 171100.0,
-      "first_sell": null,
+      "first_sell": 181100.0,
       "entries": [
         {
           "stage": 1,
@@ -412,7 +412,14 @@
           "time": "2026-08-18 14:30"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 181100.0,
+          "qty": 1,
+          "time": "2026-08-26 13:00"
+        }
+      ],
       "avg_price": 171100.0,
       "opened": "2026-08-18 14:30",
       "source": "bot"
@@ -1109,5 +1116,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-08-26 12:56:59"
+  "updated": "2026-08-26 13:49:31"
 }
