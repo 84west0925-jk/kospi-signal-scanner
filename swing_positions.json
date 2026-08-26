@@ -369,9 +369,9 @@
     "028050.KS": {
       "name": "삼성E&A",
       "buy_stage": 2,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 47350.0,
-      "first_sell": null,
+      "first_sell": 47750.0,
       "entries": [
         {
           "stage": 1,
@@ -386,7 +386,14 @@
           "time": "2026-08-24 10:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 47750.0,
+          "qty": 14,
+          "time": "2026-08-26 10:00"
+        }
+      ],
       "avg_price": 46070.93,
       "opened": "2026-08-18 14:30",
       "source": "bot"
@@ -482,9 +489,9 @@
     "267270.KS": {
       "name": "HD건설기계",
       "buy_stage": 2,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 127400.0,
-      "first_sell": null,
+      "first_sell": 135900.0,
       "entries": [
         {
           "stage": 1,
@@ -499,7 +506,14 @@
           "time": "2026-08-21 10:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 135900.0,
+          "qty": 5,
+          "time": "2026-08-26 10:00"
+        }
+      ],
       "avg_price": 121266.67,
       "opened": "2026-08-19 11:00",
       "source": "bot"
@@ -896,7 +910,7 @@
     "047040.KS": {
       "name": "대우건설",
       "buy_stage": 1,
-      "sell_stage": 1,
+      "sell_stage": 2,
       "first_buy": 15560.0,
       "first_sell": 16940.0,
       "entries": [
@@ -913,6 +927,12 @@
           "price": 16940.0,
           "qty": 21,
           "time": "2026-08-25 11:00"
+        },
+        {
+          "stage": 2,
+          "price": 19040.0,
+          "qty": 21,
+          "time": "2026-08-26 10:00"
         }
       ],
       "avg_price": 15560.0,
@@ -1097,5 +1117,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-08-25 11:44:43"
+  "updated": "2026-08-26 10:41:22"
 }
