@@ -369,7 +369,7 @@
     "028050.KS": {
       "name": "삼성E&A",
       "buy_stage": 2,
-      "sell_stage": 1,
+      "sell_stage": 2,
       "first_buy": 47350.0,
       "first_sell": 47750.0,
       "entries": [
@@ -392,6 +392,12 @@
           "price": 47750.0,
           "qty": 14,
           "time": "2026-08-26 10:00"
+        },
+        {
+          "stage": 2,
+          "price": 50200.0,
+          "qty": 14,
+          "time": "2026-08-27 14:30"
         }
       ],
       "avg_price": 46070.93,
@@ -689,9 +695,9 @@
     "267260.KS": {
       "name": "HD현대일렉트릭",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 711000.0,
-      "first_sell": null,
+      "first_sell": 818000.0,
       "entries": [
         {
           "stage": 1,
@@ -700,7 +706,14 @@
           "time": "2026-08-21 10:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 818000.0,
+          "qty": 0,
+          "time": "2026-08-27 14:30"
+        }
+      ],
       "avg_price": 711000.0,
       "opened": "2026-08-21 10:00",
       "source": "bot"
@@ -753,9 +766,9 @@
     "042660.KS": {
       "name": "한화오션",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 84000.0,
-      "first_sell": null,
+      "first_sell": 89200.0,
       "entries": [
         {
           "stage": 1,
@@ -764,7 +777,14 @@
           "time": "2026-08-21 12:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 89200.0,
+          "qty": 3,
+          "time": "2026-08-27 14:30"
+        }
+      ],
       "avg_price": 84000.0,
       "opened": "2026-08-21 12:00",
       "source": "bot"
@@ -1003,6 +1023,25 @@
       "avg_price": 466500.0,
       "opened": "2026-08-26 14:30",
       "source": "bot"
+    },
+    "028300.KQ": {
+      "name": "HLB",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 35350.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 35350.0,
+          "qty": 28,
+          "time": "2026-08-27 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 35350.0,
+      "opened": "2026-08-27 14:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -1135,5 +1174,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-08-26 16:06:54"
+  "updated": "2026-08-27 17:35:39"
 }
