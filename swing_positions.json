@@ -124,9 +124,9 @@
     "064400.KS": {
       "name": "LG씨엔에스",
       "buy_stage": 2,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 74800.0,
-      "first_sell": null,
+      "first_sell": 77100.0,
       "entries": [
         {
           "stage": 1,
@@ -141,7 +141,14 @@
           "time": "2026-08-19 12:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 77100.0,
+          "qty": 9,
+          "time": "2026-08-31 13:00"
+        }
+      ],
       "avg_price": 72829.63,
       "opened": "2026-08-18 13:00",
       "source": "bot"
@@ -1180,5 +1187,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-08-28 19:48:15"
+  "updated": "2026-08-31 13:52:19"
 }
