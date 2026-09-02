@@ -1097,6 +1097,63 @@
       "avg_price": 35350.0,
       "opened": "2026-08-27 14:30",
       "source": "bot"
+    },
+    "373220.KS": {
+      "name": "LG에너지솔루션",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 348000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 348000.0,
+          "qty": 2,
+          "time": "2026-09-02 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 348000.0,
+      "opened": "2026-09-02 14:30",
+      "source": "bot"
+    },
+    "298040.KS": {
+      "name": "효성중공업",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 2781000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 2781000.0,
+          "qty": 0,
+          "time": "2026-09-02 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 2781000.0,
+      "opened": "2026-09-02 14:30",
+      "source": "bot"
+    },
+    "029780.KS": {
+      "name": "삼성카드",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 45300.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 45300.0,
+          "qty": 22,
+          "time": "2026-09-02 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 45300.0,
+      "opened": "2026-09-02 14:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -1229,5 +1286,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-02 12:54:27"
+  "updated": "2026-09-02 17:39:57"
 }
