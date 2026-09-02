@@ -28,7 +28,7 @@
     },
     "009540.KS": {
       "name": "HD한국조선해양",
-      "buy_stage": 2,
+      "buy_stage": 3,
       "sell_stage": 0,
       "first_buy": 372500.0,
       "first_sell": null,
@@ -44,10 +44,16 @@
           "price": 349500.0,
           "qty": 2,
           "time": "2026-08-21 10:00"
+        },
+        {
+          "stage": 3,
+          "price": 331500.0,
+          "qty": 3,
+          "time": "2026-09-02 12:00"
         }
       ],
       "exits": [],
-      "avg_price": 361000.0,
+      "avg_price": 348357.14,
       "opened": "2026-08-13 14:30",
       "source": "bot"
     },
@@ -325,7 +331,7 @@
     },
     "047810.KS": {
       "name": "한국항공우주",
-      "buy_stage": 2,
+      "buy_stage": 3,
       "sell_stage": 0,
       "first_buy": 139200.0,
       "first_sell": null,
@@ -341,10 +347,16 @@
           "price": 130700.0,
           "qty": 7,
           "time": "2026-08-21 10:00"
+        },
+        {
+          "stage": 3,
+          "price": 122300.0,
+          "qty": 8,
+          "time": "2026-09-02 12:00"
         }
       ],
       "exits": [],
-      "avg_price": 134950.0,
+      "avg_price": 130350.0,
       "opened": "2026-08-18 14:30",
       "source": "bot"
     },
@@ -489,7 +501,7 @@
     },
     "064350.KS": {
       "name": "현대로템",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 136000.0,
       "first_sell": null,
@@ -499,10 +511,16 @@
           "price": 136000.0,
           "qty": 7,
           "time": "2026-08-19 11:00"
+        },
+        {
+          "stage": 2,
+          "price": 124200.0,
+          "qty": 8,
+          "time": "2026-09-02 12:00"
         }
       ],
       "exits": [],
-      "avg_price": 136000.0,
+      "avg_price": 129706.67,
       "opened": "2026-08-19 11:00",
       "source": "bot"
     },
@@ -836,7 +854,7 @@
     },
     "329180.KS": {
       "name": "HD현대중공업",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 456000.0,
       "first_sell": null,
@@ -846,10 +864,16 @@
           "price": 456000.0,
           "qty": 2,
           "time": "2026-08-21 13:00"
+        },
+        {
+          "stage": 2,
+          "price": 427500.0,
+          "qty": 2,
+          "time": "2026-09-02 12:00"
         }
       ],
       "exits": [],
-      "avg_price": 456000.0,
+      "avg_price": 441750.0,
       "opened": "2026-08-21 13:00",
       "source": "bot"
     },
@@ -912,7 +936,7 @@
     },
     "009830.KS": {
       "name": "한화솔루션",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 32125.0,
       "first_sell": null,
@@ -922,10 +946,16 @@
           "price": 32125.0,
           "qty": 31,
           "time": "2026-08-21 14:00"
+        },
+        {
+          "stage": 2,
+          "price": 30200.0,
+          "qty": 33,
+          "time": "2026-09-02 12:00"
         }
       ],
       "exits": [],
-      "avg_price": 32125.0,
+      "avg_price": 31132.42,
       "opened": "2026-08-21 14:00",
       "source": "bot"
     },
@@ -1020,7 +1050,7 @@
     },
     "012330.KS": {
       "name": "현대모비스",
-      "buy_stage": 2,
+      "buy_stage": 3,
       "sell_stage": 0,
       "first_buy": 466500.0,
       "first_sell": null,
@@ -1036,10 +1066,16 @@
           "price": 441500.0,
           "qty": 2,
           "time": "2026-09-01 13:00"
+        },
+        {
+          "stage": 3,
+          "price": 416500.0,
+          "qty": 2,
+          "time": "2026-09-02 12:00"
         }
       ],
       "exits": [],
-      "avg_price": 454000.0,
+      "avg_price": 441500.0,
       "opened": "2026-08-26 14:30",
       "source": "bot"
     },
@@ -1193,5 +1229,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-01 13:31:24"
+  "updated": "2026-09-02 12:54:27"
 }
