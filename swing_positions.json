@@ -668,7 +668,7 @@
     "086790.KS": {
       "name": "하나금융지주",
       "buy_stage": 1,
-      "sell_stage": 1,
+      "sell_stage": 2,
       "first_buy": 123600.0,
       "first_sell": 131600.0,
       "entries": [
@@ -685,6 +685,12 @@
           "price": 131600.0,
           "qty": 2,
           "time": "2026-08-25 11:00"
+        },
+        {
+          "stage": 2,
+          "price": 140500.0,
+          "qty": 3,
+          "time": "2026-09-03 12:00"
         }
       ],
       "avg_price": 123600.0,
@@ -694,7 +700,7 @@
     "055550.KS": {
       "name": "신한지주",
       "buy_stage": 1,
-      "sell_stage": 1,
+      "sell_stage": 2,
       "first_buy": 101300.0,
       "first_sell": 107100.0,
       "entries": [
@@ -711,6 +717,12 @@
           "price": 107100.0,
           "qty": 3,
           "time": "2026-08-25 11:00"
+        },
+        {
+          "stage": 2,
+          "price": 114800.0,
+          "qty": 3,
+          "time": "2026-09-03 12:00"
         }
       ],
       "avg_price": 101300.0,
@@ -1081,7 +1093,7 @@
     },
     "028300.KQ": {
       "name": "HLB",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 35350.0,
       "first_sell": null,
@@ -1091,10 +1103,16 @@
           "price": 35350.0,
           "qty": 28,
           "time": "2026-08-27 14:30"
+        },
+        {
+          "stage": 2,
+          "price": 33350.0,
+          "qty": 29,
+          "time": "2026-09-03 12:00"
         }
       ],
       "exits": [],
-      "avg_price": 35350.0,
+      "avg_price": 34332.46,
       "opened": "2026-08-27 14:30",
       "source": "bot"
     },
@@ -1153,6 +1171,44 @@
       "exits": [],
       "avg_price": 45300.0,
       "opened": "2026-09-02 14:30",
+      "source": "bot"
+    },
+    "278470.KS": {
+      "name": "에이피알",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 413500.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 413500.0,
+          "qty": 2,
+          "time": "2026-09-03 12:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 413500.0,
+      "opened": "2026-09-03 12:00",
+      "source": "bot"
+    },
+    "003230.KS": {
+      "name": "삼양식품",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 1440000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 1440000.0,
+          "qty": 0,
+          "time": "2026-09-03 12:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 1440000.0,
+      "opened": "2026-09-03 12:00",
       "source": "bot"
     }
   },
@@ -1286,5 +1342,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-02 17:39:57"
+  "updated": "2026-09-03 12:53:08"
 }
