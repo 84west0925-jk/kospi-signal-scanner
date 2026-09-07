@@ -295,9 +295,9 @@
     "034020.KS": {
       "name": "두산에너빌리티",
       "buy_stage": 2,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 77950.0,
-      "first_sell": null,
+      "first_sell": 84900.0,
       "entries": [
         {
           "stage": 1,
@@ -312,7 +312,14 @@
           "time": "2026-08-21 10:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 84900.0,
+          "qty": 8,
+          "time": "2026-09-07 12:00"
+        }
+      ],
       "avg_price": 75636.0,
       "opened": "2026-08-18 14:30",
       "source": "bot"
@@ -1194,7 +1201,7 @@
     },
     "278470.KS": {
       "name": "에이피알",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 413500.0,
       "first_sell": null,
@@ -1204,16 +1211,22 @@
           "price": 413500.0,
           "qty": 2,
           "time": "2026-09-03 12:00"
+        },
+        {
+          "stage": 2,
+          "price": 388000.0,
+          "qty": 2,
+          "time": "2026-09-07 12:00"
         }
       ],
       "exits": [],
-      "avg_price": 413500.0,
+      "avg_price": 400750.0,
       "opened": "2026-09-03 12:00",
       "source": "bot"
     },
     "003230.KS": {
       "name": "삼양식품",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 1440000.0,
       "first_sell": null,
@@ -1223,10 +1236,16 @@
           "price": 1440000.0,
           "qty": 0,
           "time": "2026-09-03 12:00"
+        },
+        {
+          "stage": 2,
+          "price": 1332000.0,
+          "qty": 0,
+          "time": "2026-09-07 12:00"
         }
       ],
       "exits": [],
-      "avg_price": 1440000.0,
+      "avg_price": 1386000.0,
       "opened": "2026-09-03 12:00",
       "source": "bot"
     }
@@ -1361,5 +1380,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-04 12:55:31"
+  "updated": "2026-09-07 12:57:09"
 }
