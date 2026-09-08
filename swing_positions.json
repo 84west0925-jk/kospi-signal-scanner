@@ -333,9 +333,9 @@
     "015760.KS": {
       "name": "한국전력",
       "buy_stage": 2,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 32350.0,
-      "first_sell": null,
+      "first_sell": 33650.0,
       "entries": [
         {
           "stage": 1,
@@ -350,7 +350,14 @@
           "time": "2026-08-19 12:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 33650.0,
+          "qty": 20,
+          "time": "2026-09-08 10:00"
+        }
+      ],
       "avg_price": 31420.97,
       "opened": "2026-08-18 14:30",
       "source": "bot"
@@ -1421,5 +1428,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-08 10:20:50"
+  "updated": "2026-09-08 10:30:54"
 }
