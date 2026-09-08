@@ -26,6 +26,7 @@ import smart_money
 import smart_radar
 import swing_rsi
 import portfolio
+import rotation
 
 # ── 파라미터 ──────────────────────────────────────────────────────────────────
 STOP_LOSS_PCT      = -3.0
@@ -482,9 +483,9 @@ st.set_page_config(
 )
 
 # ── 메인 탭 ───────────────────────────────────────────────────────────────────
-tab_scanner, tab_swing, tab_folio, tab_smart, tab_radar = st.tabs(
+tab_scanner, tab_swing, tab_folio, tab_smart, tab_radar, tab_rotation = st.tabs(
     ["🔍 매매 신호 스캐너", "⚡ 단타 RSI 3분할", "💼 보유 종목 추적",
-     "📊 Smart Money Dashboard", "🎯 Smart Money Radar"])
+     "📊 Smart Money Dashboard", "🎯 Smart Money Radar", "🔄 테마 로테이션 지도"])
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 탭 2 — 단타 RSI 3분할 (swing_rsi.py)
@@ -765,3 +766,9 @@ with tab_smart:
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_radar:
     smart_radar.render()
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 탭 6 — 테마 로테이션 지도 (rotation.py)
+# ══════════════════════════════════════════════════════════════════════════════
+with tab_rotation:
+    rotation.render()
