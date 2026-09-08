@@ -7,6 +7,7 @@
 - 3차: 키워드 기반 테마 부여
 목표: '기타' 비중 3% 미만, 대표 섹터 1개 + 연관 테마 최대 2개
 """
+import os
 import re
 from concurrent.futures import ThreadPoolExecutor
 
@@ -18,6 +19,34 @@ NAVER_HDR = {
     "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"),
 }
+
+# ── (신규) 레거시 인포스탁 테마 마스터 — 최우선 소스 ──────
+# legacy_theme_classifier.py가 생성하는 data/themes/stock_theme_master.csv.
+# GitHub Actions로 매일 자동 갱신되며, 존재하면 이 매핑을 최우선으로 사용하고
+# 없거나 해당 종목이 없으면 아래 기존 업종/큐레이션 로직으로 자동 폴백한다.
+LEGACY_THEME_MASTER_CSV = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "data", "themes", "stock_theme_master.csv"
+)
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _load_legacy_theme_master() -> dict:
+    """{종목코드: (big_theme, [primary_theme, secondary_theme_1, ...])} — 없으면 빈 dict."""
+    if not os.path.exists(LEGACY_THEME_MASTER_CSV):
+        return {}
+    try:
+        df = pd.read_csv(LEGACY_THEME_MASTER_CSV, dtype=str).fillna("")
+    except Exception:
+        return {}
+    out = {}
+    for _, r in df.iterrows():
+        code = r.get("code", "")
+        big = r.get("big_theme", "")
+        if not code or not big:
+            continue
+        related = [t for t in [r.get("primary_theme", ""), r.get("secondary_theme_1", ""),
+                               r.get("secondary_theme_2", "")] if t]
+        out[code] = (big, related[:2])
+    return out
 
 # ── KRX 업종명 → 대표 섹터 매핑 (contains 매칭) ───────
 INDUSTRY_TO_SECTOR = {
@@ -379,8 +408,18 @@ def _industry_to_sector(industry: str) -> str:
             return sec
     return industry  # 매핑 없으면 업종명 그대로 (기타 방지)
 
-def classify(code: str, name: str, ind_map: dict):
-    """→ (대표섹터, [연관테마 최대 2개])"""
+def classify(code: str, name: str, ind_map: dict, legacy_map: dict = None):
+    """→ (대표섹터, [연관테마 최대 2개])
+    0) 레거시 인포스탁 테마 마스터(최우선, data/themes/stock_theme_master.csv)
+    1) 수동 큐레이션
+    2) 업종 기반
+    3) 키워드 테마
+    """
+    # 0) 레거시 테마 마스터 최우선
+    if legacy_map and code in legacy_map:
+        big, related = legacy_map[code]
+        return big, related[:2]
+
     # 1) 수동 큐레이션 우선
     if name in STOCK_THEMES:
         sec, themes = STOCK_THEMES[name]
@@ -415,9 +454,10 @@ def classify(code: str, name: str, ind_map: dict):
 def attach_sectors(df: pd.DataFrame) -> pd.DataFrame:
     """종목 DataFrame에 '섹터'(대표) · '테마'(연관, '·' 구분) 컬럼 부여"""
     ind_map = load_industry_map()
+    legacy_map = _load_legacy_theme_master()
     secs, themes = [], []
     for _, row in df.iterrows():
-        s, t = classify(row["종목코드"], row["종목명"], ind_map)
+        s, t = classify(row["종목코드"], row["종목명"], ind_map, legacy_map)
         secs.append(s)
         themes.append(" · ".join(t) if t else "")
     df = df.copy()
