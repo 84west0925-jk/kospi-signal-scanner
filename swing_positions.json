@@ -251,9 +251,9 @@
     "016360.KS": {
       "name": "삼성증권",
       "buy_stage": 2,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 89300.0,
-      "first_sell": null,
+      "first_sell": 88800.0,
       "entries": [
         {
           "stage": 1,
@@ -268,7 +268,14 @@
           "time": "2026-08-19 13:30"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 88800.0,
+          "qty": 7,
+          "time": "2026-09-08 10:30"
+        }
+      ],
       "avg_price": 87000.0,
       "opened": "2026-08-18 14:00",
       "source": "bot"
@@ -1447,5 +1454,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-08 11:01:04"
+  "updated": "2026-09-08 11:21:02"
 }
