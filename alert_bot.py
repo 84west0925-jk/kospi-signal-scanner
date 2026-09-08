@@ -17,7 +17,7 @@ import sys
 from datetime import datetime
 
 import swing_rsi as sw
-from kakao_notify import send_text, get_access_token
+from kakao_notify import send_text
 
 INTERVAL = os.getenv("INTERVAL", "30m")
 RSI_BUY = float(os.getenv("RSI_BUY", sw.RSI_BUY))
@@ -36,10 +36,10 @@ def main() -> int:
     print(f"=== 단타 RSI 스캔 {now:%Y-%m-%d %H:%M} KST / {INTERVAL} ===")
 
     if TEST:
-        print("[TEST 모드] 카카오 연결 테스트 메시지 발송")
+        print("[TEST 모드] 알림 채널 연결 테스트 메시지 발송")
         ok = send_text(f"✅ 알림 봇 연결 테스트 성공 ({now:%m/%d %H:%M})\n"
                        f"GitHub Actions에서 정상 발송되었습니다.")
-        print("카카오 전송:", "성공" if ok else "실패")
+        print("알림 전송:", "성공" if ok else "실패")
         return 0 if ok else 1
 
     if now.weekday() >= 5 and not FORCE:
@@ -82,9 +82,8 @@ def main() -> int:
     body = "\n\n".join(sw.format_alert(a) for a in alerts)
     msg = header + "\n" + body
 
-    token = get_access_token()
-    ok = send_text(msg, token=token)
-    print("카카오 전송:", "성공" if ok else "실패")
+    ok = send_text(msg)
+    print("알림 전송:", "성공" if ok else "실패")
     for a in alerts:
         print(" -", sw.format_alert(a).replace("\n", " | "))
     return 0 if ok else 1

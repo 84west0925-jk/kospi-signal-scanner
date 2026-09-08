@@ -81,11 +81,49 @@ REST API 키와 클라이언트 시크릿을 입력하면 새 refresh_token이 �
 
 저장소 → Settings → Secrets and variables → Actions → **New repository secret**
 
+**카카오 (주 채널)**
+
 | Name | 값 |
 |---|---|
 | `KAKAO_REST_API_KEY` | 플랫폼 키 화면의 REST API 키 |
 | `KAKAO_CLIENT_SECRET` | 플랫폼 키 화면의 클라이언트 시크릿 코드 |
 | `KAKAO_REFRESH_TOKEN` | 발급받은 refresh token |
+| `GH_PAT` | **토큰 자동 갱신용** — 이 저장소에 `Secrets: Read and write` 권한이 있는 PAT |
+
+**텔레그램 (선택, 이중화하려면)**
+
+| Name | 값 |
+|---|---|
+| `TELEGRAM_BOT_TOKEN` | @BotFather 에서 봇 생성 시 받는 토큰 |
+| `TELEGRAM_CHAT_ID` | @userinfobot 이 알려주는 Id 숫자 |
+
+> ⚠️ **카카오 토큰 자동 회전 문제**
+> refresh_token은 약 2개월마다 만료되고, **만료 1개월 전부터는 갱신할 때마다
+> 새 토큰이 발급되며 기존 토큰이 즉시 무효화**됩니다.
+> 저장하지 않으면 **에러 없이 조용히 알림이 끊깁니다.**
+> 실제로 2026-09-03 이 문제로 4일간 알림이 중단된 이력이 있습니다.
+>
+> `GH_PAT`를 등록하면 새 토큰이 발급될 때 코드가 **Secret을 자동으로 덮어써서**
+> 이 문제가 재발하지 않습니다. 미등록 시에는 실행 로그에 새 토큰을 출력하고
+> 워크플로를 실패 처리해 메일로 알려줍니다(수동 갱신 필요).
+
+워크플로에 아래 한 줄이 있어야 자동 갱신이 동작합니다 (`swing_alert.yml`의 `env:` 블록).
+
+```yaml
+          GH_PAT:   ${{ secrets.GH_PAT }}
+```
+
+### 3-5. 외부 크론으로 실행 누락 방지
+
+GitHub의 예약 실행(schedule)은 무료 플랜에서 상당수가 건너뛰어집니다.
+실측 결과 하루 41회 예정 중 **2~7회만 실행**됐습니다.
+cron-job.org 같은 무료 서비스로 GitHub API를 호출해 강제 실행하면 해결됩니다.
+
+- URL: `https://api.github.com/repos/84west0925-jk/kospi-signal-scanner/actions/workflows/swing_alert.yml/dispatches`
+- Method: `POST`
+- Header: `Authorization: Bearer <PAT>` / `Accept: application/vnd.github+json`
+- Body: `{"ref":"main"}`
+- PAT 권한: **Actions: Read and write** (전용 토큰을 따로 발급할 것)
 
 ### 3-5. 동작 확인
 
