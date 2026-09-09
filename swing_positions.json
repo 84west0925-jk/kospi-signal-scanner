@@ -1515,6 +1515,44 @@
       "avg_price": 63000.0,
       "opened": "2026-09-09 09:30",
       "source": "bot"
+    },
+    "010130.KS": {
+      "name": "고려아연",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 1201000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 1201000.0,
+          "qty": 0,
+          "time": "2026-09-09 10:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 1201000.0,
+      "opened": "2026-09-09 10:00",
+      "source": "bot"
+    },
+    "069620.KS": {
+      "name": "대웅제약",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 113700.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 113700.0,
+          "qty": 8,
+          "time": "2026-09-09 10:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 113700.0,
+      "opened": "2026-09-09 10:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -1667,5 +1705,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-09 10:20:53"
+  "updated": "2026-09-09 10:30:51"
 }
