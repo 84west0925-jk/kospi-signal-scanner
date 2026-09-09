@@ -168,7 +168,7 @@
     },
     "196170.KQ": {
       "name": "알테오젠",
-      "buy_stage": 2,
+      "buy_stage": 3,
       "sell_stage": 1,
       "first_buy": 303000.0,
       "first_sell": 338500.0,
@@ -184,6 +184,12 @@
           "price": 287000.0,
           "qty": 3,
           "time": "2026-09-03 14:30"
+        },
+        {
+          "stage": 3,
+          "price": 271500.0,
+          "qty": 3,
+          "time": "2026-09-09 09:00"
         }
       ],
       "exits": [
@@ -194,7 +200,7 @@
           "time": "2026-08-20 14:30"
         }
       ],
-      "avg_price": 295000.0,
+      "avg_price": 287166.67,
       "opened": "2026-08-18 13:00",
       "source": "bot"
     },
@@ -1407,6 +1413,63 @@
       "avg_price": 24150.0,
       "opened": "2026-09-09 09:00",
       "source": "bot"
+    },
+    "138040.KS": {
+      "name": "메리츠금융지주",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 128600.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 128600.0,
+          "qty": 7,
+          "time": "2026-09-09 09:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 128600.0,
+      "opened": "2026-09-09 09:00",
+      "source": "bot"
+    },
+    "251270.KS": {
+      "name": "넷마블",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 35050.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 35050.0,
+          "qty": 28,
+          "time": "2026-09-09 09:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 35050.0,
+      "opened": "2026-09-09 09:00",
+      "source": "bot"
+    },
+    "068760.KQ": {
+      "name": "셀트리온제약",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 40000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 40000.0,
+          "qty": 25,
+          "time": "2026-09-09 09:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 40000.0,
+      "opened": "2026-09-09 09:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -1549,5 +1612,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-09 09:31:05"
+  "updated": "2026-09-09 09:41:12"
 }
