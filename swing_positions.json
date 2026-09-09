@@ -1574,6 +1574,25 @@
       "avg_price": 53500.0,
       "opened": "2026-09-09 10:00",
       "source": "bot"
+    },
+    "323410.KS": {
+      "name": "카카오뱅크",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 21500.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 21500.0,
+          "qty": 46,
+          "time": "2026-09-09 14:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 21500.0,
+      "opened": "2026-09-09 14:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -1736,5 +1755,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-09 14:40:59"
+  "updated": "2026-09-09 15:01:07"
 }
