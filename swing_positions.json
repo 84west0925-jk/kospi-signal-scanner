@@ -805,9 +805,9 @@
     "247540.KQ": {
       "name": "에코프로비엠",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 105900.0,
-      "first_sell": null,
+      "first_sell": 111400.0,
       "entries": [
         {
           "stage": 1,
@@ -816,7 +816,14 @@
           "time": "2026-08-21 10:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 111400.0,
+          "qty": 3,
+          "time": "2026-09-09 13:30"
+        }
+      ],
       "avg_price": 105900.0,
       "opened": "2026-08-21 10:00",
       "source": "bot"
@@ -1737,5 +1744,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-09 13:40:54"
+  "updated": "2026-09-09 14:01:02"
 }
