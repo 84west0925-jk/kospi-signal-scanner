@@ -1331,6 +1331,82 @@
       "avg_price": 122100.0,
       "opened": "2026-09-08 12:30",
       "source": "bot"
+    },
+    "005490.KS": {
+      "name": "POSCO홀딩스",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 328500.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 328500.0,
+          "qty": 3,
+          "time": "2026-09-09 09:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 328500.0,
+      "opened": "2026-09-09 09:00",
+      "source": "bot"
+    },
+    "051910.KS": {
+      "name": "LG화학",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 270000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 270000.0,
+          "qty": 3,
+          "time": "2026-09-09 09:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 270000.0,
+      "opened": "2026-09-09 09:00",
+      "source": "bot"
+    },
+    "003550.KS": {
+      "name": "LG",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 118900.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 118900.0,
+          "qty": 8,
+          "time": "2026-09-09 09:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 118900.0,
+      "opened": "2026-09-09 09:00",
+      "source": "bot"
+    },
+    "004990.KS": {
+      "name": "롯데지주",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 24150.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 24150.0,
+          "qty": 41,
+          "time": "2026-09-09 09:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 24150.0,
+      "opened": "2026-09-09 09:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -1473,5 +1549,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-08 13:01:12"
+  "updated": "2026-09-09 09:31:05"
 }
