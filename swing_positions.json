@@ -939,9 +939,9 @@
     "086520.KQ": {
       "name": "에코프로",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 82700.0,
-      "first_sell": null,
+      "first_sell": 85700.0,
       "entries": [
         {
           "stage": 1,
@@ -950,7 +950,14 @@
           "time": "2026-08-21 13:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 85700.0,
+          "qty": 4,
+          "time": "2026-09-09 14:00"
+        }
+      ],
       "avg_price": 82700.0,
       "opened": "2026-08-21 13:00",
       "source": "bot"
@@ -1744,5 +1751,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-09 14:01:02"
+  "updated": "2026-09-09 14:31:10"
 }
