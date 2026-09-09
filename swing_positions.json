@@ -1553,6 +1553,25 @@
       "avg_price": 113700.0,
       "opened": "2026-09-09 10:00",
       "source": "bot"
+    },
+    "030200.KS": {
+      "name": "KT",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 53500.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 53500.0,
+          "qty": 18,
+          "time": "2026-09-09 10:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 53500.0,
+      "opened": "2026-09-09 10:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -1705,5 +1724,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-09 10:30:51"
+  "updated": "2026-09-09 10:40:53"
 }
