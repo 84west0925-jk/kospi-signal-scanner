@@ -1439,6 +1439,82 @@
       "avg_price": 40000.0,
       "opened": "2026-09-09 09:00",
       "source": "bot"
+    },
+    "259960.KS": {
+      "name": "크래프톤",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 210250.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 210250.0,
+          "qty": 4,
+          "time": "2026-09-09 09:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 210250.0,
+      "opened": "2026-09-09 09:30",
+      "source": "bot"
+    },
+    "090430.KS": {
+      "name": "아모레퍼시픽",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 137600.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 137600.0,
+          "qty": 7,
+          "time": "2026-09-09 09:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 137600.0,
+      "opened": "2026-09-09 09:30",
+      "source": "bot"
+    },
+    "078930.KS": {
+      "name": "GS",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 119200.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 119200.0,
+          "qty": 8,
+          "time": "2026-09-09 09:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 119200.0,
+      "opened": "2026-09-09 09:30",
+      "source": "bot"
+    },
+    "161390.KS": {
+      "name": "한국타이어앤테크놀로지",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 63000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 63000.0,
+          "qty": 15,
+          "time": "2026-09-09 09:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 63000.0,
+      "opened": "2026-09-09 09:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -1591,5 +1667,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-09 09:50:55"
+  "updated": "2026-09-09 10:20:53"
 }
