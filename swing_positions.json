@@ -1259,9 +1259,9 @@
     "006400.KS": {
       "name": "삼성SDI",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 530000.0,
-      "first_sell": null,
+      "first_sell": 567000.0,
       "entries": [
         {
           "stage": 1,
@@ -1270,7 +1270,14 @@
           "time": "2026-09-08 09:30"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 567000.0,
+          "qty": 0,
+          "time": "2026-09-09 13:00"
+        }
+      ],
       "avg_price": 530000.0,
       "opened": "2026-09-08 09:30",
       "source": "bot"
@@ -1730,5 +1737,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-09 13:30:57"
+  "updated": "2026-09-09 13:40:54"
 }
