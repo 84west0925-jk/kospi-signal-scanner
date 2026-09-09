@@ -286,38 +286,6 @@
       "opened": "2026-08-18 14:00",
       "source": "bot"
     },
-    "011170.KS": {
-      "name": "롯데케미칼",
-      "buy_stage": 1,
-      "sell_stage": 2,
-      "first_buy": 55550.0,
-      "first_sell": 61000.0,
-      "entries": [
-        {
-          "stage": 1,
-          "price": 55550.0,
-          "qty": 18,
-          "time": "2026-08-18 14:00"
-        }
-      ],
-      "exits": [
-        {
-          "stage": 1,
-          "price": 61000.0,
-          "qty": 6,
-          "time": "2026-09-09 09:00"
-        },
-        {
-          "stage": 2,
-          "price": 64800.0,
-          "qty": 6,
-          "time": "2026-09-09 13:00"
-        }
-      ],
-      "avg_price": 55550.0,
-      "opened": "2026-08-18 14:00",
-      "source": "bot"
-    },
     "015760.KS": {
       "name": "한국전력",
       "buy_stage": 2,
@@ -1128,9 +1096,9 @@
     "373220.KS": {
       "name": "LG에너지솔루션",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 348000.0,
-      "first_sell": null,
+      "first_sell": 368000.0,
       "entries": [
         {
           "stage": 1,
@@ -1139,7 +1107,14 @@
           "time": "2026-09-02 14:30"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 368000.0,
+          "qty": 0,
+          "time": "2026-09-09 14:00"
+        }
+      ],
       "avg_price": 348000.0,
       "opened": "2026-09-02 14:30",
       "source": "bot"
@@ -1749,7 +1724,17 @@
       "last_sell": 94100.0,
       "pnl_pct": 24.41,
       "note": "3차 청산 완료"
+    },
+    {
+      "ticker": "011170.KS",
+      "name": "롯데케미칼",
+      "opened": "2026-08-18 14:00",
+      "closed": "2026-09-09 14:00",
+      "avg_buy": 55550.0,
+      "last_sell": 68200.0,
+      "pnl_pct": 22.77,
+      "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-09 14:31:10"
+  "updated": "2026-09-09 14:40:59"
 }
