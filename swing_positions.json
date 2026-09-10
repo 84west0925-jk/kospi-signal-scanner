@@ -1688,6 +1688,63 @@
       "avg_price": 208500.0,
       "opened": "2026-09-10 09:00",
       "source": "bot"
+    },
+    "017670.KS": {
+      "name": "SK텔레콤",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 90000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 90000.0,
+          "qty": 11,
+          "time": "2026-09-10 09:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 90000.0,
+      "opened": "2026-09-10 09:30",
+      "source": "bot"
+    },
+    "097950.KS": {
+      "name": "CJ제일제당",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 180700.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 180700.0,
+          "qty": 5,
+          "time": "2026-09-10 09:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 180700.0,
+      "opened": "2026-09-10 09:30",
+      "source": "bot"
+    },
+    "021240.KS": {
+      "name": "코웨이",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 95900.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 95900.0,
+          "qty": 10,
+          "time": "2026-09-10 09:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 95900.0,
+      "opened": "2026-09-10 09:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -1850,5 +1907,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-10 09:50:52"
+  "updated": "2026-09-10 10:01:10"
 }
