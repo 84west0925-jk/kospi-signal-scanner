@@ -1331,9 +1331,9 @@
     "051910.KS": {
       "name": "LG화학",
       "buy_stage": 1,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 270000.0,
-      "first_sell": null,
+      "first_sell": 293500.0,
       "entries": [
         {
           "stage": 1,
@@ -1342,7 +1342,14 @@
           "time": "2026-09-09 09:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 293500.0,
+          "qty": 1,
+          "time": "2026-09-10 09:00"
+        }
+      ],
       "avg_price": 270000.0,
       "opened": "2026-09-09 09:00",
       "source": "bot"
@@ -1593,6 +1600,63 @@
       "avg_price": 21500.0,
       "opened": "2026-09-09 14:30",
       "source": "bot"
+    },
+    "328130.KQ": {
+      "name": "루닛",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 8410.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 8410.0,
+          "qty": 118,
+          "time": "2026-09-10 09:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 8410.0,
+      "opened": "2026-09-10 09:00",
+      "source": "bot"
+    },
+    "141080.KQ": {
+      "name": "리가켐바이오",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 87000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 87000.0,
+          "qty": 11,
+          "time": "2026-09-10 09:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 87000.0,
+      "opened": "2026-09-10 09:00",
+      "source": "bot"
+    },
+    "214150.KQ": {
+      "name": "클래시스",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 30750.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 30750.0,
+          "qty": 32,
+          "time": "2026-09-10 09:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 30750.0,
+      "opened": "2026-09-10 09:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -1755,5 +1819,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-09 15:01:07"
+  "updated": "2026-09-10 09:30:59"
 }
