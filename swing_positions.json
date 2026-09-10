@@ -1273,7 +1273,7 @@
     },
     "214450.KQ": {
       "name": "파마리서치",
-      "buy_stage": 1,
+      "buy_stage": 2,
       "sell_stage": 0,
       "first_buy": 371000.0,
       "first_sell": null,
@@ -1283,10 +1283,16 @@
           "price": 371000.0,
           "qty": 2,
           "time": "2026-09-08 10:30"
+        },
+        {
+          "stage": 2,
+          "price": 349000.0,
+          "qty": 2,
+          "time": "2026-09-10 09:00"
         }
       ],
       "exits": [],
-      "avg_price": 371000.0,
+      "avg_price": 360000.0,
       "opened": "2026-09-08 10:30",
       "source": "bot"
     },
@@ -1657,6 +1663,25 @@
       "avg_price": 30750.0,
       "opened": "2026-09-10 09:00",
       "source": "bot"
+    },
+    "035420.KS": {
+      "name": "NAVER",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 208500.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 208500.0,
+          "qty": 4,
+          "time": "2026-09-10 09:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 208500.0,
+      "opened": "2026-09-10 09:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -1819,5 +1844,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-10 09:30:59"
+  "updated": "2026-09-10 09:41:00"
 }
