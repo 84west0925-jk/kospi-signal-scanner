@@ -1853,6 +1853,25 @@
       "avg_price": 484000.0,
       "opened": "2026-09-10 11:00",
       "source": "bot"
+    },
+    "004370.KS": {
+      "name": "농심",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 405500.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 405500.0,
+          "qty": 2,
+          "time": "2026-09-10 11:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 405500.0,
+      "opened": "2026-09-10 11:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -2015,5 +2034,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-10 12:01:03"
+  "updated": "2026-09-10 12:10:55"
 }
