@@ -875,9 +875,9 @@
     "329180.KS": {
       "name": "HD현대중공업",
       "buy_stage": 2,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 456000.0,
-      "first_sell": null,
+      "first_sell": 472500.0,
       "entries": [
         {
           "stage": 1,
@@ -892,7 +892,14 @@
           "time": "2026-09-02 12:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 472500.0,
+          "qty": 1,
+          "time": "2026-09-10 11:30"
+        }
+      ],
       "avg_price": 441750.0,
       "opened": "2026-08-21 13:00",
       "source": "bot"
@@ -2008,5 +2015,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-10 11:50:49"
+  "updated": "2026-09-10 12:01:03"
 }
