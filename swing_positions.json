@@ -490,7 +490,7 @@
     },
     "064350.KS": {
       "name": "현대로템",
-      "buy_stage": 2,
+      "buy_stage": 3,
       "sell_stage": 0,
       "first_buy": 136000.0,
       "first_sell": null,
@@ -506,10 +506,16 @@
           "price": 124200.0,
           "qty": 8,
           "time": "2026-09-02 12:00"
+        },
+        {
+          "stage": 3,
+          "price": 122200.0,
+          "qty": 8,
+          "time": "2026-09-10 09:30"
         }
       ],
       "exits": [],
-      "avg_price": 129706.67,
+      "avg_price": 127095.65,
       "opened": "2026-08-19 11:00",
       "source": "bot"
     },
@@ -1745,6 +1751,63 @@
       "avg_price": 95900.0,
       "opened": "2026-09-10 09:30",
       "source": "bot"
+    },
+    "207940.KS": {
+      "name": "삼성바이오로직스",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 1426000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 1426000.0,
+          "qty": 0,
+          "time": "2026-09-10 09:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 1426000.0,
+      "opened": "2026-09-10 09:30",
+      "source": "bot"
+    },
+    "028260.KS": {
+      "name": "삼성물산",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 367000.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 367000.0,
+          "qty": 2,
+          "time": "2026-09-10 09:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 367000.0,
+      "opened": "2026-09-10 09:30",
+      "source": "bot"
+    },
+    "006800.KS": {
+      "name": "미래에셋증권",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 34150.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 34150.0,
+          "qty": 29,
+          "time": "2026-09-10 09:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 34150.0,
+      "opened": "2026-09-10 09:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -1907,5 +1970,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-10 10:01:10"
+  "updated": "2026-09-10 10:10:59"
 }
