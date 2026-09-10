@@ -321,9 +321,9 @@
     "047810.KS": {
       "name": "한국항공우주",
       "buy_stage": 3,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 139200.0,
-      "first_sell": null,
+      "first_sell": 132200.0,
       "entries": [
         {
           "stage": 1,
@@ -344,7 +344,14 @@
           "time": "2026-09-02 12:00"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 132200.0,
+          "qty": 7,
+          "time": "2026-09-10 13:30"
+        }
+      ],
       "avg_price": 130350.0,
       "opened": "2026-08-18 14:30",
       "source": "bot"
@@ -2034,5 +2041,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-10 12:10:55"
+  "updated": "2026-09-10 14:20:59"
 }
