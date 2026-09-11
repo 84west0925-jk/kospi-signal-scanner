@@ -1223,9 +1223,9 @@
     "003230.KS": {
       "name": "삼양식품",
       "buy_stage": 3,
-      "sell_stage": 0,
+      "sell_stage": 1,
       "first_buy": 1440000.0,
-      "first_sell": null,
+      "first_sell": 1300000.0,
       "entries": [
         {
           "stage": 1,
@@ -1246,7 +1246,14 @@
           "time": "2026-09-10 14:30"
         }
       ],
-      "exits": [],
+      "exits": [
+        {
+          "stage": 1,
+          "price": 1300000.0,
+          "qty": 0,
+          "time": "2026-09-11 13:00"
+        }
+      ],
       "avg_price": 1345666.67,
       "opened": "2026-09-03 12:00",
       "source": "bot"
@@ -2122,5 +2129,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-11 11:40:50"
+  "updated": "2026-09-11 13:40:51"
 }
