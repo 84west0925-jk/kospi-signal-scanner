@@ -1910,6 +1910,25 @@
       "avg_price": 180500.0,
       "opened": "2026-09-11 09:00",
       "source": "bot"
+    },
+    "032640.KS": {
+      "name": "LG유플러스",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 14600.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 14600.0,
+          "qty": 68,
+          "time": "2026-09-11 09:00"
+        }
+      ],
+      "exits": [],
+      "avg_price": 14600.0,
+      "opened": "2026-09-11 09:00",
+      "source": "bot"
     }
   },
   "history": [
@@ -2072,5 +2091,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-11 09:40:48"
+  "updated": "2026-09-11 09:50:55"
 }
