@@ -411,6 +411,20 @@ def _cap_kosdaq(alerts: list[dict], limit: int = KOSDAQ_MAX_ALERTS) -> list[dict
     return kospi + kept
 
 
+def _alert_key(act: dict, ticker: str, ts: str, pos: dict | None) -> str:
+    """같은 신호를 반복 발송하지 않기 위한 식별자.
+
+    · 신규 진입(1차)  : 종목 + 봉 시각 → RSI가 30을 깬 그 봉에 대해 한 번만
+    · 그 외(2·3차/매도/손절) : 종목 + 단계 + 포지션 진입시각
+      → 해당 포지션에 대해 단계별로 한 번만. 사용자가 실제로 매수를 등록해
+        단계가 올라가면 다음 단계 신호는 새 키가 되어 다시 알림이 간다.
+    """
+    if act["action"] == "BUY" and act["stage"] == 1:
+        return f"{ticker}|BUY1|{ts}"
+    anchor = (pos or {}).get("opened") or "-"
+    return f"{ticker}|{act['action']}{act['stage']}|{anchor}"
+
+
 def scan(universe: dict[str, str], interval: str = "30m",
          rsi_buy: float = RSI_BUY, rsi_sell: float = RSI_SELL,
          state: dict | None = None, commit: bool = False,
@@ -418,7 +432,11 @@ def scan(universe: dict[str, str], interval: str = "30m",
          closed_only: bool = True) -> tuple[pd.DataFrame, list[dict]]:
     """
     전 종목 RSI 평가 + 액션 도출.
-    commit=True 이면 state에 반영 후 저장(알림 봇용). False면 조회만(앱 화면용).
+
+    commit=True (알림 봇) 이면 '이미 보낸 신호'를 걸러내고 발송 기록만 저장한다.
+    **포지션은 절대 건드리지 않는다.** 보유 종목은 사용자가 직접 등록한 것만
+    기록되어야 하므로(실제 매수분만), 봇은 알림 전달자 역할만 한다.
+
     closed_only=True 이면 마감된 봉만 사용한다(헛신호 방지). 기본값 권장.
     """
     state = state if state is not None else load_state()
@@ -438,24 +456,32 @@ def scan(universe: dict[str, str], interval: str = "30m",
         rsi_prev = float(d["RSI"].iloc[-2])
         ts = d.index[-1].strftime("%Y-%m-%d %H:%M")
 
-        acts = decide(state["positions"].get(ticker), price, rsi_now, rsi_prev,
-                      rsi_buy, rsi_sell)
+        pos = state["positions"].get(ticker)
+        acts = decide(pos, price, rsi_now, rsi_prev, rsi_buy, rsi_sell)
         for a in acts:
             a.update({"ticker": ticker, "name": name, "time": ts,
-                      "rsi": round(rsi_now, 1), "market": market_of(ticker)})
+                      "rsi": round(rsi_now, 1), "market": market_of(ticker),
+                      "_key": _alert_key(a, ticker, ts, pos)})
             alerts.append(a)
         snaps.append((ticker, name, price, rsi_now, rsi_prev, ts, acts))
 
-    # 2) 코스닥 알림 상한 적용 (잘린 신호는 소실이 아니라 다음 스캔으로 이월)
+    # 2) 이미 보낸 신호 제거 (중복 발송 방지)
+    if commit:
+        sent = state.setdefault("alerted", {})
+        alerts = [a for a in alerts if a["_key"] not in sent]
+
+    # 3) 코스닥 알림 상한 (잘린 신호는 소실이 아니라 다음 스캔으로 이월)
     alerts = _cap_kosdaq(alerts, kosdaq_limit)
     kept = {id(a) for a in alerts}
 
-    # 3) 발송 대상 신호만 상태에 반영
-    if commit:
-        for _t, _n, _p, _r, _rp, _ts, acts in snaps:
-            for a in acts:
-                if id(a) in kept:
-                    apply_action(state, _t, _n, a, _ts)
+    # 4) 발송 기록만 저장 — 포지션은 건드리지 않는다
+    if commit and alerts:
+        now = datetime.now(KST).strftime("%Y-%m-%d %H:%M")
+        for a in alerts:
+            sent[a["_key"]] = now
+        if len(sent) > 800:      # 오래된 기록 정리
+            keep = sorted(sent.items(), key=lambda kv: kv[1])[-400:]
+            state["alerted"] = dict(keep)
         save_state(state)
 
     # 4) 화면용 표 구성

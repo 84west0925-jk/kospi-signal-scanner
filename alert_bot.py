@@ -51,8 +51,9 @@ def main() -> int:
     n_kq = sum(1 for t in universe if sw.market_of(t) == "KOSDAQ")
     print(f"유니버스 {len(universe)}종목 (코스피 {len(universe) - n_kq} / 코스닥 {n_kq})")
 
+    # commit=True → 중복 발송 방지 기록만 남긴다(포지션은 사용자 등록분만 유지)
     df, alerts = sw.scan(universe, INTERVAL, RSI_BUY, RSI_SELL, state,
-                         commit=False, kosdaq_limit=KOSDAQ_LIMIT)
+                         commit=True, kosdaq_limit=KOSDAQ_LIMIT)
     if df.empty:
         print("데이터 없음 — 종료")
         return 0
@@ -72,13 +73,10 @@ def main() -> int:
         print("트리거 없음 — 알림 미발송")
         return 0
 
-    # 상태 반영 (commit)
+    # 포지션은 건드리지 않는다. 실제 매수분만 사용자가 앱에서 등록한다.
     unit = SEED / 3
-    for a in alerts:
-        sw.apply_action(state, a["ticker"], a["name"], a, a["time"], unit_krw=unit)
-    sw.save_state(state)
-
-    header = f"📣 KOSPI 단타 신호 {now:%m/%d %H:%M} ({INTERVAL})\n1회 투입금 {unit:,.0f}원\n"
+    header = (f"📣 KOSPI 단타 신호 {now:%m/%d %H:%M} ({INTERVAL})\n"
+              f"1회 투입금 {unit:,.0f}원 · 매수하셨다면 앱에 등록하세요\n")
     body = "\n\n".join(sw.format_alert(a) for a in alerts)
     msg = header + "\n" + body
 

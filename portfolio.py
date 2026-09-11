@@ -226,6 +226,72 @@ def hist_view(history: list[dict]) -> pd.DataFrame:
     return df[[c for c in df.columns if not str(c).startswith("_")]]
 
 
+TX_COLS = ["일시", "종목", "코드", "구분", "단가", "수량", "금액", "상태"]
+
+
+def tx_ledger(state: dict) -> pd.DataFrame:
+    """거래내역 원장 — 매수·매도 한 건 한 건을 개별 행으로 펼친다.
+
+    별도 저장하지 않고 보유 포지션과 청산 이력에서 그때그때 만들어낸다.
+    ‘거래내역 수정’ 탭에서 고친 내용이 자동으로 반영되고, 원장이 실제
+    보유 상태와 어긋날 일이 없다.
+    """
+    rows: list[dict] = []
+
+    def add(ticker, name, kind, e, status):
+        price = float(e.get("price", 0) or 0)
+        qty = int(e.get("qty", 0) or 0)
+        rows.append({
+            "일시": str(e.get("time") or "")[:16],
+            "종목": name,
+            "코드": str(ticker).split(".")[0],
+            "구분": kind,
+            "단가": round(price, 1),
+            "수량": qty,
+            # 매수는 지출(음수), 매도는 수입(양수)
+            "금액": round(-price * qty if kind == "매수" else price * qty),
+            "상태": status,
+        })
+
+    for ticker, pos in (state.get("positions") or {}).items():
+        for e in pos.get("entries", []):
+            add(ticker, pos.get("name", ticker), "매수", e, "보유중")
+        for x in pos.get("exits", []):
+            add(ticker, pos.get("name", ticker), "매도", x, "보유중")
+
+    for h in (state.get("history") or []):
+        tk = h.get("_ticker") or h.get("코드", "")
+        nm = h.get("종목", tk)
+        ents, exs = h.get("_entries") or [], h.get("_exits") or []
+
+        if ents or exs:
+            for e in ents:
+                add(tk, nm, "매수", e, "청산")
+            for x in exs:
+                add(tk, nm, "매도", x, "청산")
+            continue
+
+        # 건별 스냅샷이 없는 과거 기록 → 요약값으로 매수·매도 1건씩 복원
+        qty = int(h.get("총수량") or 0)
+        if qty <= 0:
+            continue
+        add(tk, nm, "매수",
+            {"price": h.get("평단") or 0, "qty": qty, "time": h.get("진입")},
+            "청산(요약)")
+        # 회수금액은 수수료·세금이 빠진 뒤 금액이므로 역산해 매도 단가를 복원
+        net = float(h.get("회수금액") or 0)
+        rate = 1 - (SELL_FEE_PCT + SELL_TAX_PCT) / 100
+        add(tk, nm, "매도",
+            {"price": (net / rate / qty) if qty and rate else 0,
+             "qty": qty, "time": h.get("청산")},
+            "청산(요약)")
+
+    if not rows:
+        return pd.DataFrame(columns=TX_COLS)
+    return pd.DataFrame(rows)[TX_COLS].sort_values(
+        "일시", ascending=False).reset_index(drop=True)
+
+
 def close_out(state: dict, ticker: str, price: float, qty: int, ts: str, note: str) -> dict:
     """매도 반영. 잔량 0이면 이력으로 이관."""
     pos = state["positions"][ticker]
@@ -278,8 +344,45 @@ def render(st):
     else:
         c4.metric("승률", "-")
 
-    tab_hold, tab_add, tab_sell, tab_edit, tab_hist = st.tabs(
-        ["📋 보유 현황", "➕ 매수 등록", "➖ 매도 등록", "✏️ 거래내역 수정", "📜 거래 이력"])
+    tab_hold, tab_add, tab_sell, tab_tx, tab_edit, tab_hist = st.tabs(
+        ["📋 보유 현황", "➕ 매수 등록", "➖ 매도 등록",
+         "📒 거래내역", "✏️ 거래내역 수정", "📜 종목별 손익"])
+
+    # ── 거래내역 원장 ────────────────────────────────────────────────────────
+    with tab_tx:
+        led = tx_ledger(state)
+        if led.empty:
+            st.info("아직 등록된 거래가 없습니다.")
+        else:
+            f1, f2 = st.columns([1, 3])
+            with f1:
+                kind = st.radio("구분", ["전체", "매수", "매도"], horizontal=True,
+                                key="tx_kind")
+            with f2:
+                names = ["전체"] + sorted(led["종목"].unique().tolist())
+                pick = st.selectbox("종목", names, key="tx_name")
+
+            view = led
+            if kind != "전체":
+                view = view[view["구분"] == kind]
+            if pick != "전체":
+                view = view[view["종목"] == pick]
+
+            buy_amt = -view.loc[view["구분"] == "매수", "금액"].sum()
+            sell_amt = view.loc[view["구분"] == "매도", "금액"].sum()
+            m1, m2, m3 = st.columns(3)
+            m1.metric("거래 건수", f"{len(view)}건")
+            m2.metric("매수 합계", f"{buy_amt:,.0f}원")
+            m3.metric("매도 합계", f"{sell_amt:,.0f}원")
+
+            st.dataframe(view, use_container_width=True, hide_index=True)
+            st.download_button(
+                "📥 거래내역 CSV 저장",
+                view.to_csv(index=False).encode("utf-8-sig"),
+                file_name=f"거래내역_{datetime.now(sw.KST):%Y%m%d}.csv",
+                mime="text/csv")
+            st.caption("금액은 단가×수량 기준입니다(수수료·세금 제외). "
+                       "비용까지 반영된 손익은 ‘종목별 손익’ 탭에서 확인하세요.")
 
     # ── 보유 현황 ────────────────────────────────────────────────────────────
     with tab_hold:
@@ -306,11 +409,37 @@ def render(st):
 
     # ── 매수 등록 ────────────────────────────────────────────────────────────
     with tab_add:
+        # 단타 탭에서 스캔을 돌렸다면 그 결과로 종목·현재가를 자동으로 채운다
+        scan_df = st.session_state.get("swing_df")
+        use_scan = False
+        if scan_df is not None and not scan_df.empty:
+            use_scan = st.checkbox(
+                "🔍 스캔 결과에서 고르기 (종목·가격 자동 입력)", value=True,
+                help="‘단타 RSI 3분할’ 탭에서 스캔한 결과를 그대로 씁니다. "
+                     "과매도 종목이 위로 옵니다.")
+
+        default_name, default_price = list(universe.values())[0], 100000.0
+        if use_scan:
+            sdf = scan_df.sort_values("RSI")
+            labels = [f"{r['종목']}  ·  RSI {r['RSI']}  ·  {r['현재가']:,.0f}원"
+                      for _, r in sdf.iterrows()]
+            sel = st.selectbox("스캔 종목", labels, key="add_from_scan")
+            row = sdf.iloc[labels.index(sel)]
+            default_name, default_price = row["종목"], float(row["현재가"])
+            st.caption(f"선택: **{row['종목']}** · {row['시장']} · RSI {row['RSI']} "
+                       f"({row['구간']}) · 기준시각 {row['시각']}")
+
         with st.form("add_pos"):
             col1, col2 = st.columns(2)
             with col1:
-                name = st.selectbox("종목", list(universe.values()))
-                price = st.number_input("매수 단가(원)", 1.0, 100_000_000.0, 100000.0, 100.0)
+                if use_scan:
+                    name = default_name
+                    st.text_input("종목", value=name, disabled=True)
+                else:
+                    names = list(universe.values())
+                    name = st.selectbox("종목", names)
+                price = st.number_input("매수 단가(원)", 1.0, 100_000_000.0,
+                                        default_price, 100.0)
             with col2:
                 qty = st.number_input("수량(주)", 1, 1_000_000, 1)
                 when = st.text_input("매수 일시", datetime.now(sw.KST).strftime("%Y-%m-%d %H:%M"))
@@ -319,7 +448,11 @@ def render(st):
                                               disabled=not writable())
 
         if submitted:
-            ticker = [k for k, v in universe.items() if v == name][0]
+            match = [k for k, v in universe.items() if v == name]
+            if not match:
+                st.error(f"‘{name}’ 종목 코드를 찾지 못했습니다. 유니버스를 다시 불러오세요.")
+                st.stop()
+            ticker = match[0]
             pos = positions.get(ticker) or sw.new_position(name)
             stage = min(pos["buy_stage"] + 1, 3)
             pos["buy_stage"] = stage
