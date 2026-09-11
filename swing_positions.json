@@ -1935,6 +1935,25 @@
       "avg_price": 14600.0,
       "opened": "2026-09-11 09:00",
       "source": "bot"
+    },
+    "066570.KS": {
+      "name": "LG전자",
+      "buy_stage": 1,
+      "sell_stage": 0,
+      "first_buy": 199200.0,
+      "first_sell": null,
+      "entries": [
+        {
+          "stage": 1,
+          "price": 199200.0,
+          "qty": 5,
+          "time": "2026-09-11 10:30"
+        }
+      ],
+      "exits": [],
+      "avg_price": 199200.0,
+      "opened": "2026-09-11 10:30",
+      "source": "bot"
     }
   },
   "history": [
@@ -2097,5 +2116,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-11 10:20:55"
+  "updated": "2026-09-11 11:10:48"
 }
