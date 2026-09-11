@@ -1185,7 +1185,7 @@
     },
     "278470.KS": {
       "name": "에이피알",
-      "buy_stage": 2,
+      "buy_stage": 3,
       "sell_stage": 0,
       "first_buy": 413500.0,
       "first_sell": null,
@@ -1201,16 +1201,22 @@
           "price": 388000.0,
           "qty": 2,
           "time": "2026-09-07 12:00"
+        },
+        {
+          "stage": 3,
+          "price": 360500.0,
+          "qty": 2,
+          "time": "2026-09-10 14:30"
         }
       ],
       "exits": [],
-      "avg_price": 400750.0,
+      "avg_price": 387333.33,
       "opened": "2026-09-03 12:00",
       "source": "bot"
     },
     "003230.KS": {
       "name": "삼양식품",
-      "buy_stage": 2,
+      "buy_stage": 3,
       "sell_stage": 0,
       "first_buy": 1440000.0,
       "first_sell": null,
@@ -1226,10 +1232,16 @@
           "price": 1332000.0,
           "qty": 0,
           "time": "2026-09-07 12:00"
+        },
+        {
+          "stage": 3,
+          "price": 1265000.0,
+          "qty": 0,
+          "time": "2026-09-10 14:30"
         }
       ],
       "exits": [],
-      "avg_price": 1386000.0,
+      "avg_price": 1345666.67,
       "opened": "2026-09-03 12:00",
       "source": "bot"
     },
@@ -2041,5 +2053,5 @@
       "note": "3차 청산 완료"
     }
   ],
-  "updated": "2026-09-10 14:20:59"
+  "updated": "2026-09-11 09:01:08"
 }
