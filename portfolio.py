@@ -60,7 +60,7 @@ def _token() -> str:
 
 def writable() -> bool:
     """등록·수정이 가능한 상태인지."""
-    return IN_ACTIONS or bool(_token())
+    return IN_ACTIONS or bool(_token() and _repo())
 
 
 def load() -> dict:
@@ -315,7 +315,7 @@ def render(st):
 
     if not writable():
         st.warning(
-            "**읽기 전용 모드** — 등록·수정하려면 Streamlit Secrets에 `GITHUB_TOKEN`이 필요합니다. "
+            "**읽기 전용 모드** — 등록·수정하려면 Streamlit Secrets에 `GITHUB_TOKEN`과 `GITHUB_REPO`가 필요합니다. "
             "(Manage app → Settings → Secrets)", icon="🔒")
 
     state = load()

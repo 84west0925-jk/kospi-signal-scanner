@@ -429,7 +429,10 @@ def scan(universe: dict[str, str], interval: str = "30m",
          rsi_buy: float = RSI_BUY, rsi_sell: float = RSI_SELL,
          state: dict | None = None, commit: bool = False,
          kosdaq_limit: int = KOSDAQ_MAX_ALERTS,
-         closed_only: bool = True) -> tuple[pd.DataFrame, list[dict]]:
+         closed_only: bool = True,
+         data_override: dict[str, pd.DataFrame] | None = None,
+         expected_close: datetime | None = None,
+         filter_alerted: bool = False) -> tuple[pd.DataFrame, list[dict]]:
     """
     전 종목 RSI 평가 + 액션 도출.
 
@@ -440,7 +443,14 @@ def scan(universe: dict[str, str], interval: str = "30m",
     closed_only=True 이면 마감된 봉만 사용한다(헛신호 방지). 기본값 권장.
     """
     state = state if state is not None else load_state()
-    data = fetch_intraday(list(universe.keys()), interval)
+    # 기본 화면/백테스트는 기존 yfinance를 그대로 사용한다.
+    # 텔레그램 알림 봇은 data_override에 KIS 공식 분봉을 넣어 같은 전략 로직을 재사용한다.
+    data = data_override if data_override is not None else fetch_intraday(list(universe.keys()), interval)
+
+    expected_start = None
+    if expected_close is not None:
+        step = timedelta(minutes=INTERVAL_MIN.get(interval, 30))
+        expected_start = expected_close - step
 
     # 1) 전 종목 평가 — 아직 상태에 반영하지 않는다
     snaps, alerts = [], []
@@ -451,6 +461,22 @@ def scan(universe: dict[str, str], interval: str = "30m",
             d = drop_unclosed(d, interval)
         if len(d) < 2:
             continue
+
+        # KIS 정시 알림에서는 반드시 이번에 막 확정된 대상 봉만 사용한다.
+        # API/네트워크 지연으로 오래된 봉이 돌아오면 늦은 신호를 보내지 않는다.
+        if expected_start is not None:
+            last_idx = d.index[-1]
+            try:
+                if last_idx.tzinfo is None:
+                    last_dt = last_idx.to_pydatetime().replace(tzinfo=KST)
+                else:
+                    last_dt = last_idx.to_pydatetime().astimezone(KST)
+            except Exception:
+                last_dt = last_idx
+            exp = expected_start.astimezone(KST) if expected_start.tzinfo else expected_start.replace(tzinfo=KST)
+            if last_dt.replace(second=0, microsecond=0) != exp.replace(second=0, microsecond=0):
+                continue
+
         price = float(d["Close"].iloc[-1])
         rsi_now = float(d["RSI"].iloc[-1])
         rsi_prev = float(d["RSI"].iloc[-2])
@@ -461,12 +487,17 @@ def scan(universe: dict[str, str], interval: str = "30m",
         for a in acts:
             a.update({"ticker": ticker, "name": name, "time": ts,
                       "rsi": round(rsi_now, 1), "market": market_of(ticker),
+                      "interval": interval,
+                      "bar_close": (expected_close.strftime("%Y-%m-%d %H:%M")
+                                    if expected_close is not None else None),
                       "_key": _alert_key(a, ticker, ts, pos)})
             alerts.append(a)
         snaps.append((ticker, name, price, rsi_now, rsi_prev, ts, acts))
 
     # 2) 이미 보낸 신호 제거 (중복 발송 방지)
-    if commit:
+    # filter_alerted=True 는 '저장은 아직 하지 않고' 필터만 한다.
+    # 텔레그램 봇은 실제 전송 성공 뒤에 완료 기록을 남기기 위해 이 모드를 사용한다.
+    if commit or filter_alerted:
         sent = state.setdefault("alerted", {})
         alerts = [a for a in alerts if a["_key"] not in sent]
 
@@ -517,9 +548,23 @@ def format_alert(a: dict) -> str:
     icon = {"BUY": "🟢 매수", "SELL": "🔴 매도", "STOP": "⛔ 손절"}[a["action"]]
     stage = "전량" if a["stage"] == 9 else f"{a['stage']}차"
     tag = "[코스닥] " if a.get("market") == "KOSDAQ" else ""
+
+    time_line = a["time"]
+    if a.get("bar_close"):
+        try:
+            start = datetime.strptime(a["time"], "%Y-%m-%d %H:%M").replace(tzinfo=KST)
+            close = datetime.strptime(a["bar_close"], "%Y-%m-%d %H:%M").replace(tzinfo=KST)
+            # 사용자에게는 실제 포함된 마지막 분(예: 09:29)을 표시한다.
+            end_disp = close - timedelta(minutes=1)
+            label = "30분봉" if a.get("interval") == "30m" else "60분봉"
+            time_line = (f"{label} {start:%H:%M}~{end_disp:%H:%M} · "
+                         f"{close:%H:%M} 확정")
+        except Exception:
+            pass
+
     return (f"{icon} {stage} · {tag}{a['name']}({a['ticker'].split('.')[0]})\n"
             f"가격 {a['price']:,.0f}원 | RSI {a['rsi']}\n"
-            f"{a['reason']}\n{a['time']}")
+            f"{a['reason']}\n{time_line}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -606,7 +651,7 @@ def render(st):
         f"／ 안전장치: 평단 -15% 이탈 시 강제 청산"
     )
     st.caption("⏱ 신호는 **마감된 봉** 기준으로만 판정합니다. 진행 중인 봉은 값이 계속 바뀌어 "
-               "헛신호가 되므로 제외합니다. 알림 봇은 10분마다 돌며 봉이 마감되는 즉시 감지합니다.")
+               "헛신호가 되므로 제외합니다. 텔레그램 자동알림은 KIS 공식 분봉을 사용해 봉 마감 직후 판정합니다.")
 
     state = load_state()
     run = st.button("🔍 단타 신호 스캔", type="primary", use_container_width=True)

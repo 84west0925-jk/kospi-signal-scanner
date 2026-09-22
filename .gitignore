@@ -9,3 +9,5 @@ signal_log.csv
 # 비밀값
 .streamlit/secrets.toml
 .env
+.kis_cache/
+*.pyc
