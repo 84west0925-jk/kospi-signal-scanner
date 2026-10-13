@@ -15,12 +15,13 @@ concurrency:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # ubuntu-latest → Ubuntu 26 자동 전환(2026-10-19) 영향 차단을 위해 버전 고정
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -29,7 +30,12 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: 레거시 인포스탁 테마 분류 재수집
-        run: python legacy_theme_classifier.py --output-dir data/themes --refresh --workers 8
+        # 2026-10 네이버 구 시세 페이지 폐지 → JSON API 수집으로 전환
+        # 실패 시 직전 성공 CSV 유지 + 경고(annotation)만 남기고 정상 종료
+        # 동시 요청 8 → 3 으로 축소 (차단 리스크 완화, 소요 약 5~7분)
+        env:
+          NAVER_REQUEST_DELAY: "0.3"
+        run: python legacy_theme_classifier.py --output-dir data/themes --refresh --workers 3 --keep-last-on-fail
 
       - name: 변경 사항 커밋 및 푸시
         run: |
@@ -38,6 +44,8 @@ jobs:
             git config user.email "bot@users.noreply.github.com"
             git add data/themes
             git commit -m "chore: 레거시 테마 마스터 갱신 $(date -u +'%Y-%m-%d %H:%M UTC')"
+            # 다른 워크플로(단타 알림 상태 커밋)와 충돌 방지
+            git pull --rebase origin main
             git push
           else
             echo "변경 없음"
