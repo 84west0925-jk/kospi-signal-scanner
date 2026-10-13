@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures as cf
+import json
 import os
 import re
 import time
@@ -149,7 +150,28 @@ def _get_html(url: str, timeout: int = 15) -> str:
     # finance.naver.com은 일부 페이지가 EUC-KR 계열로 내려올 수 있음
     if not r.encoding or r.encoding.lower() in {"iso-8859-1", "ascii"}:
         r.encoding = r.apparent_encoding or "euc-kr"
+    # 차단/빈 응답 진단용 마지막 응답 정보 저장
+    _LAST_RESPONSE.update({
+        "url": url,
+        "status": r.status_code,
+        "final_url": r.url,
+        "length": len(r.text),
+        "head": re.sub(r"\s+", " ", r.text[:300]),
+    })
+    # 연속 요청 간 최소 간격 (봇 차단 완화)
+    time.sleep(REQUEST_DELAY_SEC)
     return r.text
+
+
+_LAST_RESPONSE: Dict[str, object] = {}
+REQUEST_DELAY_SEC = float(os.environ.get("NAVER_REQUEST_DELAY", "0.3"))
+
+
+def _diagnose(label: str) -> None:
+    """수집 실패 시 원인(차단 vs 구조 변경) 판별용 로그."""
+    print(f"[진단] {label}")
+    for k in ("url", "status", "final_url", "length", "head"):
+        print(f"  - {k}: {_LAST_RESPONSE.get(k)}")
 
 
 def _extract_no(href: str, expected_type: str) -> Optional[str]:
@@ -173,79 +195,91 @@ def _extract_stock_code(href: str) -> Optional[str]:
     return None
 
 
-def get_all_stocks(max_pages: int = 80) -> pd.DataFrame:
-    """네이버 시가총액 목록으로 KOSPI/KOSDAQ 전체 종목(우선주 포함)을 수집."""
+API_BASE = "https://m.stock.naver.com/api/stocks"
+API_PAGE_SIZE = 100  # 네이버 API 최대 pageSize
+# 기존 결과와 동일한 범위 유지: 주식 + ETF (ETN 제외)
+STOCK_END_TYPES = {"stock", "etf"}
+
+
+def _get_json(url: str, timeout: int = 15) -> dict:
+    s = _session()
+    r = s.get(url, timeout=timeout)
+    r.raise_for_status()
+    _LAST_RESPONSE.update({
+        "url": url, "status": r.status_code, "final_url": r.url,
+        "length": len(r.text), "head": re.sub(r"\s+", " ", r.text[:300]),
+    })
+    time.sleep(REQUEST_DELAY_SEC)
+    try:
+        return r.json()
+    except ValueError:
+        _diagnose("JSON 응답 아님")
+        raise
+
+
+def _paged(path: str, key: str, max_pages: int = 60) -> List[dict]:
+    """네이버 증권 API 페이지네이션 공통 처리."""
+    out: List[dict] = []
+    for page in range(1, max_pages + 1):
+        j = _get_json(f"{API_BASE}/{path}?page={page}&pageSize={API_PAGE_SIZE}")
+        items = j.get(key) or []
+        out.extend(items)
+        total = int(j.get("totalCount") or 0)
+        if not items or len(out) >= total:
+            break
+    return out
+
+
+def get_all_stocks(max_pages: int = 60) -> pd.DataFrame:
+    """네이버 증권 API(시가총액 순)로 KOSPI/KOSDAQ 전체 종목(우선주·ETF 포함) 수집.
+
+    2026-10 네이버 구 시세 페이지(finance.naver.com/sise/*)가 stock.naver.com으로
+    이관되어 HTML 스크래핑이 불가해짐 → 모바일 JSON API로 전환.
+    """
     rows: Dict[str, Dict[str, str]] = {}
-    for sosok, market in [(0, "KOSPI"), (1, "KOSDAQ")]:
-        empty_streak = 0
-        for page in range(1, max_pages + 1):
-            html = _get_html(MARKET_URL.format(sosok=sosok, page=page))
-            soup = BeautifulSoup(html, "html.parser")
-            found = 0
-            # 네이버 시총표 종목명 링크는 class=tltle가 일반적. 구조 변경 대비 code 링크도 허용.
-            for a in soup.select('a.tltle, a[href*="/item/main.naver?code="]'):
-                code = _extract_stock_code(a.get("href", ""))
-                name = a.get_text(" ", strip=True)
-                if not code or not name:
-                    continue
-                if code not in rows:
-                    rows[code] = {"code": code, "name": name, "market": market}
-                    found += 1
-            if found == 0:
-                empty_streak += 1
-            else:
-                empty_streak = 0
-            if empty_streak >= 2:
-                break
+    for market in ("KOSPI", "KOSDAQ"):
+        for it in _paged(f"marketValue/{market}", "stocks", max_pages):
+            code = str(it.get("itemCode") or "")
+            name = str(it.get("stockName") or "").strip()
+            if it.get("stockEndType") not in STOCK_END_TYPES:
+                continue
+            if re.fullmatch(r"\d{6}|\d{5}[A-Z]|\d[0-9A-Z]{5}", code) and name and code not in rows:
+                rows[code] = {"code": code, "name": name, "market": market}
     df = pd.DataFrame(rows.values())
     if df.empty:
-        raise RuntimeError("KOSPI/KOSDAQ 종목 목록을 수집하지 못했습니다. 네이버 페이지 구조를 확인하세요.")
+        _diagnose("시가총액 API에서 종목 0건")
+        raise RuntimeError("KOSPI/KOSDAQ 종목 목록을 수집하지 못했습니다. 네이버 API 응답을 확인하세요.")
     return df.sort_values(["market", "code"]).reset_index(drop=True)
 
 
-def get_theme_catalog(max_pages: int = 30) -> List[ThemeInfo]:
-    """레거시 테마 목록 및 theme no 수집."""
+def get_theme_catalog(max_pages: int = 20) -> List[ThemeInfo]:
+    """레거시(인포스탁) 테마 목록 및 theme no 수집. 테마 번호는 신규 사이트에서도 동일."""
     themes: Dict[str, ThemeInfo] = {}
-    empty_streak = 0
-    for page in range(1, max_pages + 1):
-        html = _get_html(THEME_LIST_URL.format(page=page))
-        soup = BeautifulSoup(html, "html.parser")
-        before = len(themes)
-        for a in soup.select('a[href*="sise_group_detail.naver?type=theme"]'):
-            no = _extract_no(a.get("href", ""), "theme")
-            name = a.get_text(" ", strip=True)
-            if no and name:
-                themes[no] = ThemeInfo(no, name)
-        if len(themes) == before:
-            empty_streak += 1
-        else:
-            empty_streak = 0
-        if empty_streak >= 2:
-            break
+    for g in _paged("theme", "groups", max_pages):
+        no, name = str(g.get("no") or ""), str(g.get("name") or "").strip()
+        if no and name:
+            themes[no] = ThemeInfo(no, name)
     if not themes:
+        _diagnose("테마 목록 API에서 테마 0건")
         raise RuntimeError("레거시 테마 목록을 수집하지 못했습니다.")
     return list(themes.values())
 
 
 def get_upjong_catalog() -> Dict[str, str]:
-    html = _get_html(UPJONG_LIST_URL)
-    soup = BeautifulSoup(html, "html.parser")
     result: Dict[str, str] = {}
-    for a in soup.select('a[href*="sise_group_detail.naver?type=upjong"]'):
-        no = _extract_no(a.get("href", ""), "upjong")
-        name = a.get_text(" ", strip=True)
+    for g in _paged("industry", "groups", 10):
+        no, name = str(g.get("no") or ""), str(g.get("name") or "").strip()
         if no and name:
             result[no] = name
     return result
 
 
-def _members_from_group(url: str) -> Set[Tuple[str, str]]:
-    html = _get_html(url)
-    soup = BeautifulSoup(html, "html.parser")
+def _members_from_group(kind: str, no: str) -> Set[Tuple[str, str]]:
+    """kind: 'theme' | 'industry'"""
     out: Set[Tuple[str, str]] = set()
-    for a in soup.select('a[href*="/item/main.naver?code="]'):
-        code = _extract_stock_code(a.get("href", ""))
-        name = a.get_text(" ", strip=True)
+    for it in _paged(f"{kind}/{no}", "stocks", 20):
+        code = str(it.get("itemCode") or "")
+        name = str(it.get("stockName") or "").strip()
         if code and name:
             out.add((code, name))
     return out
@@ -255,7 +289,7 @@ def get_theme_memberships(themes: Iterable[ThemeInfo], workers: int = 6) -> pd.D
     themes = list(themes)
 
     def work(t: ThemeInfo):
-        members = _members_from_group(THEME_DETAIL_URL.format(no=t.theme_id))
+        members = _members_from_group("theme", t.theme_id)
         return t, members
 
     rows: List[Dict[str, str]] = []
@@ -281,7 +315,7 @@ def get_industry_memberships(workers: int = 6) -> pd.DataFrame:
 
     def work(item: Tuple[str, str]):
         no, industry = item
-        members = _members_from_group(UPJONG_DETAIL_URL.format(no=no))
+        members = _members_from_group("industry", no)
         return no, industry, members
 
     rows: List[Dict[str, str]] = []
@@ -511,8 +545,41 @@ def main() -> None:
     ap.add_argument("--output-dir", default="data/themes", help="CSV 출력 디렉터리")
     ap.add_argument("--refresh", action="store_true", help="24시간 캐시를 무시하고 새로 수집")
     ap.add_argument("--workers", type=int, default=6, help="테마/업종 상세 수집 동시 요청 수")
+    ap.add_argument(
+        "--keep-last-on-fail",
+        action="store_true",
+        help="수집 실패 시 직전 성공 CSV를 유지하고 경고만 남긴 채 정상 종료 (CI용)",
+    )
     args = ap.parse_args()
-    run(args.output_dir, refresh=args.refresh, workers=args.workers)
+
+    status_path = Path(args.output_dir) / "_status.json"
+    status: Dict[str, object] = {}
+    if status_path.exists():
+        try:
+            status = json.loads(status_path.read_text(encoding="utf-8"))
+        except Exception:
+            status = {}
+    now = datetime.now().isoformat(timespec="seconds")
+
+    try:
+        summary = run(args.output_dir, refresh=args.refresh, workers=args.workers)
+        status.update({"last_success_at": now, "last_result": "success",
+                       "last_error": "", "consecutive_failures": 0,
+                       "stocks": summary.get("stocks")})
+        status_path.write_text(json.dumps(status, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception as e:  # noqa: BLE001
+        status.update({"last_failure_at": now, "last_result": "failure",
+                       "last_error": f"{type(e).__name__}: {e}",
+                       "consecutive_failures": int(status.get("consecutive_failures", 0) or 0) + 1})
+        master = Path(args.output_dir) / "stock_theme_master.csv"
+        if args.keep_last_on_fail and master.exists():
+            status_path.write_text(json.dumps(status, ensure_ascii=False, indent=2), encoding="utf-8")
+            msg = (f"테마 마스터 수집 실패 - 직전 데이터 유지 "
+                   f"(마지막 성공: {status.get('last_success_at', '기록 없음')}, "
+                   f"연속 실패 {status['consecutive_failures']}회): {e}")
+            print(f"::warning title=테마 마스터 갱신 실패::{msg}")
+            return
+        raise
 
 
 if __name__ == "__main__":
