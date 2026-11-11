@@ -275,6 +275,7 @@
 440290,HB인베스트먼트,KOSDAQ,금융,창투사,,,,창업투자,1,창투사,,legacy_theme,높음
 452300,캡스톤파트너스,KOSDAQ,금융,창투사,,,,창업투자,1,창투사,,legacy_theme,높음
 0007J0,인벤테라,KOSDAQ,기타·이벤트,2026 상반기 신규상장,,,,제약,1,2026 상반기 신규상장,2026 상반기 신규상장,legacy_theme,높음
+0153R0,바로팜,KOSDAQ,기타·이벤트,2026 하반기 신규상장,,,,건강관리업체및서비스,1,2026 하반기 신규상장,2026 하반기 신규상장,legacy_theme,높음
 950260,인제니아테라퓨틱스(Reg.S),KOSDAQ,기타·이벤트,2026 하반기 신규상장,,,,생물공학,1,2026 하반기 신규상장,2026 하반기 신규상장,legacy_theme,높음
 131180,딜리,KOSDAQ,기타·이벤트,DMZ 평화공원,,,,컴퓨터와주변기기,1,DMZ 평화공원,,legacy_theme,높음
 045510,정원엔시스,KOSDAQ,기타·이벤트,SI(시스템통합),,,,IT서비스,1,SI(시스템통합),,legacy_theme,높음
@@ -803,7 +804,6 @@
 119610,인터로조,KOSDAQ,바이오·헬스케어,의료기기,고령화 사회(노인복지),,,건강관리장비와용품,2,고령화 사회(노인복지) | 의료기기,,legacy_theme,높음
 122310,제노레이,KOSDAQ,바이오·헬스케어,의료기기,,,,건강관리장비와용품,1,의료기기,,legacy_theme,높음
 141080,리가켐바이오,KOSDAQ,바이오·헬스케어,의료기기,면역항암제,,,제약,4,면역항암제 | 의료기기 | 코로나19(진단/치료제/백신 개발 등) | 코로나19(치료제/백신 개발 등),코로나19(진단/치료제/백신 개발 등) | 코로나19(치료제/백신 개발 등),legacy_theme,높음
-149980,하이로닉,KOSDAQ,바이오·헬스케어,의료기기,미용기기,,,건강관리장비와용품,2,미용기기 | 의료기기,,legacy_theme,높음
 156100,엘앤케이바이오,KOSDAQ,바이오·헬스케어,의료기기,,,,건강관리장비와용품,1,의료기기,,legacy_theme,높음
 179290,엠아이텍,KOSDAQ,바이오·헬스케어,의료기기,,,,건강관리장비와용품,1,의료기기,,legacy_theme,높음
 199550,레이저옵텍,KOSDAQ,바이오·헬스케어,의료기기,미용기기,,,건강관리장비와용품,2,미용기기 | 의료기기,,legacy_theme,높음
@@ -932,7 +932,6 @@
 396470,워트,KOSDAQ,반도체·AI,냉각시스템(액침냉각 등),HBM(고대역폭메모리),반도체 장비,,반도체와반도체장비,3,HBM(고대역폭메모리) | 냉각시스템(액침냉각 등) | 반도체 장비,,legacy_theme,높음
 033640,네패스,KOSDAQ,반도체·AI,뉴로모픽 반도체,온디바이스 AI,시스템반도체,지능형로봇/인공지능(AI),반도체와반도체장비,5,뉴로모픽 반도체 | 반도체 재료/부품 | 시스템반도체 | 온디바이스 AI | 지능형로봇/인공지능(AI),,legacy_theme,높음
 092600,앤씨앤,KOSDAQ,반도체·AI,뉴로모픽 반도체,보안주(물리),자율주행차,시스템반도체,전자제품,5,CCTV＆DVR | 뉴로모픽 반도체 | 보안주(물리) | 시스템반도체 | 자율주행차,,legacy_theme,높음
-330860,네패스아크,KOSDAQ,반도체·AI,뉴로모픽 반도체,온디바이스 AI,시스템반도체,반도체 장비,반도체와반도체장비,4,뉴로모픽 반도체 | 반도체 장비 | 시스템반도체 | 온디바이스 AI,,legacy_theme,높음
 389020,자람테크놀로지,KOSDAQ,반도체·AI,뉴로모픽 반도체,광통신(광케이블/광섬유 등),통신장비,5G(5세대 이동통신),통신장비,5,5G(5세대 이동통신) | 광통신(광케이블/광섬유 등) | 뉴로모픽 반도체 | 시스템반도체 | 통신장비,,legacy_theme,높음
 394280,오픈엣지테크놀로지,KOSDAQ,반도체·AI,뉴로모픽 반도체,CXL(컴퓨트익스프레스링크),온디바이스 AI,HBM(고대역폭메모리),반도체와반도체장비,5,CXL(컴퓨트익스프레스링크) | HBM(고대역폭메모리) | 뉴로모픽 반도체 | 시스템반도체 | 온디바이스 AI,,legacy_theme,높음
 445090,에이직랜드,KOSDAQ,반도체·AI,뉴로모픽 반도체,시스템반도체,,,반도체와반도체장비,2,뉴로모픽 반도체 | 시스템반도체,,legacy_theme,높음
@@ -1004,7 +1003,7 @@
 061250,화일약품,KOSDAQ,반도체·AI,"백신/진단시약/방역(신종플루, AI 등)",치매,제약업체,,제약,3,"백신/진단시약/방역(신종플루, AI 등) | 제약업체 | 치매",,legacy_theme,높음
 064550,바이오니아,KOSDAQ,반도체·AI,"백신/진단시약/방역(신종플루, AI 등)",탈모 치료,유전자 치료제/분석,,생물공학,5,"백신/진단시약/방역(신종플루, AI 등) | 유전자 치료제/분석 | 코로나19(진단/치료제/백신 개발 등) | 코로나19(진단키트) | 탈모 치료",코로나19(진단/치료제/백신 개발 등) | 코로나19(진단키트),legacy_theme,높음
 072020,중앙백신,KOSDAQ,반도체·AI,"백신/진단시약/방역(신종플루, AI 등)",아프리카 돼지열병(ASF),,,제약,2,"백신/진단시약/방역(신종플루, AI 등) | 아프리카 돼지열병(ASF)",,legacy_theme,높음
-086060,진바이오텍,KOSDAQ,반도체·AI,"백신/진단시약/방역(신종플루, AI 등)",아프리카 돼지열병(ASF),,,,2,"백신/진단시약/방역(신종플루, AI 등) | 아프리카 돼지열병(ASF)",,legacy_theme,높음
+086060,진바이오텍,KOSDAQ,반도체·AI,"백신/진단시약/방역(신종플루, AI 등)",아프리카 돼지열병(ASF),,,제약,2,"백신/진단시약/방역(신종플루, AI 등) | 아프리카 돼지열병(ASF)",,legacy_theme,높음
 096530,씨젠,KOSDAQ,반도체·AI,"백신/진단시약/방역(신종플루, AI 등)",유전자 치료제/분석,,,생명과학도구및서비스,4,"백신/진단시약/방역(신종플루, AI 등) | 유전자 치료제/분석 | 코로나19(진단/치료제/백신 개발 등) | 코로나19(진단키트)",코로나19(진단/치료제/백신 개발 등) | 코로나19(진단키트),legacy_theme,높음
 109820,진매트릭스,KOSDAQ,반도체·AI,"백신/진단시약/방역(신종플루, AI 등)",,,,생물공학,4,"백신/진단시약/방역(신종플루, AI 등) | 코로나19(진단/치료제/백신 개발 등) | 코로나19(진단키트) | 코로나19(치료제/백신 개발 등)",코로나19(진단/치료제/백신 개발 등) | 코로나19(진단키트) | 코로나19(치료제/백신 개발 등),legacy_theme,높음
 142760,모아라이프플러스,KOSDAQ,반도체·AI,"백신/진단시약/방역(신종플루, AI 등)",화장품,건강기능식품,,제약,3,"건강기능식품 | 백신/진단시약/방역(신종플루, AI 등) | 화장품",,legacy_theme,높음
@@ -1130,6 +1129,7 @@
 246690,TS인베스트먼트,KOSDAQ,반도체·AI,퓨리오사AI,가상화폐(비트코인 등),일자리(취업),두나무(Dunamu),창업투자,5,가상화폐(비트코인 등) | 두나무(Dunamu) | 일자리(취업) | 창투사 | 퓨리오사AI,,legacy_theme,높음
 293580,나우IB,KOSDAQ,반도체·AI,퓨리오사AI,창투사,,,창업투자,2,창투사 | 퓨리오사AI,,legacy_theme,높음
 309960,LB인베스트먼트,KOSDAQ,반도체·AI,퓨리오사AI,소캠(SOCAMM),창투사,,창업투자,3,소캠(SOCAMM) | 창투사 | 퓨리오사AI,,legacy_theme,높음
+317770,엑스페릭스,KOSDAQ,반도체·AI,퓨리오사AI,바이오인식(생체인식),,,전자장비와기기,2,바이오인식(생체인식) | 퓨리오사AI,,legacy_theme,높음
 389140,포바이포,KOSDAQ,반도체·AI,퓨리오사AI,영화,영상콘텐츠,,방송과엔터테인먼트,3,영상콘텐츠 | 영화 | 퓨리오사AI,,legacy_theme,높음
 393210,토마토시스템,KOSDAQ,반도체·AI,퓨리오사AI,의료AI,원격진료/비대면진료(U-Healthcare),,IT서비스,3,원격진료/비대면진료(U-Healthcare) | 의료AI | 퓨리오사AI,,legacy_theme,높음
 0035S0,빅웨이브로보틱스,KOSDAQ,반도체·AI,피지컬 AI/휴머노이드 로봇,로봇(산업용/협동로봇 등),,,IT서비스,3,2026 하반기 신규상장 | 로봇(산업용/협동로봇 등) | 피지컬 AI/휴머노이드 로봇,2026 하반기 신규상장,legacy_theme,높음
@@ -1768,7 +1768,6 @@
 368770,파이버프로,KOSDAQ,통신·네트워크,광통신(광케이블/광섬유 등),우주항공산업(누리호/인공위성 등),방위산업/전쟁 및 테러,UAM(도심항공모빌리티),전자장비와기기,4,UAM(도심항공모빌리티) | 광통신(광케이블/광섬유 등) | 방위산업/전쟁 및 테러 | 우주항공산업(누리호/인공위성 등),,legacy_theme,높음
 388790,라이콤,KOSDAQ,통신·네트워크,광통신(광케이블/광섬유 등),통신장비,5G(5세대 이동통신),자율주행차,통신장비,4,5G(5세대 이동통신) | 광통신(광케이블/광섬유 등) | 자율주행차 | 통신장비,,legacy_theme,높음
 036630,세종텔레콤,KOSDAQ,통신·네트워크,마이데이터,재택근무/스마트워크,,,다각화된통신서비스,2,마이데이터 | 재택근무/스마트워크,,legacy_theme,높음
-039010,현대에이치티,KOSDAQ,통신·네트워크,보안주(물리),음성인식,스마트홈(홈네트워크),,통신장비,3,보안주(물리) | 스마트홈(홈네트워크) | 음성인식,,legacy_theme,높음
 099520,DGI,KOSDAQ,통신·네트워크,보안주(물리),CCTV＆DVR,,,통신장비,2,CCTV＆DVR | 보안주(물리),,legacy_theme,높음
 140430,카티스,KOSDAQ,통신·네트워크,보안주(물리),방위산업/전쟁 및 테러,,,통신장비,2,방위산업/전쟁 및 테러 | 보안주(물리),,legacy_theme,높음
 046970,우리로,KOSDAQ,통신·네트워크,양자암호/양자컴퓨팅,통신장비,5G(5세대 이동통신),日 수출 규제(국산화 등),컴퓨터와주변기기,4,5G(5세대 이동통신) | 日 수출 규제(국산화 등) | 양자암호/양자컴퓨팅 | 통신장비,,legacy_theme,높음
@@ -1831,6 +1830,7 @@
 014190,원익큐브,KOSDAQ,화학·정유,폴더블폰,,,,화학,1,폴더블폰,,legacy_theme,높음
 187790,나노,KOSDAQ,화학·정유,황사/미세먼지,,,,화학,1,황사/미세먼지,,legacy_theme,높음
 066970,엘앤에프,KOSPI,2차전지·전기차,2차전지(LFP/리튬인산철),2차전지(소재/부품),전기차,2차전지,전기제품,4,2차전지 | 2차전지(LFP/리튬인산철) | 2차전지(소재/부품) | 전기차,,legacy_theme,높음
+092200,디아이씨,KOSPI,2차전지·전기차,2차전지(나트륨이온),로봇(산업용/협동로봇 등),전기차,자동차부품,자동차부품,6,2차전지(나트륨이온) | 로봇(산업용/협동로봇 등) | 자동차부품 | 전기차 | 쿠팡(coupang) | 탈 플라스틱(친환경/생분해성 등),,legacy_theme,높음
 161000,애경케미칼,KOSPI,2차전지·전기차,2차전지(나트륨이온),2차전지(소재/부품),2차전지,석유화학,화학,5,2차전지 | 2차전지(나트륨이온) | 2차전지(소재/부품) | 밸류업(24년 기업가치 제고계획 발표) | 석유화학,밸류업(24년 기업가치 제고계획 발표),legacy_theme,높음
 006400,삼성SDI,KOSPI,2차전지·전기차,2차전지(생산),2차전지(나트륨이온),2차전지(전고체),전력저장장치(ESS),전기제품,10,2차전지 | 2차전지(나트륨이온) | 2차전지(생산) | 2차전지(전고체) | IT 대표주 | 리비안(RIVIAN) | 스마트폰 | 아이폰 | 전기차 | 전력저장장치(ESS),,legacy_theme,높음
 006405,삼성SDI우,KOSPI,2차전지·전기차,2차전지(생산),2차전지(나트륨이온),2차전지(전고체),전력저장장치(ESS),전기제품,10,2차전지 | 2차전지(나트륨이온) | 2차전지(생산) | 2차전지(전고체) | IT 대표주 | 리비안(RIVIAN) | 스마트폰 | 아이폰 | 전기차 | 전력저장장치(ESS),,legacy_theme_inherited,중간
@@ -1872,7 +1872,7 @@
 308170,씨티알모빌리티,KOSPI,2차전지·전기차,전기차,자동차부품,,,자동차부품,2,자동차부품 | 전기차,,legacy_theme,높음
 024900,디와이덕양,KOSPI,2차전지·전기차,전기차 화재 방지(배터리 열폭주 등),전력저장장치(ESS),전기차,자동차부품,자동차부품,5,그래핀 | 자동차부품 | 전기차 | 전기차 화재 방지(배터리 열폭주 등) | 전력저장장치(ESS),,legacy_theme,높음
 200880,서연이화,KOSPI,2차전지·전기차,전기차 화재 방지(배터리 열폭주 등),자동차부품,UAM(도심항공모빌리티),,자동차부품,3,UAM(도심항공모빌리티) | 자동차부품 | 전기차 화재 방지(배터리 열폭주 등),,legacy_theme,높음
-214330,금호에이치티,KOSPI,2차전지·전기차,전기차 화재 방지(배터리 열폭주 등),LED,전기차,자동차부품,자동차부품,4,LED | 자동차부품 | 전기차 | 전기차 화재 방지(배터리 열폭주 등),,legacy_theme,높음
+214330,금호에이치티,KOSPI,2차전지·전기차,전기차 화재 방지(배터리 열폭주 등),LED,전기차,,자동차부품,3,LED | 전기차 | 전기차 화재 방지(배터리 열폭주 등),,legacy_theme,높음
 372910,한컴라이프케어,KOSPI,2차전지·전기차,전기차 화재 방지(배터리 열폭주 등),방위산업/전쟁 및 테러,마스크,,건강관리장비와용품,4,마스크 | 방위산업/전쟁 및 테러 | 재난/안전(지진/화재 등) | 전기차 화재 방지(배터리 열폭주 등),재난/안전(지진/화재 등),legacy_theme,높음
 001740,SK네트웍스,KOSPI,2차전지·전기차,전기차(충전소/충전기),종합상사,마켓컬리(kurly),호텔/리조트,복합기업,5,마켓컬리(kurly) | 밸류업(24년 기업가치 제고계획 발표) | 전기차(충전소/충전기) | 종합상사 | 호텔/리조트,밸류업(24년 기업가치 제고계획 발표),legacy_theme,높음
 011690,와이투솔루션,KOSPI,2차전지·전기차,전기차(충전소/충전기),LED,로봇(산업용/협동로봇 등),OLED(유기 발광 다이오드),전자장비와기기,4,LED | OLED(유기 발광 다이오드) | 로봇(산업용/협동로봇 등) | 전기차(충전소/충전기),,legacy_theme,높음
@@ -2004,8 +2004,8 @@
 030210,다올투자증권,KOSPI,금융,증권,,,,증권,1,증권,,legacy_theme,높음
 030610,교보증권,KOSPI,금융,증권,STO(토큰증권 발행),,,증권,2,STO(토큰증권 발행) | 증권,,legacy_theme,높음
 039490,키움증권,KOSPI,금융,증권,STO(토큰증권 발행),,,증권,4,STO(토큰증권 발행) | 밸류업(24년 기업가치 제고계획 발표) | 증권 | 코리아 밸류업 지수(Korea Value-up Index),밸류업(24년 기업가치 제고계획 발표) | 코리아 밸류업 지수(Korea Value-up Index),legacy_theme,높음
-071050,한국금융지주,KOSPI,금융,증권,STO(토큰증권 발행),인터넷은행,카카오뱅크(kakao BANK),증권,7,STO(토큰증권 발행) | 밸류업(25년 기업가치 제고계획 발표) | 인터넷은행 | 증권 | 지주사 | 카카오뱅크(kakao BANK) | 코리아 밸류업 지수(Korea Value-up Index),밸류업(25년 기업가치 제고계획 발표) | 코리아 밸류업 지수(Korea Value-up Index),legacy_theme,높음
-071055,한국금융지주우,KOSPI,금융,증권,STO(토큰증권 발행),인터넷은행,카카오뱅크(kakao BANK),증권,7,STO(토큰증권 발행) | 밸류업(25년 기업가치 제고계획 발표) | 인터넷은행 | 증권 | 지주사 | 카카오뱅크(kakao BANK) | 코리아 밸류업 지수(Korea Value-up Index),밸류업(25년 기업가치 제고계획 발표) | 코리아 밸류업 지수(Korea Value-up Index),legacy_theme_inherited,중간
+071050,한국금융지주,KOSPI,금융,증권,STO(토큰증권 발행),인터넷은행,카카오뱅크(kakao BANK),증권,6,STO(토큰증권 발행) | 밸류업(25년 기업가치 제고계획 발표) | 인터넷은행 | 증권 | 카카오뱅크(kakao BANK) | 코리아 밸류업 지수(Korea Value-up Index),밸류업(25년 기업가치 제고계획 발표) | 코리아 밸류업 지수(Korea Value-up Index),legacy_theme,높음
+071055,한국금융지주우,KOSPI,금융,증권,STO(토큰증권 발행),인터넷은행,카카오뱅크(kakao BANK),증권,6,STO(토큰증권 발행) | 밸류업(25년 기업가치 제고계획 발표) | 인터넷은행 | 증권 | 카카오뱅크(kakao BANK) | 코리아 밸류업 지수(Korea Value-up Index),밸류업(25년 기업가치 제고계획 발표) | 코리아 밸류업 지수(Korea Value-up Index),legacy_theme_inherited,중간
 026890,스틱인베스트먼트,KOSPI,금융,창투사,,,,창업투자,1,창투사,,legacy_theme,높음
 071950,코아스,KOSPI,기타·이벤트,DMZ 평화공원,,,,가구,1,DMZ 평화공원,,legacy_theme,높음
 267850,아시아나IDT,KOSPI,기타·이벤트,SI(시스템통합),,,,IT서비스,1,SI(시스템통합),,legacy_theme,높음
@@ -2020,10 +2020,23 @@
 016590,신대양제지,KOSPI,기타·이벤트,골판지 제조,,,,포장재,1,골판지 제조,,legacy_theme,높음
 095720,웅진씽크빅,KOSPI,기타·이벤트,교육/온라인 교육,엔젤산업,,,교육서비스,3,교육/온라인 교육 | 엔젤산업 | 출산장려정책,출산장려정책,legacy_theme,높음
 100220,비상교육,KOSPI,기타·이벤트,교육/온라인 교육,,,,교육서비스,1,교육/온라인 교육,,legacy_theme,높음
-0207G0,SOL 우주항공밸류체인,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
-0227K0,RISE 미국우주위성통신,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
-130730,KIWOOM 단기자금,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
-315270,TIGER 200커뮤니케이션서비스,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+0025N0,TIGER TDF2045 적격,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+252400,RISE 200선물레버리지,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+282000,RISE 국고채3년선물인버스,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+294400,KIWOOM 200TR,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+310960,TIGER 200TR,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+363580,KODEX 200IT TR,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+365000,TIGER 인터넷TOP10,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+379790,RISE 유로스탁스50(H),KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+402970,ACE 미국배당다우존스,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+434730,HANARO 원자력iSelect,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+448100,WON 200,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+451060,1Q 200액티브,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+469170,ACE 포스코그룹포커스,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+474800,KIWOOM 미국원유에너지기업,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+475350,RISE 버크셔포트폴리오TOP10,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+494890,KODEX 200액티브,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
+495230,KoAct 코리아밸류업액티브,KOSPI,기타·이벤트,기타/미분류,,,,,0,,,unclassified,낮음
 017800,현대엘리베이터,KOSPI,기타·이벤트,남북경협,,,,기계,3,남북경협 | 밸류업(24년 기업가치 제고계획 발표) | 코리아 밸류업 지수(Korea Value-up Index),밸류업(24년 기업가치 제고계획 발표) | 코리아 밸류업 지수(Korea Value-up Index),legacy_theme,높음
 002020,코오롱,KOSPI,기타·이벤트,두나무(Dunamu),지주사,,,복합기업,2,두나무(Dunamu) | 지주사,,legacy_theme,높음
 002025,코오롱우,KOSPI,기타·이벤트,두나무(Dunamu),지주사,,,복합기업,2,두나무(Dunamu) | 지주사,,legacy_theme_inherited,중간
@@ -2118,7 +2131,6 @@
 0022T0,SOL 국제금커버드콜액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0023A0,SOL 미국양자컴퓨팅TOP10,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0023B0,PLUS 미국양자컴퓨팅TOP10,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-0025N0,TIGER TDF2045 적격,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0026E0,KODEX 미국S&P500버퍼3월액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0026S0,1Q 미국S&P500,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0028X0,KODEX 미국금융테크액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2346,6 +2358,7 @@
 0204D0,KODEX 현대차로보틱스밸류체인TOP3플러스,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0204S0,TIGER 코스닥액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0206G0,1Q 현대차기아채권혼합50,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
+0207G0,SOL 우주항공밸류체인,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0207Z0,KIWOOM 미국우주데이터센터인프라,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0208N0,IBK 코스피액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0209D0,KODEX 전고체배터리ESS TOP2플러스,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2375,6 +2388,7 @@
 0226A0,PLUS SK하이닉스샌디스크채권혼합50,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0226D0,FOCUS 금융반도체지주채권혼합50액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0226G0,WON 피지컬AI TOP2플러스액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
+0227K0,RISE 미국우주위성통신,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0227L0,HANARO 미국에이전틱AI TOP2+,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0228G0,ACE 반도체Plus전략산업,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 0229F0,마이티 신약포커스바이오액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2452,6 +2466,7 @@
 123310,TIGER 인버스,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 123320,TIGER 레버리지,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 130680,TIGER 원유선물Enhanced(H),KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
+130730,KIWOOM 단기자금,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 131890,ACE 삼성그룹동일가중,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 132030,KODEX 골드선물(H),KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 133690,TIGER 미국나스닥100,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2594,7 +2609,6 @@
 251590,PLUS 고배당저변동50,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 251600,PLUS 고배당주채권혼합,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 252000,TIGER 200동일가중,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-252400,RISE 200선물레버리지,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 252410,RISE 200선물인버스,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 252420,RISE 200선물인버스2X,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 252650,KODEX 200동일가중,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2669,7 +2683,6 @@
 280930,KODEX 미국러셀2000(H),KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 280940,KODEX 골드선물인버스(H),KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 281990,RISE 중소형고배당,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-282000,RISE 국고채3년선물인버스,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 283580,KODEX 차이나CSI300,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 284430,KODEX 200미국채혼합50,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 284980,RISE 200금융,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2695,7 +2708,6 @@
 292560,TIGER 일본엔선물,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 292770,KODEX 국채선물3년인버스,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 293180,HANARO 200,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-294400,KIWOOM 200TR,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 295000,RISE 국채선물10년,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 295020,RISE 국채선물10년인버스,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 295040,SOL 200TR,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2725,10 +2737,10 @@
 308620,KODEX 미국10년국채선물,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 309230,ACE 미국WideMoat동일가중,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 310080,RISE 중국MSCI China(H),KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-310960,TIGER 200TR,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 310970,TIGER MSCI Korea TR,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 314250,KODEX 미국빅테크10(H),KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 314700,HANARO 농업융복합산업,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
+315270,TIGER 200커뮤니케이션서비스,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 315930,KODEX Top5PlusTR,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 315960,RISE 대형고배당10TR,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 316670,KIWOOM 코스닥150,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2770,13 +2782,11 @@
 361580,RISE 200TR,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 363510,SOL KIS단기통안채,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 363570,KODEX 장기종합채권(AA-이상)액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-363580,KODEX 200IT TR,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 364690,KODEX 혁신기술테마액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 364960,TIGER BBIG,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 364970,TIGER 바이오TOP10,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 364980,TIGER 2차전지TOP10,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 364990,TIGER 게임TOP10,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-365000,TIGER 인터넷TOP10,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 365040,TIGER AI코리아그로스액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 365780,ACE 국고채10년,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 367380,ACE 미국나스닥100,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2800,7 +2810,6 @@
 376410,TIGER 탄소효율그린뉴딜,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 377990,TIGER Fn신재생에너지,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 379780,RISE 미국S&P500,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-379790,RISE 유로스탁스50(H),KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 379800,KODEX 미국S&P500,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 379810,KODEX 미국나스닥100,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 380340,ACE 코리아AI테크핵심산업,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2848,7 +2857,6 @@
 401470,KODEX 메타버스액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 401590,HANARO 글로벌탄소배출권선물ICE(합성),KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 402460,HANARO Fn K-메타버스MZ,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-402970,ACE 미국배당다우존스,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 403790,MIDAS 코스피액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 404120,TIME K신재생에너지액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 404260,KODEX 기후변화솔루션,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2910,7 +2918,6 @@
 433970,KODEX TDF2030액티브 적격,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 433980,KODEX TDF2040액티브 적격,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 434060,KODEX TDF2050액티브 적격,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-434730,HANARO 원자력iSelect,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 434960,DAISHIN K200,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 435040,ACE 글로벌브랜드TOP10,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 435420,TIGER 미국나스닥100채권혼합50,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2961,7 +2968,6 @@
 447620,SOL 미국TOP5채권혼합50,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 447660,PLUS 애플채권혼합,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 447770,TIGER 테슬라채권혼합Fn,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-448100,WON 200,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 448290,TIGER 미국S&P500(H),KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 448300,TIGER 미국나스닥100(H),KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 448330,KODEX 삼성전자채권혼합,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -2982,7 +2988,6 @@
 450190,KODEX 한중반도체(합성),KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 450910,SOL 코스닥150,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 451000,PLUS 종합채권(AA-이상)액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-451060,1Q 200액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 451150,에셋플러스 글로벌영에이지액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 451530,TIGER 국고채30년스트립액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 451540,TIGER 종합채권(AA-이상)액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -3082,7 +3087,6 @@
 469070,RISE AI&로봇,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 469150,ACE AI반도체TOP3+,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 469160,ACE 일본반도체,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-469170,ACE 포스코그룹포커스,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 469530,RISE 미국달러선물인버스,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 469790,KIWOOM 코리아테크TOP10,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 469830,SOL 초단기채권액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -3111,7 +3115,6 @@
 474220,TIGER 미국테크TOP10타겟커버드콜,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 474390,SOL 국고채30년액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 474590,WON 반도체밸류체인액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-474800,KIWOOM 미국원유에너지기업,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 474920,에셋플러스 차이나일등기업포커스10액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 475050,ACE KPOP포커스,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 475070,KoAct 글로벌친환경전력인프라액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -3121,7 +3124,6 @@
 475280,ACE 8월만기자동연장회사채AA-이상액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 475300,SOL 반도체전공정,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 475310,SOL 반도체후공정,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-475350,RISE 버크셔포트폴리오TOP10,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 475380,RISE 글로벌리얼티인컴,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 475630,TIGER CD1년금리액티브(합성),KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 475720,RISE 200위클리커버드콜,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -3229,11 +3231,9 @@
 494420,PLUS 미국배당증가성장주데일리커버드콜,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 494670,TIGER 조선TOP10,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 494840,TIGER 미국방산TOP10,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-494890,KODEX 200액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 495040,PLUS 코리아밸류업,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 495050,RISE 코리아밸류업,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 495060,TIME 코리아밸류업액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
-495230,KoAct 코리아밸류업액티브,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 495330,1Q 코리아밸류업,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 495550,SOL 코리아밸류업TR,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
 495750,HANARO 코리아밸류업,KOSPI,기타·이벤트,업종:기타,,,,기타,0,,,industry_fallback,중간
@@ -3499,9 +3499,9 @@
 001070,대한방직,KOSPI,소비·유통·패션,"업종:섬유,의류,신발,호화품",,,,"섬유,의류,신발,호화품",0,,,industry_fallback,중간
 002170,SYTS,KOSPI,소비·유통·패션,"업종:섬유,의류,신발,호화품",,,,"섬유,의류,신발,호화품",0,,,industry_fallback,중간
 004700,조광피혁,KOSPI,소비·유통·패션,"업종:섬유,의류,신발,호화품",,,,"섬유,의류,신발,호화품",0,,,industry_fallback,중간
-007700,F&F홀딩스,KOSPI,소비·유통·패션,"업종:섬유,의류,신발,호화품",,,,"섬유,의류,신발,호화품",0,,,industry_fallback,중간
 008600,윌비스,KOSPI,소비·유통·패션,"업종:섬유,의류,신발,호화품",,,,"섬유,의류,신발,호화품",0,,,industry_fallback,중간
 035150,백산,KOSPI,소비·유통·패션,"업종:섬유,의류,신발,호화품",,,,"섬유,의류,신발,호화품",0,,,industry_fallback,중간
+007700,F&F홀딩스,KOSPI,소비·유통·패션,지주사,,,,"섬유,의류,신발,호화품",1,지주사,,legacy_theme,높음
 009970,영원무역홀딩스,KOSPI,소비·유통·패션,지주사,,,,"섬유,의류,신발,호화품",2,밸류업(25년 기업가치 제고계획 발표) | 지주사,밸류업(25년 기업가치 제고계획 발표),legacy_theme,높음
 004830,덕성,KOSPI,소비·유통·패션,초전도체,,,,"섬유,의류,신발,호화품",1,초전도체,,legacy_theme,높음
 004835,덕성우,KOSPI,소비·유통·패션,초전도체,,,,"섬유,의류,신발,호화품",1,초전도체,,legacy_theme_inherited,중간
